@@ -52,7 +52,6 @@ const paths = {
     </g>
   ),
   chevron: <path {...stroke} strokeWidth={2.2} d="m6 9 6 6 6-6" />,
-  filter: <path {...stroke} strokeWidth={2} d="M3 5h18l-7 8.5V19l-4 2v-7.5L3 5Z" />,
   left: <path {...stroke} d="m15 18-6-6 6-6" />,
   right: <path {...stroke} d="m9 18 6-6-6-6" />,
   up: <path {...stroke} strokeWidth={2.6} d="m6 15 6-6 6 6" />,
