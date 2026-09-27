@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
@@ -59,6 +60,7 @@ export function IdeasBoard({
   pendingMine: number;
 }) {
   const { locale, t } = useI18n();
+  const router = useRouter();
   const r = t.ideas;
   const [items, setItems] = useState(initial);
   const [sort, setSort] = useState<Sort>("top");
@@ -121,9 +123,8 @@ export function IdeasBoard({
 
   const vote = async (item: FeedbackItem) => {
     if (!authReady || pending.includes(item.id) || viewer?.banned) return;
-    if (!viewer) return signIn(next);
     const before = { hasVoted: item.hasVoted, voteCount: item.voteCount };
-    patch(item.id, { hasVoted: !item.hasVoted, voteCount: item.voteCount + (item.hasVoted ? -1 : 1) });
+    if (viewer) patch(item.id, { hasVoted: !item.hasVoted, voteCount: item.voteCount + (item.hasVoted ? -1 : 1) });
     setPending((ids) => [...ids, item.id]);
     try {
       const response = await fetch("/api/roadmap/vote", {
@@ -138,6 +139,7 @@ export function IdeasBoard({
       if (!response.ok) throw new Error(String(response.status));
       const result = (await response.json()) as { voteCount: number; voted: boolean };
       patch(item.id, { hasVoted: result.voted, voteCount: result.voteCount });
+      if (!viewer) router.refresh();
     } catch {
       patch(item.id, before);
     } finally {
