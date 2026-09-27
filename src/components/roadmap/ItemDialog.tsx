@@ -23,6 +23,7 @@ import { Icon } from "../Icon";
 import { Modal } from "../Modal";
 import type { EditValues, useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
+import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
 import { loginHref, signIn } from "./viewer";
 
@@ -556,17 +557,23 @@ function EditForm({
         {b.editTitle}
       </h2>
       <label>
-        <span>{r.titleLabel}</span>
+        <span className="field-label">
+          {r.titleLabel}
+          <FieldCount length={values.title.length} max={Math.max(ideaLimits.title, item.title.length)} />
+        </span>
         <input
           value={values.title}
           onChange={(e) => set("title")(e.target.value)}
           minLength={3}
-          maxLength={ideaLimits.title}
+          maxLength={Math.max(ideaLimits.title, item.title.length)}
           required
         />
       </label>
       <label>
-        <span>{r.detailsLabel}</span>
+        <span className="field-label">
+          {r.detailsLabel}
+          <FieldCount length={values.description.length} max={ideaLimits.description} />
+        </span>
         <textarea
           value={values.description}
           onChange={(e) => set("description")(e.target.value)}

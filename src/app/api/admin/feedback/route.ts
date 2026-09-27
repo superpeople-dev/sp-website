@@ -22,7 +22,7 @@ const text = (value: unknown) => (typeof value === "string" ? value.trim() : "")
 async function edit(feedbackId: string, body: Body) {
   const title = text(body.title);
   const description = text(body.description);
-  if (title.length < 3 || title.length > ideaLimits.title || description.length > ideaLimits.description) return false;
+  if (title.length < 3 || title.length > ideaLimits.titleMax || description.length > ideaLimits.description) return false;
   const [{ categories, types }, item] = await Promise.all([getTags(), getIdea(feedbackId)]);
   const managed = new Set([...categories, ...types].map((tag) => tag.id));
   const wanted = [

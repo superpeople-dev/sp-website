@@ -63,7 +63,7 @@ body {
 body > main { flex: 1 0 auto; }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
 ::selection { background: var(--signal); color: #fff; }
 
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
@@ -930,6 +930,10 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .idea-form__types svg { width: 17px; height: 17px; flex: none; }
 .idea-form__types label:last-of-type:nth-of-type(odd) { grid-column: 1 / -1; }
 .idea-form__note { margin: 0; color: var(--green); font-size: 15px; }
+.field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.field-count { color: var(--muted); font: 600 12px var(--body); letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
+.field-count.is-near { color: var(--gold); }
+.field-count.is-full { color: var(--signal-hi); }
 .idea-form__fields { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .idea-form__fields:disabled { opacity: 0.55; }
 .idea-form__limit {

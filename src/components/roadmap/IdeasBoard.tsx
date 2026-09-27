@@ -12,6 +12,7 @@ import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { AdminActions, useAdmin } from "./admin";
+import { FieldCount } from "./FieldCount";
 import { CategoryTag } from "./CategoryTag";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
@@ -353,7 +354,10 @@ export function IdeasBoard({
                 </fieldset>
               )}
               <label>
-                <span>{r.titleLabel}</span>
+                <span className="field-label">
+                  {r.titleLabel}
+                  <FieldCount length={title.length} max={ideaLimits.title} />
+                </span>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -364,7 +368,10 @@ export function IdeasBoard({
                 />
               </label>
               <label>
-                <span>{r.detailsLabel}</span>
+                <span className="field-label">
+                  {r.detailsLabel}
+                  <FieldCount length={details.length} max={ideaLimits.description} />
+                </span>
                 <textarea
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}

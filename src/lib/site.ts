@@ -34,7 +34,7 @@ export const originalPriceUsd = 14.99;
 
 export const seoHiddenFaq = [0];
 
-export const ideaLimits = { title: 100, description: 2000, comment: 1000, pending: 3 };
+export const ideaLimits = { title: 60, titleMax: 100, description: 2000, comment: 1000, pending: 3 };
 
 export const mediaLimits = {
   files: 4,
