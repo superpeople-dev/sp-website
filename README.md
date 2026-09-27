@@ -3,7 +3,7 @@
 The website of the SUPER PEOPLE community revival: https://superpeople.dev
 
 It explains the project, links the launcher download and the Discord, and hosts the community pages
-(ideas, roadmap and completed work). The whole site is available in 9 languages.
+(ideas, roadmap and completed work). The whole site is available in 10 languages.
 
 ## Stack
 
@@ -64,7 +64,7 @@ To add a language:
 1. Add it to `locales` and `localeInfo` in [`src/i18n/config.ts`](src/i18n/config.ts).
 2. Copy `en.ts`, translate it and register it in [`src/i18n/dictionaries/index.ts`](src/i18n/dictionaries/index.ts).
 3. Add its flag to [`src/components/Flag.tsx`](src/components/Flag.tsx) and a 1200×630 share image as `public/og/<lang>.jpg`.
-4. If it needs other fonts, see how the Japanese, Korean, Chinese and Cyrillic fonts are loaded in
+4. If it needs other fonts, see how the Japanese, Korean, Chinese, Devanagari and Cyrillic fonts are loaded in
    [`src/app/[lang]/layout.tsx`](src/app/[lang]/layout.tsx).
 
 ## Launcher download
@@ -155,7 +155,7 @@ update `legalUpdated` in [`src/lib/site.ts`](src/lib/site.ts).
   [Discord](https://discord.com/invite/superpeopleofficial) first.
 - Keep pull requests focused on one change.
 - Follow the style of the surrounding code. The source doesn't use code comments.
-- Visible text changes need all 9 dictionaries updated.
+- Visible text changes need all 10 dictionaries updated.
 
 ## Disclaimer
 
