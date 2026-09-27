@@ -1,0 +1,163 @@
+# superpeople.dev
+
+The website of the SUPER PEOPLE community revival: https://superpeople.dev
+
+It explains the project, links the launcher download and the Discord, and hosts the community pages
+(ideas, roadmap and completed work). The whole site is available in 9 languages.
+
+## Stack
+
+- Next.js 16 (App Router), React 19 and TypeScript
+- [Motion](https://motion.dev) for animations
+- Launcher releases come from the GitHub API
+- Ideas, comments, the roadmap and release notes come from [Reflet](https://reflet.app); players sign in with Discord
+- Commenter profiles and the ban list live in [Upstash Redis](https://upstash.com)
+
+## Getting started
+
+You need Node.js 22 or newer.
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Open http://localhost:3000. The home and legal pages work without any environment variables. The
+Ideas, Roadmap and Completed pages need the Reflet and Discord variables listed below; without them
+they show a "not available" message.
+
+Before opening a pull request, check that these pass:
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
+## Project layout
+
+```
+src/
+  app/[lang]/     pages for each language: home, ideas, roadmap, completed, terms, privacy
+  app/api/        Discord sign-in, votes, new ideas, admin actions and the Reflet webhook
+  components/     UI components; roadmap/ holds the community pages
+  i18n/           language config, shared types and one dictionary per language
+  lib/            GitHub, Reflet, sessions, SEO and data shared by every language (site.ts)
+scripts/          importing the known bug list into Reflet
+public/og/        share images, one per language
+```
+
+## Text and translations
+
+All text lives in [`src/i18n/dictionaries/`](src/i18n/dictionaries/), one file per language (`en.ts`,
+`fr.ts`, ...). Every dictionary follows the same type in [`src/i18n/types.ts`](src/i18n/types.ts), so the
+type check fails if a language is missing a string. When you change English text, update the other
+languages too, or say in your pull request which ones still need a translation. Long texts support
+`**bold**` and `` `code` ``.
+
+Things that are the same in every language live in [`src/lib/site.ts`](src/lib/site.ts): the launcher
+repo, the Discord invite, the timeline dates, the progress bar and the gallery images.
+
+To add a language:
+
+1. Add it to `locales` and `localeInfo` in [`src/i18n/config.ts`](src/i18n/config.ts).
+2. Copy `en.ts`, translate it and register it in [`src/i18n/dictionaries/index.ts`](src/i18n/dictionaries/index.ts).
+3. Add its flag to [`src/components/Flag.tsx`](src/components/Flag.tsx) and a 1200×630 share image as `public/og/<lang>.jpg`.
+4. If it needs other fonts, see how the Japanese, Korean, Chinese and Cyrillic fonts are loaded in
+   [`src/app/[lang]/layout.tsx`](src/app/[lang]/layout.tsx).
+
+## Launcher download
+
+The server fetches the latest release of `site.repo` from GitHub and caches it for 5 minutes
+([`src/lib/github.ts`](src/lib/github.ts)). Publishing a new release updates every download button on
+its own. `/download` always redirects to the newest installer.
+
+## Community pages
+
+| Page | Shows | Reflet status |
+| --- | --- | --- |
+| `/ideas` | Approved ideas and bug reports. Signed-in players post and vote. | Open |
+| `/ideas`, admins only | New posts waiting for review | Under review |
+| `/roadmap` | To do, working on and recently completed | Planned, In progress, Completed |
+| `/completed` | Everything completed, grouped by area, and the release notes | Completed |
+
+- The kind of post (Bug, Feature, Improvement, Question) comes from Reflet's default tags. Every other
+  tag is treated as an area (Game, Launcher, Servers, Website...).
+- New posts start as "Under review" and stay hidden until an admin approves them.
+- A player can have at most 3 posts waiting for review. Each approval or rejection frees a slot.
+- Posts can include up to 4 images or videos (10 MB per image, 100 MB per video). The browser uploads
+  them straight to Reflet's file storage, and they show in the post's details.
+- Clicking a card opens its details and comments. Signed-in players comment with their Discord name
+  and avatar.
+- Posts, votes and comments are stored in Reflet. Reflet doesn't keep avatars or know about bans, so
+  a small Redis store ([`src/lib/store.ts`](src/lib/store.ts)) keeps the Discord profile of each post
+  and comment author, and the ban list. Without Redis, comments still work but show no avatars, and
+  banning is turned off.
+- Reflet and Redis are only called from the server ([`src/lib/`](src/lib/) and
+  [`src/app/api/`](src/app/api/)), so the keys never reach the browser.
+
+### Admins
+
+A signed-in player is an admin when:
+
+- their Discord user ID is listed in [`src/lib/admins.ts`](src/lib/admins.ts) or in
+  `ADMIN_DISCORD_IDS`, or
+- they have one of the `DISCORD_ADMIN_ROLE_IDS` roles on the `DISCORD_GUILD_ID` server. Roles are read
+  when they sign in.
+
+Admins can approve or reject new posts, edit a post's title, details, type and area, move cards between
+stages (by dragging them on the roadmap, or from the ⋯ menu on any card), delete posts and comments, and ban players from posting, voting and commenting. Bans are
+listed, and can be lifted, from the Bans button next to the admin's name.
+To find a Discord ID, turn on Developer Mode in Discord's advanced settings, then right-click a user,
+server or role and choose Copy ID.
+
+### Discord announcements
+
+When a post is approved, or moves to the roadmap, into progress or to completed, Reflet calls
+`/api/webhooks/reflet`. The site checks the signature, refreshes its pages and posts a message to a
+Discord channel. To set it up, create a webhook on the Discord channel, then add a webhook in Reflet
+(Project → API keys → Webhooks) that points to `https://superpeople.dev/api/webhooks/reflet`.
+
+### Known bugs
+
+[`scripts/known-bugs.json`](scripts/known-bugs.json) lists bugs reported on Discord.
+`npm run seed:bugs` adds the ones that aren't in Reflet yet, using the Reflet keys from `.env.local`.
+It skips anything already there, so it is safe to run again after adding bugs to the file.
+
+## Environment variables
+
+| Name | Used for |
+| --- | --- |
+| `NEXT_PUBLIC_REFLET_PUBLIC_KEY` | Reading the community pages from Reflet |
+| `REFLET_SECRET_KEY` | Signing players' identity and admin actions (server only) |
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Discord sign-in |
+| `AUTH_SECRET` | Signing the sign-in cookie, any long random string |
+| `DISCORD_GUILD_ID`, `DISCORD_ADMIN_ROLE_IDS` | Optional: role-based admins |
+| `ADMIN_DISCORD_IDS` | Optional: extra admins by Discord user ID, comma-separated |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Optional: comment avatars and bans. Connecting Upstash from the Vercel Marketplace adds them (as `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which also work) |
+| `DISCORD_WEBHOOK_URL`, `REFLET_WEBHOOK_SECRET` | Optional: Discord announcements |
+| `GITHUB_TOKEN` | Optional: only if the GitHub API rate-limits the server |
+| `NEXT_PUBLIC_SITE_URL` | Optional: replaces `https://superpeople.dev` in canonical links and the sitemap |
+| `REFLET_API_URL` | Optional: a self-hosted Reflet backend |
+
+The Discord application needs these OAuth2 redirects: `http://localhost:3000/api/auth/discord/callback`
+for local work and `https://superpeople.dev/api/auth/discord/callback` in production.
+
+## Legal pages
+
+The text of `/terms` and `/privacy` is in the `legal` section of each dictionary. When it changes,
+update `legalUpdated` in [`src/lib/site.ts`](src/lib/site.ts).
+
+## Contributing
+
+- For anything bigger than a small fix, open an issue or ask in the
+  [Discord](https://discord.com/invite/superpeopleofficial) first.
+- Keep pull requests focused on one change.
+- Follow the style of the surrounding code. The source doesn't use code comments.
+- Visible text changes need all 9 dictionaries updated.
+
+## Disclaimer
+
+A fan-made, non-commercial project. Not affiliated with or endorsed by Wonder People. SUPER PEOPLE and
+its assets belong to their respective owners.
