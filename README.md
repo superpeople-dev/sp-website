@@ -16,7 +16,8 @@ It explains the project, links the launcher download and the Discord, and hosts 
 ## Getting started
 
 You need [Bun](https://bun.com) 1.3 or newer. Bun installs the packages and runs the site, including on Vercel
-(see `bunVersion` in [`vercel.json`](vercel.json)).
+(see `bunVersion` in [`vercel.json`](vercel.json)). The one exception is `bun run build`: it runs `next build` on
+Node.js, because Bun 1.3.14 crashes on exit after a Next.js build on Vercel's Linux build machines.
 
 ```bash
 bun install
