@@ -4,6 +4,7 @@ import logo from "@/assets/sp-logo.png";
 import { localeHref, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
 import { site } from "@/lib/site";
+import { Icon } from "./Icon";
 
 export function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
@@ -14,7 +15,8 @@ export function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
         <nav className="footer__links" aria-label={t.nav.sections}>
           <Link href={localeHref(locale, "/terms")}>{t.legal.terms}</Link>
           <Link href={localeHref(locale, "/privacy")}>{t.legal.privacy}</Link>
-          <a href={site.discord} target="_blank" rel="noopener">
+          <a className="footer__discord" href={site.discord} target="_blank" rel="noopener">
+            <Icon name="discord" />
             Discord
           </a>
         </nav>

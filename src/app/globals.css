@@ -1559,6 +1559,8 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .footer__links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 .footer__links a { text-decoration: none; }
 .footer__links a:hover { color: var(--paper); text-decoration: underline; }
+.footer__discord { display: inline-flex; align-items: center; gap: 7px; }
+.footer__discord svg { width: 16px; height: 16px; flex: none; color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
