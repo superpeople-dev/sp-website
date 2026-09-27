@@ -15,12 +15,13 @@ It explains the project, links the launcher download and the Discord, and hosts 
 
 ## Getting started
 
-You need Node.js 22 or newer.
+You need [Bun](https://bun.com) 1.3 or newer. Bun installs the packages and runs the site, including on Vercel
+(see `bunVersion` in [`vercel.json`](vercel.json)).
 
 ```bash
-npm install
+bun install
 cp .env.example .env.local
-npm run dev
+bun dev
 ```
 
 Open http://localhost:3000. The home and legal pages work without any environment variables. The
@@ -30,9 +31,9 @@ they show a "not available" message.
 Before opening a pull request, check that these pass:
 
 ```bash
-npm run lint
-npx tsc --noEmit
-npm run build
+bun run lint
+bunx tsc --noEmit
+bun run build
 ```
 
 ## Project layout
@@ -122,7 +123,7 @@ Discord channel. To set it up, create a webhook on the Discord channel, then add
 ### Known bugs
 
 [`scripts/known-bugs.json`](scripts/known-bugs.json) lists bugs reported on Discord.
-`npm run seed:bugs` adds the ones that aren't in Reflet yet, using the Reflet keys from `.env.local`.
+`bun run seed:bugs` adds the ones that aren't in Reflet yet, using the Reflet keys from `.env.local`.
 It skips anything already there, so it is safe to run again after adding bugs to the file.
 
 ## Environment variables
