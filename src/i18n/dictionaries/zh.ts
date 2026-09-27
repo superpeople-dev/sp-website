@@ -296,6 +296,12 @@ export const zh: Dictionary = {
     addTask: "添加任务",
     taskPlaceholder: "任务标题",
     add: "添加",
+    adminPanel: "管理面板",
+    tabReview: "审核",
+    tabAdmins: "管理员",
+    reviewEmpty: "没有等待审核的内容。",
+    openIdeas: "打开想法页面",
+    adminsNote: "管理员在网站代码（src/lib/admins.ts）中列出，或由 Discord 角色决定。",
   },
   legal: {
     terms: "服务条款",

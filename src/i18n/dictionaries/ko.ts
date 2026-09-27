@@ -298,6 +298,12 @@ export const ko: Dictionary = {
     addTask: "작업 추가",
     taskPlaceholder: "작업 제목",
     add: "추가",
+    adminPanel: "관리자 패널",
+    tabReview: "검토",
+    tabAdmins: "관리자",
+    reviewEmpty: "검토를 기다리는 게시물이 없습니다.",
+    openIdeas: "아이디어 페이지 열기",
+    adminsNote: "관리자는 사이트 코드(src/lib/admins.ts)나 Discord 역할로 지정됩니다.",
   },
   legal: {
     terms: "이용약관",

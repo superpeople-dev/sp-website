@@ -298,6 +298,12 @@ export const ja: Dictionary = {
     addTask: "タスクを追加",
     taskPlaceholder: "タスク名",
     add: "追加",
+    adminPanel: "管理パネル",
+    tabReview: "審査",
+    tabAdmins: "管理者",
+    reviewEmpty: "審査待ちの投稿はありません。",
+    openIdeas: "アイデアページを開く",
+    adminsNote: "管理者はサイトのコード (src/lib/admins.ts) か Discord のロールで決まります。",
   },
   legal: {
     terms: "利用規約",

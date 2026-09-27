@@ -298,6 +298,12 @@ export const en: Dictionary = {
     addTask: "Add task",
     taskPlaceholder: "Task title",
     add: "Add",
+    adminPanel: "Admin panel",
+    tabReview: "Review",
+    tabAdmins: "Admins",
+    reviewEmpty: "Nothing is waiting for review.",
+    openIdeas: "Open the Ideas page",
+    adminsNote: "Admins are listed in the site's code (src/lib/admins.ts) or come from Discord roles.",
   },
   legal: {
     terms: "Terms of Service",

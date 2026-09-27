@@ -220,6 +220,12 @@ export type Dictionary = {
     addTask: string;
     taskPlaceholder: string;
     add: string;
+    adminPanel: string;
+    tabReview: string;
+    tabAdmins: string;
+    reviewEmpty: string;
+    openIdeas: string;
+    adminsNote: string;
   };
   legal: {
     terms: string;

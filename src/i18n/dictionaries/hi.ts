@@ -298,6 +298,12 @@ export const hi: Dictionary = {
     addTask: "टास्क जोड़ें",
     taskPlaceholder: "टास्क का शीर्षक",
     add: "जोड़ें",
+    adminPanel: "एडमिन पैनल",
+    tabReview: "समीक्षा",
+    tabAdmins: "एडमिन",
+    reviewEmpty: "समीक्षा के लिए कुछ भी बाकी नहीं है।",
+    openIdeas: "आइडिया पेज खोलें",
+    adminsNote: "एडमिन साइट के कोड (src/lib/admins.ts) में दर्ज हैं या Discord रोल से तय होते हैं।",
   },
   legal: {
     terms: "सेवा की शर्तें",

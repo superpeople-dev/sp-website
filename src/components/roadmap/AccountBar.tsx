@@ -6,7 +6,7 @@ import { useI18n } from "@/i18n/context";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import type { Viewer } from "@/lib/board";
-import { BansButton } from "./Bans";
+import { AdminPanel } from "./AdminPanel";
 import { loginHref, signOut } from "./viewer";
 
 export function AccountBar({ authReady, next, viewer }: { authReady: boolean; next: string; viewer: Viewer | null }) {
@@ -46,7 +46,7 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
         <Icon name="logout" />
         {t.board.signOut}
       </button>
-      {viewer.canBan && <BansButton />}
+      {viewer.admin && <AdminPanel />}
       {dialog}
     </div>
   );

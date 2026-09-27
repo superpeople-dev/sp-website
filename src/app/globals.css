@@ -1032,7 +1032,39 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 }
 .account-bar__out:hover { color: var(--paper); }
 .account-bar__out svg { width: 15px; height: 15px; }
-.account-bar__bans { margin-left: auto; }
+.account-bar__admin { margin-left: auto; }
+.sheet--admin { width: min(640px, 100%); }
+.admin-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 16px 0 20px; border-bottom: 1px solid var(--line-soft); }
+.admin-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -1px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: 700 13px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.admin-tabs button:hover { color: var(--paper); }
+.admin-tabs button.is-active { border-bottom-color: var(--signal); color: var(--paper); }
+.admin-review { grid-template-columns: 36px minmax(0, 1fr) auto; }
+.admin-review__icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r); background: rgba(240, 183, 25, 0.14); color: var(--gold); }
+.admin-review__icon svg { width: 17px; height: 17px; }
+.admin-review__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn.admin-review__reject:hover:not(:disabled) { border-color: var(--signal); color: var(--signal-hi); }
+.admin-names { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.admin-names li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); font-weight: 600; }
+.admin-note { margin: 14px 0 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 600px) {
+  .admin-review { grid-template-columns: 36px minmax(0, 1fr); }
+  .admin-review__actions { grid-column: 1 / -1; }
+}
 
 .plan { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .plan__col .panel__title { display: flex; align-items: center; gap: 10px; }

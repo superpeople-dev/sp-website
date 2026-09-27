@@ -298,6 +298,12 @@ export const ru: Dictionary = {
     addTask: "Добавить задачу",
     taskPlaceholder: "Название задачи",
     add: "Добавить",
+    adminPanel: "Панель администратора",
+    tabReview: "Проверка",
+    tabAdmins: "Администраторы",
+    reviewEmpty: "Нет ничего на проверке.",
+    openIdeas: "Открыть страницу идей",
+    adminsNote: "Администраторы указаны в коде сайта (src/lib/admins.ts) или назначаются ролями в Discord.",
   },
   legal: {
     terms: "Условия использования",

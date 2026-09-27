@@ -298,6 +298,12 @@ export const de: Dictionary = {
     addTask: "Aufgabe hinzufügen",
     taskPlaceholder: "Titel der Aufgabe",
     add: "Hinzufügen",
+    adminPanel: "Admin-Bereich",
+    tabReview: "Prüfen",
+    tabAdmins: "Admins",
+    reviewEmpty: "Nichts wartet auf Prüfung.",
+    openIdeas: "Ideen-Seite öffnen",
+    adminsNote: "Admins stehen im Code der Seite (src/lib/admins.ts) oder kommen über Discord-Rollen.",
   },
   legal: {
     terms: "Nutzungsbedingungen",
