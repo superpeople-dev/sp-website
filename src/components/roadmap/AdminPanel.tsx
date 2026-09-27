@@ -34,7 +34,7 @@ export function AdminPanel() {
 
   return (
     <>
-      <button type="button" className="account-bar__out account-bar__admin" onClick={() => setOpen(true)}>
+      <button type="button" className="btn btn--primary btn--sm account-bar__admin" onClick={() => setOpen(true)}>
         <Icon name="shield" />
         {t.board.adminPanel}
       </button>

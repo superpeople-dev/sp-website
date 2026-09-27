@@ -10,6 +10,7 @@ import { categoryOf, typeOf, type Category, type TypeTag, type Viewer } from "@/
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
+import { Modal } from "../Modal";
 import { AdminActions, useAdmin } from "./admin";
 import { FieldCount } from "./FieldCount";
 import { CategoryTag } from "./CategoryTag";
@@ -73,6 +74,7 @@ export function IdeasBoard({
   const [fileError, setFileError] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [mine, setMine] = useState(pendingMine);
+  const [composing, setComposing] = useState(false);
   const atLimit = !viewer?.admin && mine >= ideaLimits.pending;
   const previews = useMemo(() => files.map((file) => ({ file, url: URL.createObjectURL(file) })), [files]);
   const [ask, dialog] = useConfirm();
@@ -80,6 +82,7 @@ export function IdeasBoard({
   const [opened, setOpened] = useState<Opened | null>(null);
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
   const close = useCallback(() => setOpened(null), []);
+  const closeForm = useCallback(() => setComposing(false), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const next = localeHref(locale, "/ideas");
   const available = ideaTypes.filter((type) => type.slug === "other" || types.some((tag) => tag.slug === type.slug));
@@ -153,6 +156,7 @@ export function IdeasBoard({
       }
       setProgress(null);
       setForm(failed ? "partial" : "pending");
+      setComposing(false);
       setTitle("");
       setDetails("");
       setFiles([]);
@@ -229,44 +233,56 @@ export function IdeasBoard({
     );
   };
 
-  const notes: Partial<Record<FormState, string>> = { pending: r.pending, partial: r.mediaFailed, error: r.error };
-  const note = notes[form] ?? null;
+  const sentNotes: Partial<Record<FormState, string>> = { pending: r.pending, partial: r.mediaFailed };
+  const sent = sentNotes[form] ?? null;
   const sending = form === "sending";
+  const canPost = viewer && !viewer.banned;
+  const openForm = () => {
+    if (sent) setForm("idle");
+    setComposing(true);
+  };
 
   return (
     <section id="ideas" className="flush">
-      <div className={`wrap ideas${viewer ? "" : " ideas--solo"}`}>
-        <div className="ideas__main">
-          {viewer?.admin && review.length > 0 && (
-            <div className="review">
-              <p className="panel__title review__title">
-                <span className="review__icon" aria-hidden="true">
-                  <Icon name="clock" />
-                </span>
-                {r.reviewTitle}
-                <span className="panel__count">{review.length}</span>
-              </p>
-              <ul className="idea-list">{review.map((item) => card(item, true))}</ul>
+      <div className="wrap">
+        {viewer?.banned && (
+          <p className="thread__banned ideas__banned" role="status">
+            <Icon name="ban" />
+            {t.board.bannedNotice}
+          </p>
+        )}
+
+        {viewer?.admin && review.length > 0 && (
+          <div className="review">
+            <p className="panel__title review__title">
+              <span className="review__icon" aria-hidden="true">
+                <Icon name="clock" />
+              </span>
+              {r.reviewTitle}
+              <span className="panel__count">{review.length}</span>
+            </p>
+            <ul className="idea-list">{review.map((item) => card(item, true))}</ul>
+          </div>
+        )}
+
+        <div className="ideas__bar">
+          {available.length > 1 && (
+            <div className="ideas__filters" role="group" aria-label={r.typeLabel}>
+              {(["all", ...available.map((type) => type.slug)] as Filter[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={filter === key ? "is-active" : undefined}
+                  aria-pressed={filter === key}
+                  onClick={() => setFilter(key)}
+                >
+                  {key !== "all" && <Icon name={iconOf(key)} />}
+                  {key === "all" ? r.filterAll : r.types[key]}
+                </button>
+              ))}
             </div>
           )}
-
-          <div className="ideas__bar">
-            {available.length > 1 && (
-              <div className="ideas__filters" role="group" aria-label={r.typeLabel}>
-                {(["all", ...available.map((type) => type.slug)] as Filter[]).map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={filter === key ? "is-active" : undefined}
-                    aria-pressed={filter === key}
-                    onClick={() => setFilter(key)}
-                  >
-                    {key !== "all" && <Icon name={iconOf(key)} />}
-                    {key === "all" ? r.filterAll : r.types[key]}
-                  </button>
-                ))}
-              </div>
-            )}
+          <div className="ideas__end">
             <div className="ideas__sort" role="group">
               {(["top", "new"] as const).map((key) => (
                 <button
@@ -280,30 +296,53 @@ export function IdeasBoard({
                 </button>
               ))}
             </div>
+            {canPost && (
+              <button type="button" className="btn btn--primary btn--sm ideas__suggest" onClick={openForm}>
+                <Icon name="plus" />
+                {r.formTitle}
+              </button>
+            )}
           </div>
-
-          {visible.length ? (
-            <ul className="idea-list">{visible.map((item) => card(item, false))}</ul>
-          ) : (
-            <p className="ideas__empty">{r.empty}</p>
-          )}
         </div>
 
-        {viewer?.banned && (
-          <aside className="ideas__side">
-            <p className="panel thread__banned" role="status">
-              <Icon name="ban" />
-              {t.board.bannedNotice}
-            </p>
-          </aside>
+        {sent && (
+          <p className={`ideas__sent${form === "partial" ? " is-error" : ""}`} role="status">
+            <Icon name={form === "partial" ? "attach" : "check"} />
+            {sent}
+          </p>
         )}
-        {viewer && !viewer.banned && (
-          <aside className="ideas__side">
-            <form className="panel idea-form" onSubmit={(e) => void submit(e)}>
-              <p className="panel__title">{r.formTitle}</p>
-              {note && (
-                <p className={`idea-form__note${form === "error" || form === "partial" ? " is-error" : ""}`} role="status">
-                  {note}
+
+        {visible.length ? (
+          <ul className="idea-list">{visible.map((item) => card(item, false))}</ul>
+        ) : (
+          <p className="ideas__empty">{r.empty}</p>
+        )}
+      </div>
+      {canPost && (
+        <Modal open={composing} onClose={closeForm} labelledBy="idea-form-title" className="sheet--narrow">
+          <div className="sheet__bar">
+            <h2 id="idea-form-title" className="sheet__heading">
+              <Icon name="bulb" />
+              {r.formTitle}
+            </h2>
+            <div className="sheet__actions">
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={closeForm}
+                aria-label={t.board.close}
+                title={t.board.close}
+                data-autofocus={atLimit || undefined}
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+          </div>
+          <div className="sheet__body">
+            <form className="idea-form" onSubmit={(e) => void submit(e)}>
+              {form === "error" && (
+                <p className="idea-form__note is-error" role="status">
+                  {r.error}
                 </p>
               )}
               {atLimit && (
@@ -340,6 +379,7 @@ export function IdeasBoard({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder={r.titlePlaceholder}
+                  data-autofocus={!atLimit || undefined}
                   minLength={3}
                   maxLength={ideaLimits.title}
                   required
@@ -414,9 +454,9 @@ export function IdeasBoard({
               </button>
               </fieldset>
             </form>
-          </aside>
-        )}
-      </div>
+          </div>
+        </Modal>
+      )}
       <ItemDialog
         item={current}
         mode={opened?.mode ?? "view"}
