@@ -42,11 +42,11 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
       <Image className="account-bar__avatar" src={viewer.avatar} alt="" width={32} height={32} unoptimized />
       <span className="account-bar__name">{fill(t.board.signedInAs, { name: viewer.name })}</span>
       {viewer.admin && <span className="account-bar__badge">{t.board.admin}</span>}
-      {viewer.canBan && <BansButton />}
       <button type="button" className="account-bar__out" onClick={() => void confirmSignOut()}>
         <Icon name="logout" />
         {t.board.signOut}
       </button>
+      {viewer.canBan && <BansButton />}
       {dialog}
     </div>
   );

@@ -1,11 +1,24 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import type { FeedbackStatus } from "reflet-sdk";
-import { deleteIdea, failure, getIdea, getTags, refletTag, setStatus, updateIdea, updateTags } from "@/lib/reflet";
-import { readSession, sameOrigin } from "@/lib/session";
+import {
+  createIdea,
+  deleteIdea,
+  failure,
+  getIdea,
+  getTags,
+  refletTag,
+  setStatus,
+  updateIdea,
+  updateTags,
+  userToken,
+} from "@/lib/reflet";
+import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
+import { profileOf, rememberAuthor } from "@/lib/store";
 
 const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
+const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
 
 type Body = {
   feedbackId?: unknown;
@@ -18,6 +31,23 @@ type Body = {
 };
 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+
+async function create(user: SessionUser, body: Body) {
+  const title = text(body.title);
+  const status = body.status as FeedbackStatus;
+  if (title.length < 3 || title.length > ideaLimits.title || !boardStatuses.includes(status)) {
+    return Response.json({ error: "invalid" }, { status: 400 });
+  }
+  try {
+    const { feedbackId } = await createIdea(title, "", await userToken(user));
+    await Promise.all([setStatus(feedbackId, status), rememberAuthor(feedbackId, profileOf(user))]);
+    revalidateTag(refletTag, { expire: 0 });
+    const item = await getIdea(feedbackId);
+    return Response.json({ item: { ...item, status } });
+  } catch (error) {
+    return failure("create task", error);
+  }
+}
 
 async function edit(feedbackId: string, body: Body) {
   const title = text(body.title);
@@ -42,6 +72,7 @@ export async function POST(request: NextRequest) {
   const user = await readSession(request);
   if (!user?.admin) return Response.json({ error: "forbidden" }, { status: user ? 403 : 401 });
   const body = (await request.json().catch(() => ({}))) as Body;
+  if (body.action === "create") return create(user, body);
   const feedbackId = typeof body.feedbackId === "string" ? body.feedbackId : "";
   if (!feedbackId) return Response.json({ error: "invalid" }, { status: 400 });
 

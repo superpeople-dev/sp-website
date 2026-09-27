@@ -8,7 +8,7 @@ import { PlanBoard } from "@/components/roadmap/PlanBoard";
 import { isLocale, localeHref } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
-import { getTags, listByStatus, safely } from "@/lib/reflet";
+import { getTags, listByStatus, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
@@ -26,9 +26,15 @@ export default async function RoadmapPage({ params }: PageProps<"/[lang]/roadmap
   const session = await currentSession();
   const [release, items, tags, banned] = await Promise.all([
     getLatestRelease(),
-    safely(async () =>
-      (await Promise.all([listByStatus("planned"), listByStatus("in_progress"), listByStatus("completed", 1)])).flat(),
-    ),
+    safely(async () => {
+      const token = session ? await userToken(session) : undefined;
+      const lists = await Promise.all([
+        listByStatus("planned", 10, token),
+        listByStatus("in_progress", 10, token),
+        listByStatus("completed", 1),
+      ]);
+      return lists.flat();
+    }),
     safely(getTags),
     session ? isBanned(session.id) : false,
   ]);

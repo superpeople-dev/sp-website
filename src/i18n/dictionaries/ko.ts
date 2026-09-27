@@ -295,6 +295,9 @@ export const ko: Dictionary = {
     deleteMediaTitle: "이 파일을 삭제할까요?",
     deleteMediaBody: "모든 사람에게서 이 게시물의 파일이 삭제됩니다.",
     openMedia: "{name} 열기",
+    addTask: "작업 추가",
+    taskPlaceholder: "작업 제목",
+    add: "추가",
   },
   legal: {
     terms: "이용약관",

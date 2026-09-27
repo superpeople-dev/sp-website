@@ -21,7 +21,9 @@ import { doneAt, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
+import { AddTask } from "./AddTask";
 import { useAdmin } from "./admin";
+import { useVote } from "./useVote";
 import { WorkCard } from "./WorkCard";
 
 const recentDone = 6;
@@ -76,6 +78,9 @@ export function PlanBoard({
     useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 6 } }),
   );
   const canDrag = viewer?.admin === true;
+  const next = localeHref(locale, "/roadmap");
+  const { vote, pending } = useVote({ patch, viewer, authReady, next });
+  const add = (item: FeedbackItem) => setItems((list) => [...list.filter((entry) => entry.id !== item.id), item]);
 
   const columns = useMemo(() => {
     const of = (status: FeedbackStatus) => items.filter((item) => item.status === status);
@@ -125,6 +130,8 @@ export function PlanBoard({
                     admin: canDrag ? admin : null,
                     showDate: column.key === "completed",
                     onOpen: (mode) => open(item.id, mode),
+                    onVote: authReady ? () => void vote(item) : undefined,
+                    voteDisabled: pending.includes(item.id) || viewer?.banned,
                   };
                   return canDrag ? <DraggableCard key={item.id} {...props} /> : <WorkCard key={item.id} {...props} />;
                 })}
@@ -132,6 +139,7 @@ export function PlanBoard({
             ) : (
               <p className="plan__empty">{p.empty}</p>
             )}
+            {canDrag && <AddTask status={column.key} onAdded={add} />}
             {column.key === "completed" && (column.total ?? 0) > 0 && (
               <Link className="plan__more" href={localeHref(locale, "/completed")}>
                 {p.seeAll}
@@ -181,9 +189,11 @@ export function PlanBoard({
         types={types}
         viewer={viewer}
         authReady={authReady}
-        next={localeHref(locale, "/roadmap")}
+        next={next}
         admin={admin}
         onPatch={patch}
+        vote={(item) => void vote(item)}
+        votePending={current ? pending.includes(current.id) : false}
       />
       {admin.dialog}
     </section>

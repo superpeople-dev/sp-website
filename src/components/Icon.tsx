@@ -63,6 +63,7 @@ const paths = {
   wrench: <path {...stroke} strokeWidth={2} d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-5.8 5.8 3 3 5.8-5.8a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.1-.5-.5-2.1 2.5-2.5Z" />,
   other: <path {...stroke} strokeWidth={2} d="M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z" />,
   send: <path {...stroke} strokeWidth={2} d="M20.5 3.5 10 14M20.5 3.5 14 20.5l-4-6.5-6.5-4 17-6.5Z" />,
+  plus: <path {...stroke} strokeWidth={2} d="M12 5v14M5 12h14" />,
   more: (
     <g fill="currentColor">
       <circle cx="5.5" cy="12" r="1.9" />

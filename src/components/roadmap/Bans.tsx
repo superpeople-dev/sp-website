@@ -17,7 +17,7 @@ export function BansButton() {
 
   return (
     <>
-      <button type="button" className="account-bar__out" onClick={() => setOpen(true)}>
+      <button type="button" className="account-bar__out account-bar__bans" onClick={() => setOpen(true)}>
         <Icon name="ban" />
         {t.board.bansOpen}
       </button>

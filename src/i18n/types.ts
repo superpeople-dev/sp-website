@@ -217,6 +217,9 @@ export type Dictionary = {
     deleteMediaTitle: string;
     deleteMediaBody: string;
     openMedia: string;
+    addTask: string;
+    taskPlaceholder: string;
+    add: string;
   };
   legal: {
     terms: string;

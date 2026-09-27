@@ -328,7 +328,7 @@ function ItemBody({
   );
 
   const votes =
-    vote && !inReview ? (
+    item.status === "completed" ? null : vote && !inReview ? (
       <button
         type="button"
         className={`sheet__vote${item.hasVoted ? " is-voted" : ""}`}

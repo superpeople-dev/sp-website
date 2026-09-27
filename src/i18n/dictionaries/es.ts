@@ -295,6 +295,9 @@ export const es: Dictionary = {
     deleteMediaTitle: "¿Eliminar este archivo?",
     deleteMediaBody: "Se quitará de esta publicación para todos.",
     openMedia: "Abrir {name}",
+    addTask: "Añadir tarea",
+    taskPlaceholder: "Título de la tarea",
+    add: "Añadir",
   },
   legal: {
     terms: "Términos del servicio",

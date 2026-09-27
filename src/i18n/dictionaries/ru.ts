@@ -295,6 +295,9 @@ export const ru: Dictionary = {
     deleteMediaTitle: "Удалить этот файл?",
     deleteMediaBody: "Он будет удалён из записи для всех.",
     openMedia: "Открыть {name}",
+    addTask: "Добавить задачу",
+    taskPlaceholder: "Название задачи",
+    add: "Добавить",
   },
   legal: {
     terms: "Условия использования",

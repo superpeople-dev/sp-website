@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
@@ -16,6 +15,7 @@ import { FieldCount } from "./FieldCount";
 import { CategoryTag } from "./CategoryTag";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
+import { useVote } from "./useVote";
 import { signIn } from "./viewer";
 
 type Sort = "top" | "new";
@@ -61,12 +61,10 @@ export function IdeasBoard({
   pendingMine: number;
 }) {
   const { locale, t } = useI18n();
-  const router = useRouter();
   const r = t.ideas;
   const [items, setItems] = useState(initial);
   const [sort, setSort] = useState<Sort>("top");
   const [filter, setFilter] = useState<Filter>("all");
-  const [pending, setPending] = useState<string[]>([]);
   const [kind, setKind] = useState<IdeaType | null>(types.find((type) => type.slug === "feature-request")?.slug ?? types[0]?.slug ?? null);
   const [title, setTitle] = useState("");
   const [details, setDetails] = useState("");
@@ -121,32 +119,7 @@ export function IdeasBoard({
       setItems((list) => list.map((item) => (item.id === id ? { ...item, ...change } : item))),
     [],
   );
-
-  const vote = async (item: FeedbackItem) => {
-    if (!authReady || pending.includes(item.id) || viewer?.banned) return;
-    const before = { hasVoted: item.hasVoted, voteCount: item.voteCount };
-    if (viewer) patch(item.id, { hasVoted: !item.hasVoted, voteCount: item.voteCount + (item.hasVoted ? -1 : 1) });
-    setPending((ids) => [...ids, item.id]);
-    try {
-      const response = await fetch("/api/roadmap/vote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ feedbackId: item.id }),
-      });
-      if (response.status === 401) {
-        patch(item.id, before);
-        return signIn(next);
-      }
-      if (!response.ok) throw new Error(String(response.status));
-      const result = (await response.json()) as { voteCount: number; voted: boolean };
-      patch(item.id, { hasVoted: result.voted, voteCount: result.voteCount });
-      if (!viewer) router.refresh();
-    } catch {
-      patch(item.id, before);
-    } finally {
-      setPending((ids) => ids.filter((id) => id !== item.id));
-    }
-  };
+  const { vote, pending } = useVote({ patch, viewer, authReady, next });
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

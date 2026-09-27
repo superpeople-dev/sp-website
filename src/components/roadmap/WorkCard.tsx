@@ -24,6 +24,8 @@ export function WorkCard({
   onOpen,
   drag,
   overlay,
+  onVote,
+  voteDisabled,
 }: {
   item: FeedbackItem;
   categories: Category[];
@@ -32,6 +34,8 @@ export function WorkCard({
   onOpen: (mode: "view" | "edit") => void;
   drag?: Drag;
   overlay?: boolean;
+  onVote?: () => void;
+  voteDisabled?: boolean;
 }) {
   const { locale, t } = useI18n();
   const category = categoryOf(item, categories);
@@ -43,10 +47,25 @@ export function WorkCard({
   return (
     <li ref={drag?.ref} className={classes.filter(Boolean).join(" ")} {...drag?.listeners}>
       <div className="work__top">
-        <span className="work__votes">
-          <Icon name="up" />
-          {item.voteCount}
-        </span>
+        {item.status !== "completed" &&
+          (onVote && !overlay ? (
+            <button
+              type="button"
+              className={`work__vote${item.hasVoted ? " is-voted" : ""}`}
+              aria-pressed={item.hasVoted}
+              aria-label={fill(item.hasVoted ? t.ideas.unvote : t.ideas.vote, { title: item.title })}
+              disabled={voteDisabled}
+              onClick={onVote}
+            >
+              <Icon name="up" />
+              {item.voteCount}
+            </button>
+          ) : (
+            <span className={`work__votes${item.hasVoted ? " is-voted" : ""}`}>
+              <Icon name="up" />
+              {item.voteCount}
+            </span>
+          ))}
         {category && <CategoryTag category={category} />}
         {admin && !overlay && <ItemMenu item={item} admin={admin} onEdit={() => onOpen("edit")} className="work__menu" />}
       </div>

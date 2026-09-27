@@ -65,12 +65,12 @@ export const getChangelog = () => call<ChangelogEntry[]>("/api/v1/feedback/chang
 export const listIdeas = (token?: string) =>
   call<FeedbackListResponse>("/api/v1/feedback/list?sortBy=votes&limit=100", { token, cache: token ? undefined : 60 });
 
-export async function listByStatus(status: FeedbackStatus, pages = 10) {
+export async function listByStatus(status: FeedbackStatus, pages = 10, token?: string) {
   const items: FeedbackItem[] = [];
   for (let page = 0; page < pages; page++) {
     const result = await call<FeedbackListResponse>(
       `/api/v1/feedback/list?status=${status}&sortBy=newest&limit=100&offset=${page * 100}`,
-      { cache: 60 },
+      { token, cache: token ? undefined : 60 },
     );
     items.push(...result.items);
     if (!result.hasMore) break;

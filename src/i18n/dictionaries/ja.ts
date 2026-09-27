@@ -295,6 +295,9 @@ export const ja: Dictionary = {
     deleteMediaTitle: "このファイルを削除しますか？",
     deleteMediaBody: "この投稿からすべての人の画面で削除されます。",
     openMedia: "{name} を開く",
+    addTask: "タスクを追加",
+    taskPlaceholder: "タスク名",
+    add: "追加",
   },
   legal: {
     terms: "利用規約",

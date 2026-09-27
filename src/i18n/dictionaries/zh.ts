@@ -293,6 +293,9 @@ export const zh: Dictionary = {
     deleteMediaTitle: "删除这个文件？",
     deleteMediaBody: "所有人都将看不到这个文件。",
     openMedia: "打开 {name}",
+    addTask: "添加任务",
+    taskPlaceholder: "任务标题",
+    add: "添加",
   },
   legal: {
     terms: "服务条款",

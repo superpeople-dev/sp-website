@@ -295,6 +295,9 @@ export const en: Dictionary = {
     deleteMediaTitle: "Delete this file?",
     deleteMediaBody: "It will be removed from this post for everyone.",
     openMedia: "Open {name}",
+    addTask: "Add task",
+    taskPlaceholder: "Task title",
+    add: "Add",
   },
   legal: {
     terms: "Terms of Service",
