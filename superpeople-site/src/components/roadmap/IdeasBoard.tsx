@@ -75,7 +75,6 @@ export function IdeasBoard({
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [mine, setMine] = useState(pendingMine);
   const [composing, setComposing] = useState(false);
-  const [picking, setPicking] = useState(false);
   const atLimit = !viewer?.admin && mine >= ideaLimits.pending;
   const previews = useMemo(() => files.map((file) => ({ file, url: URL.createObjectURL(file) })), [files]);
   const [ask, dialog] = useConfirm();
@@ -84,12 +83,9 @@ export function IdeasBoard({
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
   const close = useCallback(() => setOpened(null), []);
   const closeForm = useCallback(() => setComposing(false), []);
-  const closePicker = useCallback(() => setPicking(false), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const next = localeHref(locale, "/ideas");
   const available = ideaTypes.filter((type) => type.slug === "other" || types.some((tag) => tag.slug === type.slug));
-  const filters: Filter[] = ["all", ...available.map((type) => type.slug)];
-  const filterLabel = (key: Filter) => (key === "all" ? r.filterAll : r.types[key]);
 
   const visible = useMemo(
     () =>
@@ -271,33 +267,20 @@ export function IdeasBoard({
 
         <div className="ideas__bar">
           {available.length > 1 && (
-            <>
-              <button
-                type="button"
-                className={`ideas__filter-btn${filter === "all" ? "" : " is-active"}`}
-                aria-haspopup="dialog"
-                aria-label={`${r.typeLabel}: ${filterLabel(filter)}`}
-                onClick={() => setPicking(true)}
-              >
-                <Icon name="filter" />
-                {filterLabel(filter)}
-                <Icon name="chevron" />
-              </button>
-              <div className="ideas__filters" role="group" aria-label={r.typeLabel}>
-                {filters.map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={filter === key ? "is-active" : undefined}
-                    aria-pressed={filter === key}
-                    onClick={() => setFilter(key)}
-                  >
-                    {key !== "all" && <Icon name={iconOf(key)} />}
-                    {filterLabel(key)}
-                  </button>
-                ))}
-              </div>
-            </>
+            <div className="ideas__filters" role="group" aria-label={r.typeLabel}>
+              {(["all", ...available.map((type) => type.slug)] as Filter[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={filter === key ? "is-active" : undefined}
+                  aria-pressed={filter === key}
+                  onClick={() => setFilter(key)}
+                >
+                  {key !== "all" && <Icon name={iconOf(key)} />}
+                  {key === "all" ? r.filterAll : r.types[key]}
+                </button>
+              ))}
+            </div>
           )}
           <div className="ideas__end">
             <div className="ideas__sort" role="group">
@@ -335,42 +318,6 @@ export function IdeasBoard({
           <p className="ideas__empty">{r.empty}</p>
         )}
       </div>
-      {available.length > 1 && (
-        <Modal open={picking} onClose={closePicker} labelledBy="idea-filter-title" className="sheet--narrow">
-          <div className="sheet__bar">
-            <h2 id="idea-filter-title" className="sheet__heading">
-              <Icon name="filter" />
-              {r.typeLabel}
-            </h2>
-            <div className="sheet__actions">
-              <button type="button" className="icon-btn" onClick={closePicker} aria-label={t.board.close} title={t.board.close}>
-                <Icon name="close" />
-              </button>
-            </div>
-          </div>
-          <div className="sheet__body">
-            <div className="filter-pick" role="group" aria-label={r.typeLabel}>
-              {filters.map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={filter === key ? "is-active" : undefined}
-                  aria-pressed={filter === key}
-                  data-autofocus={filter === key || undefined}
-                  onClick={() => {
-                    setFilter(key);
-                    closePicker();
-                  }}
-                >
-                  <Icon name={key === "all" ? "layers" : iconOf(key)} />
-                  {filterLabel(key)}
-                  {filter === key && <Icon name="check" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        </Modal>
-      )}
       {canPost && (
         <Modal open={composing} onClose={closeForm} labelledBy="idea-form-title" className="sheet--narrow">
           <div className="sheet__bar">

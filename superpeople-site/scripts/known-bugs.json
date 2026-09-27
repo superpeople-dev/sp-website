@@ -1,0 +1,137 @@
+{
+  "categories": [
+    {
+      "name": "Game",
+      "color": "#3ddc84"
+    },
+    {
+      "name": "Launcher",
+      "color": "#ef4438"
+    },
+    {
+      "name": "Servers",
+      "color": "#f0b719"
+    },
+    {
+      "name": "Website",
+      "color": "#8fb0ff"
+    }
+  ],
+  "bugs": [
+    {
+      "title": "Spectator view cancels after about a minute",
+      "description": "When spectating, the spectator view loads and then cancels after about a minute.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Spectating restarts when a teleporter is used",
+      "description": "When a teleporter teleports the player you're spectating, spectating ends and restarts.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Some settings are in Korean",
+      "description": "Some settings are still shown in Korean.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Guns disappear randomly",
+      "description": "Sometimes guns disappear and appear again after some time.\n\nReported on Discord by FAXY.S7.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Titan: shield smash doesn't work",
+      "description": "The Titan's ability to smash the shield into the ground doesn't work. Only the forward charge works.\n\nReported on Discord by The_Reaper.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Server crash when strafing left and right quickly",
+      "description": "Walking left, right, left, right quickly makes the server crash. Not confirmed yet.\n\nReported on Discord by Alice.",
+      "status": "open",
+      "category": "Servers"
+    },
+    {
+      "title": "No care packages",
+      "description": "Care packages don't show up.\n\nReported on Discord by Alice.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Loading screen appears randomly while spectating",
+      "description": "When spectating someone, the loading screen randomly appears.\n\nReported on Discord by qbie.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Different font when connecting from the launcher",
+      "description": "When you connected using the launcher, the in-game font was different.\n\nReported on Discord by qbie.",
+      "status": "completed",
+      "category": "Launcher"
+    },
+    {
+      "title": "Shotgun Master skill: extra fire rate not applied",
+      "description": "The extra fire rate that the Shotgun Master skill gives to shotguns doesn't seem to apply.\n\nReported on Discord by Gaara.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "No sound when breaking windows",
+      "description": "Breaking a window makes no sound.\n\nReported on Discord by FAXY.S7.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Map waypoint doesn't work with right-click",
+      "description": "Placing a waypoint by right-clicking the map doesn't work. It only works with the scroll wheel.\n\nReported on Discord by FAXY.S7.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Driver class: skill #3 bug",
+      "description": "The Driver class's skill #3 doesn't work as expected. Details and screenshot in the Discord report.\n\nReported on Discord by Tacio Philip.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Acquired ability isn't shown in the list",
+      "description": "An acquired ability isn't displayed in the ability list. Screenshot in the Discord report.\n\nReported on Discord by pang0shka雨.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Grenades and bandages can't be used continuously",
+      "description": "Grenades and bandages can't be used automatically one after another.\n\nReported on Discord by Trouble.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Unexpected screen when opening the launcher",
+      "description": "Something unexpected appears when entering the launcher interface. Screenshot in the Discord report.\n\nReported on Discord by Trouble.",
+      "status": "open",
+      "category": "Launcher"
+    },
+    {
+      "title": "Driver class: movement bug after the vehicle explodes",
+      "description": "In training with the Driver class, moving to the vehicle is bugged after it explodes.\n\nReported on Discord by Riwoter.",
+      "status": "open",
+      "category": "Game"
+    },
+    {
+      "title": "Gold capsules not working",
+      "description": "Gold capsules couldn't be used. Red, blue and green were tested.\n\nReported on Discord by Aaridin.",
+      "status": "completed",
+      "category": "Game"
+    },
+    {
+      "title": "First Blood audio plays after every kill in bot matches",
+      "description": "The First Blood audio played after almost every kill instead of only after the first kill.\n\nReported on Discord by qbie.",
+      "status": "completed",
+      "category": "Game"
+    }
+  ],
+  "type": "bug-report"
+}
