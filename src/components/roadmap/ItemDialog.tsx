@@ -323,31 +323,28 @@ function ItemBody({
           </dd>
         </div>
       )}
-      <div className="sheet__fact">
-        <dt>{b.votes}</dt>
-        <dd>
-          {vote && !inReview ? (
-            <button
-              type="button"
-              className={`sheet__vote${item.hasVoted ? " is-voted" : ""}`}
-              aria-pressed={item.hasVoted}
-              aria-label={fill(item.hasVoted ? r.unvote : r.vote, { title: item.title })}
-              disabled={!authReady || votePending || viewer?.banned}
-              onClick={() => vote(item)}
-            >
-              <Icon name="up" />
-              {item.voteCount}
-            </button>
-          ) : (
-            <span className="sheet__votes">
-              <Icon name="up" />
-              {item.voteCount}
-            </span>
-          )}
-        </dd>
-      </div>
     </dl>
   );
+
+  const votes =
+    vote && !inReview ? (
+      <button
+        type="button"
+        className={`sheet__vote${item.hasVoted ? " is-voted" : ""}`}
+        aria-pressed={item.hasVoted}
+        aria-label={fill(item.hasVoted ? r.unvote : r.vote, { title: item.title })}
+        disabled={!authReady || votePending || viewer?.banned}
+        onClick={() => vote(item)}
+      >
+        <Icon name="up" />
+        {item.voteCount}
+      </button>
+    ) : (
+      <span className="sheet__votes" title={b.votes}>
+        <Icon name="up" />
+        {item.voteCount}
+      </span>
+    );
 
   const composer = () => {
     if (!authReady) return null;
@@ -410,6 +407,7 @@ function ItemBody({
     <>
       <div className="sheet__bar">
         <div className="sheet__chips">
+          {votes}
           <span className={`sheet__status sheet__status--${item.status}`}>{b.status[item.status]}</span>
           {types.length > 0 && (
             <span className={`idea__type idea__type--${type}`}>
