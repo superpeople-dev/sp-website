@@ -77,9 +77,19 @@ export function useAdmin(setItems: Dispatch<SetStateAction<FeedbackItem[]>>) {
   };
 }
 
-export function AdminActions({ item, admin, steps }: { item: FeedbackItem; admin: ReturnType<typeof useAdmin>; steps: Step[] }) {
+export function AdminActions({
+  item,
+  admin,
+  steps,
+  rejectLabel,
+}: {
+  item: FeedbackItem;
+  admin: ReturnType<typeof useAdmin>;
+  steps: Step[];
+  rejectLabel?: string;
+}) {
   const busy = admin.busy === item.id;
-  if (!steps.length) return null;
+  if (!steps.length && !rejectLabel) return null;
 
   return (
     <div className="admin-actions" aria-busy={busy}>
@@ -89,6 +99,12 @@ export function AdminActions({ item, admin, steps }: { item: FeedbackItem; admin
           {step.label}
         </button>
       ))}
+      {rejectLabel && (
+        <button type="button" className="admin-actions__reject" disabled={busy} onClick={() => void admin.remove(item, rejectLabel)}>
+          <Icon name="close" />
+          {rejectLabel}
+        </button>
+      )}
     </div>
   );
 }

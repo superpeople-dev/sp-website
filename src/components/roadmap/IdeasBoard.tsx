@@ -235,7 +235,12 @@ export function IdeasBoard({
             {item.author?.name && <span className="idea__author">{item.author.name}</span>}
           </div>
           {viewer?.admin && inReview && (
-            <AdminActions item={item} admin={admin} steps={[{ status: "open", label: r.approve, icon: "check" }]} />
+            <AdminActions
+              item={item}
+              admin={admin}
+              steps={[{ status: "open", label: r.approve, icon: "check" }]}
+              rejectLabel={r.reject}
+            />
           )}
         </div>
         {viewer?.admin && (
