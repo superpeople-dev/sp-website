@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FeedbackItem } from "reflet-sdk";
+import { useI18n } from "@/i18n/context";
 import type { Viewer } from "@/lib/board";
+import { useConfirm } from "../ConfirmDialog";
 import { signIn } from "./viewer";
 
 export function useVote({
@@ -18,7 +20,19 @@ export function useVote({
   next: string;
 }) {
   const router = useRouter();
+  const { t } = useI18n();
+  const [ask, prompt] = useConfirm();
   const [pending, setPending] = useState<string[]>([]);
+
+  const offerSignIn = () =>
+    void ask({
+      title: t.board.connectTitle,
+      body: t.board.connectBody,
+      confirm: t.board.signIn,
+      cancel: t.board.cancel,
+      icon: "discord",
+      discord: true,
+    }).then((ok) => ok && signIn(next));
 
   const vote = async (item: FeedbackItem) => {
     if (!authReady || pending.includes(item.id) || viewer?.banned) return;
@@ -33,7 +47,7 @@ export function useVote({
       });
       if (response.status === 401) {
         patch(item.id, before);
-        return signIn(next);
+        return offerSignIn();
       }
       if (!response.ok) throw new Error(String(response.status));
       const result = (await response.json()) as { voteCount: number; voted: boolean };
@@ -46,5 +60,5 @@ export function useVote({
     }
   };
 
-  return { vote, pending };
+  return { vote, pending, prompt };
 }

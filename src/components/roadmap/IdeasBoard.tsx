@@ -137,7 +137,7 @@ export function IdeasBoard({
       setItems((list) => list.map((item) => (item.id === id ? { ...item, ...change } : item))),
     [],
   );
-  const { vote, pending } = useVote({ patch, viewer, authReady, next });
+  const { vote, pending, prompt: signInPrompt } = useVote({ patch, viewer, authReady, next });
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -539,6 +539,7 @@ export function IdeasBoard({
       />
       {dialog}
       {admin.dialog}
+      {signInPrompt}
     </section>
   );
 }

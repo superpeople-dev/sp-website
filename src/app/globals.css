@@ -1625,11 +1625,16 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 }
 .confirm__icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border-radius: var(--r); background: rgba(239, 68, 56, 0.14); color: var(--signal-hi); }
 .confirm__icon.is-danger { background: rgba(239, 68, 56, 0.2); }
+.confirm__icon.is-discord { background: rgba(88, 101, 242, 0.18); color: #8f98ff; }
 .confirm__icon svg { width: 22px; height: 22px; }
 .confirm h2 { margin: 0 0 8px; font-size: 26px; line-height: 1.1; }
 .confirm p { margin: 0; color: var(--paper-dim); }
 .confirm__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .confirm__actions .btn { flex: 1 1 140px; white-space: normal; line-height: 1.2; }
+@media (max-width: 600px) {
+  .confirm-root { padding: 0; place-items: end stretch; }
+  .confirm { width: 100%; padding: 24px 18px 28px; border-bottom: 0; border-radius: 12px 12px 0 0; }
+}
 .btn--danger { background: linear-gradient(180deg, #d64035, #a81d14); border-color: rgba(255, 255, 255, 0.35); }
 .btn--danger:hover { border-color: #fff; }
 .btn:disabled { opacity: 0.6; cursor: default; transform: none; }

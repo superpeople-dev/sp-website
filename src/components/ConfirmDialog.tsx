@@ -13,6 +13,7 @@ type Request = {
   cancel: string;
   icon?: IconName;
   danger?: boolean;
+  discord?: boolean;
   resolve: (value: boolean) => void;
 };
 
@@ -56,7 +57,7 @@ function Dialog({ request, onClose }: { request: Request | null; onClose: (value
             transition={{ duration: 0.25, ease }}
           >
             {request.icon && (
-              <span className={`confirm__icon${request.danger ? " is-danger" : ""}`}>
+              <span className={`confirm__icon${request.danger ? " is-danger" : ""}${request.discord ? " is-discord" : ""}`}>
                 <Icon name={request.icon} />
               </span>
             )}
@@ -68,10 +69,11 @@ function Dialog({ request, onClose }: { request: Request | null; onClose: (value
               </button>
               <button
                 type="button"
-                className={`btn ${request.danger ? "btn--danger" : "btn--primary"}`}
+                className={`btn ${request.danger ? "btn--danger" : request.discord ? "btn--discord" : "btn--primary"}`}
                 onClick={() => onClose(true)}
                 autoFocus
               >
+                {request.discord && <Icon name="discord" />}
                 {request.confirm}
               </button>
             </div>

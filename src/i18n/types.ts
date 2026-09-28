@@ -159,6 +159,8 @@ export type Dictionary = {
   board: {
     status: Record<IdeaStatus, string>;
     signIn: string;
+    connectTitle: string;
+    connectBody: string;
     signOut: string;
     signedInAs: string;
     signInHint: string;

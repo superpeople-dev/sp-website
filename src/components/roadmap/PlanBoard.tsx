@@ -79,7 +79,7 @@ export function PlanBoard({
   );
   const canDrag = viewer?.admin === true;
   const next = localeHref(locale, "/roadmap");
-  const { vote, pending } = useVote({ patch, viewer, authReady, next });
+  const { vote, pending, prompt: signInPrompt } = useVote({ patch, viewer, authReady, next });
   const add = (item: FeedbackItem) => setItems((list) => [...list.filter((entry) => entry.id !== item.id), item]);
 
   const columns = useMemo(() => {
@@ -196,6 +196,7 @@ export function PlanBoard({
         votePending={current ? pending.includes(current.id) : false}
       />
       {admin.dialog}
+      {signInPrompt}
     </section>
   );
 }

@@ -237,6 +237,8 @@ export const en: Dictionary = {
   board: {
     status: { open: "Open", under_review: "Under review", planned: "Planned", in_progress: "In progress", completed: "Done", closed: "Closed" },
     signIn: "Sign in with Discord",
+    connectTitle: "Connect your Discord",
+    connectBody: "To upvote, suggest ideas and comment, you need to sign in with your Discord account.",
     signOut: "Sign out",
     signedInAs: "Signed in as {name}",
     signInHint: "Sign in with Discord to vote and post ideas.",

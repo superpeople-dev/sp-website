@@ -237,6 +237,8 @@ export const hi: Dictionary = {
   board: {
     status: { open: "खुला", under_review: "समीक्षा में", planned: "योजना में", in_progress: "जारी", completed: "पूरा", closed: "बंद" },
     signIn: "Discord से साइन इन करें",
+    connectTitle: "अपना Discord कनेक्ट करें",
+    connectBody: "वोट करने, आइडिया सुझाने और कमेंट करने के लिए आपको अपने Discord अकाउंट से साइन इन करना होगा।",
     signOut: "साइन आउट",
     signedInAs: "{name} के रूप में साइन इन",
     signInHint: "वोट करने और आइडिया पोस्ट करने के लिए Discord से साइन इन करें।",
