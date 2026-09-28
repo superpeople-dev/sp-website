@@ -194,6 +194,8 @@ export const es: Dictionary = {
     confirmTitle: "¿Publicar esta idea?",
     confirmBody: "Un admin la revisará antes de que aparezca en el tablero.",
     confirmYes: "Sí, publicar",
+    closeTitle: "¿Cerrar sin publicar?",
+    closeBody: "Tu idea aún no está publicada. Lo que escribiste se queda aquí hasta que salgas de la página.",
     reviewTitle: "Pendiente de revisión",
     approve: "Aprobar",
     reject: "Rechazar",

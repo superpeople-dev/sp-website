@@ -194,6 +194,8 @@ export const ko: Dictionary = {
     confirmTitle: "이 아이디어를 올릴까요?",
     confirmBody: "보드에 표시되기 전에 관리자가 검토합니다.",
     confirmYes: "네, 올릴게요",
+    closeTitle: "올리지 않고 닫을까요?",
+    closeBody: "아이디어가 아직 게시되지 않았습니다. 작성한 내용은 페이지를 떠나기 전까지 여기에 남아 있습니다.",
     reviewTitle: "검토 대기 중",
     approve: "승인",
     reject: "거절",

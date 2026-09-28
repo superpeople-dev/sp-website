@@ -194,6 +194,8 @@ export const en: Dictionary = {
     confirmTitle: "Post this idea?",
     confirmBody: "An admin will review it before it shows up on the board.",
     confirmYes: "Yes, post it",
+    closeTitle: "Close without posting?",
+    closeBody: "Your idea isn't posted yet. What you wrote stays here until you leave the page.",
     reviewTitle: "Waiting for review",
     approve: "Approve",
     reject: "Reject",

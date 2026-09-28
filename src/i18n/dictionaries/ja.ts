@@ -194,6 +194,8 @@ export const ja: Dictionary = {
     confirmTitle: "このアイデアを投稿しますか？",
     confirmBody: "ボードに表示される前に管理者が確認します。",
     confirmYes: "投稿する",
+    closeTitle: "投稿せずに閉じますか？",
+    closeBody: "アイデアはまだ投稿されていません。入力した内容は、ページを離れるまでここに残ります。",
     reviewTitle: "確認待ち",
     approve: "承認",
     reject: "却下",
