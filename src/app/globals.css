@@ -1105,7 +1105,6 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .btn.admin-review__reject:hover:not(:disabled) { border-color: var(--signal); color: var(--signal-hi); }
 .admin-names { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
 .admin-names li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); font-weight: 600; }
-.admin-note { margin: 14px 0 0; color: var(--muted); font-size: 14px; }
 @media (max-width: 600px) {
   .admin-review { grid-template-columns: 36px minmax(0, 1fr); }
   .admin-review__actions { grid-column: 1 / -1; }

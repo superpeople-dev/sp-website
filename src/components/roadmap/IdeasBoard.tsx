@@ -11,6 +11,7 @@ import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
+import { Reveal } from "../motion";
 import { AdminActions, useAdmin } from "./admin";
 import { FieldCount } from "./FieldCount";
 import { CategoryTag } from "./CategoryTag";
@@ -268,7 +269,7 @@ export function IdeasBoard({
         )}
 
         {viewer?.admin && review.length > 0 && (
-          <div className="review">
+          <Reveal className="review" y={16}>
             <p className="panel__title review__title">
               <span className="review__icon" aria-hidden="true">
                 <Icon name="clock" />
@@ -277,10 +278,10 @@ export function IdeasBoard({
               <span className="panel__count">{review.length}</span>
             </p>
             <ul className="idea-list">{review.map((item) => card(item, true))}</ul>
-          </div>
+          </Reveal>
         )}
 
-        <div className="ideas__bar">
+        <Reveal className="ideas__bar" y={16}>
           {available.length > 1 && (
             <>
               <button
@@ -331,7 +332,7 @@ export function IdeasBoard({
               </button>
             )}
           </div>
-        </div>
+        </Reveal>
 
         {sent && (
           <p className={`ideas__sent${form === "partial" ? " is-error" : ""}`} role="status">
@@ -340,11 +341,13 @@ export function IdeasBoard({
           </p>
         )}
 
-        {visible.length ? (
-          <ul className="idea-list">{visible.map((item) => card(item, false))}</ul>
-        ) : (
-          <p className="ideas__empty">{r.empty}</p>
-        )}
+        <Reveal delay={0.08} y={16}>
+          {visible.length ? (
+            <ul className="idea-list">{visible.map((item) => card(item, false))}</ul>
+          ) : (
+            <p className="ideas__empty">{r.empty}</p>
+          )}
+        </Reveal>
       </div>
       {available.length > 1 && (
         <Modal open={picking} onClose={closePicker} labelledBy="idea-filter-title" className="sheet--narrow">

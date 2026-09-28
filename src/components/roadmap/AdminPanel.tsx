@@ -211,19 +211,16 @@ function AdminBody({
     );
 
   const adminList = () => (
-    <>
-      <ul className="admin-names">
-        {data?.admins.map((name) => (
-          <li key={name}>
-            <span className="avatar avatar--blank" style={{ width: 32, height: 32 }} aria-hidden="true">
-              {name.slice(0, 1).toUpperCase()}
-            </span>
-            {name}
-          </li>
-        ))}
-      </ul>
-      <p className="admin-note">{b.adminsNote}</p>
-    </>
+    <ul className="admin-names">
+      {data?.admins.map((name) => (
+        <li key={name}>
+          <span className="avatar avatar--blank" style={{ width: 32, height: 32 }} aria-hidden="true">
+            {name.slice(0, 1).toUpperCase()}
+          </span>
+          {name}
+        </li>
+      ))}
+    </ul>
   );
 
   return (

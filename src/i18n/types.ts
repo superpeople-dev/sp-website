@@ -229,7 +229,6 @@ export type Dictionary = {
     tabAdmins: string;
     reviewEmpty: string;
     openIdeas: string;
-    adminsNote: string;
   };
   legal: {
     terms: string;

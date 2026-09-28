@@ -307,7 +307,6 @@ export const hi: Dictionary = {
     tabAdmins: "एडमिन",
     reviewEmpty: "समीक्षा के लिए कुछ भी बाकी नहीं है।",
     openIdeas: "आइडिया पेज खोलें",
-    adminsNote: "एडमिन साइट के कोड (src/lib/admins.ts) में दर्ज हैं या Discord रोल से तय होते हैं।",
   },
   legal: {
     terms: "सेवा की शर्तें",

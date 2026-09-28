@@ -307,7 +307,6 @@ export const pt: Dictionary = {
     tabAdmins: "Admins",
     reviewEmpty: "Nada aguardando revisão.",
     openIdeas: "Abrir a página de Ideias",
-    adminsNote: "Os admins ficam no código do site (src/lib/admins.ts) ou vêm dos cargos do Discord.",
   },
   legal: {
     terms: "Termos de Serviço",

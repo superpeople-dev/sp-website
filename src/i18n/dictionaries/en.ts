@@ -307,7 +307,6 @@ export const en: Dictionary = {
     tabAdmins: "Admins",
     reviewEmpty: "Nothing is waiting for review.",
     openIdeas: "Open the Ideas page",
-    adminsNote: "Admins are listed in the site's code (src/lib/admins.ts) or come from Discord roles.",
   },
   legal: {
     terms: "Terms of Service",

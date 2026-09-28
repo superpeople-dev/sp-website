@@ -307,7 +307,6 @@ export const ru: Dictionary = {
     tabAdmins: "Администраторы",
     reviewEmpty: "Нет ничего на проверке.",
     openIdeas: "Открыть страницу идей",
-    adminsNote: "Администраторы указаны в коде сайта (src/lib/admins.ts) или назначаются ролями в Discord.",
   },
   legal: {
     terms: "Условия использования",
