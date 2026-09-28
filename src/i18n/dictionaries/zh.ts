@@ -235,6 +235,8 @@ export const zh: Dictionary = {
   board: {
     status: { open: "待处理", under_review: "审核中", planned: "已计划", in_progress: "进行中", completed: "已完成", closed: "已关闭" },
     signIn: "使用 Discord 登录",
+    connectTitle: "连接你的 Discord",
+    connectBody: "要投票、提交想法和发表评论，需要先用你的 Discord 账号登录。",
     signOut: "退出登录",
     signedInAs: "已登录：{name}",
     signInHint: "使用 Discord 登录后即可投票和提交想法。",

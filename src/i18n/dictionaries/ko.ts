@@ -237,6 +237,8 @@ export const ko: Dictionary = {
   board: {
     status: { open: "접수", under_review: "검토 중", planned: "예정", in_progress: "진행 중", completed: "완료", closed: "종료" },
     signIn: "Discord로 로그인",
+    connectTitle: "Discord를 연결해 주세요",
+    connectBody: "투표하고 아이디어를 제안하고 댓글을 달려면 Discord 계정으로 로그인해야 합니다.",
     signOut: "로그아웃",
     signedInAs: "{name}(으)로 로그인됨",
     signInHint: "투표하고 아이디어를 올리려면 Discord로 로그인하세요.",

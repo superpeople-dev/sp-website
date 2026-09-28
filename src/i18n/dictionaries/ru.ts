@@ -237,6 +237,8 @@ export const ru: Dictionary = {
   board: {
     status: { open: "Открыта", under_review: "На рассмотрении", planned: "Запланирована", in_progress: "В работе", completed: "Готово", closed: "Закрыта" },
     signIn: "Войти через Discord",
+    connectTitle: "Подключите Discord",
+    connectBody: "Чтобы голосовать, предлагать идеи и комментировать, нужно войти через аккаунт Discord.",
     signOut: "Выйти",
     signedInAs: "Вы вошли как {name}",
     signInHint: "Войдите через Discord, чтобы голосовать и предлагать идеи.",

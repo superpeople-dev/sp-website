@@ -237,6 +237,8 @@ export const es: Dictionary = {
   board: {
     status: { open: "Abierta", under_review: "En revisión", planned: "Planeada", in_progress: "En curso", completed: "Hecha", closed: "Cerrada" },
     signIn: "Iniciar sesión con Discord",
+    connectTitle: "Conecta tu Discord",
+    connectBody: "Para votar, proponer ideas y comentar, necesitas iniciar sesión con tu cuenta de Discord.",
     signOut: "Cerrar sesión",
     signedInAs: "Sesión iniciada como {name}",
     signInHint: "Inicia sesión con Discord para votar y publicar ideas.",

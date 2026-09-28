@@ -237,6 +237,8 @@ export const ja: Dictionary = {
   board: {
     status: { open: "受付中", under_review: "検討中", planned: "予定", in_progress: "対応中", completed: "完了", closed: "終了" },
     signIn: "Discordでログイン",
+    connectTitle: "Discordと連携してください",
+    connectBody: "投票、アイデアの提案、コメントをするには、Discordアカウントでログインする必要があります。",
     signOut: "ログアウト",
     signedInAs: "{name} としてログイン中",
     signInHint: "投票やアイデアの投稿には Discord でのログインが必要です。",
