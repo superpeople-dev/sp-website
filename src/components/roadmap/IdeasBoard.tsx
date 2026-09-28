@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -84,6 +84,17 @@ export function IdeasBoard({
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
   const close = useCallback(() => setOpened(null), []);
   const closeForm = useCallback(() => setComposing(false), []);
+  const unsaved = form !== "sending" && (title.trim() !== "" || details.trim() !== "" || files.length > 0);
+  const unsavedRef = useRef(unsaved);
+  useEffect(() => {
+    unsavedRef.current = unsaved;
+  }, [unsaved]);
+  const dismissForm = useCallback(() => {
+    if (!unsavedRef.current) return setComposing(false);
+    void ask({ title: r.closeTitle, body: r.closeBody, confirm: t.board.close, cancel: t.board.cancel, icon: "close" }).then(
+      (ok) => ok && setComposing(false),
+    );
+  }, [ask, r, t]);
   const closePicker = useCallback(() => setPicking(false), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const next = localeHref(locale, "/ideas");
@@ -372,7 +383,7 @@ export function IdeasBoard({
         </Modal>
       )}
       {canPost && (
-        <Modal open={composing} onClose={closeForm} labelledBy="idea-form-title" className="sheet--narrow">
+        <Modal open={composing} onClose={dismissForm} labelledBy="idea-form-title" className="sheet--narrow">
           <div className="sheet__bar">
             <h2 id="idea-form-title" className="sheet__heading">
               <Icon name="bulb" />

@@ -116,6 +116,8 @@ export type Dictionary = {
     confirmTitle: string;
     confirmBody: string;
     confirmYes: string;
+    closeTitle: string;
+    closeBody: string;
     reviewTitle: string;
     approve: string;
     reject: string;

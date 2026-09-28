@@ -192,6 +192,8 @@ export const zh: Dictionary = {
     confirmTitle: "发布这个想法？",
     confirmBody: "管理员审核后才会显示在看板上。",
     confirmYes: "确定发布",
+    closeTitle: "不发布直接关闭？",
+    closeBody: "你的想法还没有发布。写下的内容会一直保留，直到你离开此页面。",
     reviewTitle: "等待审核",
     approve: "通过",
     reject: "拒绝",
