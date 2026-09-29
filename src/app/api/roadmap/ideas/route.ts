@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import { pendingCount } from "@/lib/authorship";
-import { createIdea, failure, getTags, refletTag, setStatus, userToken } from "@/lib/reflet";
+import { createIdea, failure, getIdeaFor, getTags, refletTag, setStatus, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { isBanned, profileOf, rememberAuthor } from "@/lib/store";
@@ -23,8 +23,14 @@ export async function POST(request: NextRequest) {
   try {
     const { types } = await getTags().catch(() => ({ types: [] }));
     const tagId = types.find((type) => type.slug === body.type)?.id;
-    const { feedbackId } = await createIdea(title, description, await userToken(user), tagId);
+    const token = await userToken(user);
+    const { feedbackId } = await createIdea(title, description, token, tagId);
     await Promise.all([setStatus(feedbackId, "under_review"), rememberAuthor(feedbackId, profileOf(user))]);
+    // Like Reddit, a post starts with its author's upvote. Reflet's vote toggles, so only when the
+    // author has none yet; a failure here doesn't fail the post.
+    await getIdeaFor(feedbackId, token)
+      .then((item) => (item.hasVoted ? null : voteIdea(feedbackId, token)))
+      .catch(() => null);
     revalidateTag(refletTag, { expire: 0 });
     return Response.json({ pending: true, feedbackId });
   } catch (error) {

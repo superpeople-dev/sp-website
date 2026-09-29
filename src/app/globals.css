@@ -984,7 +984,7 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
   border-radius: var(--r);
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
 }
-/* Voting (VoteControl): a rounded pill like Reddit's, ⇧ score ⇩, the score being upvotes minus
+/* Voting (VoteControl): a bar like Reddit's (with the site's square corners), ⇧ score ⇩, the score being upvotes minus
    downvotes. Up is blue, down is red: your vote fills its arrow and colours the score. On phones and
    touch screens the buttons are finger-sized. */
 .votes {
@@ -994,7 +994,7 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
   height: 34px;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r);
   background: var(--surface);
   color: var(--paper-dim);
   transition: border-color 0.2s, background 0.2s;
@@ -1007,7 +1007,7 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
   height: 100%;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: 2px;
   background: none;
   color: inherit;
   transition: color 0.2s, background 0.2s;
