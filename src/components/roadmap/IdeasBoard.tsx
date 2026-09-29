@@ -12,10 +12,11 @@ import { useConfirm } from "../ConfirmDialog";
 import { FilterPicker, type FilterOption } from "../FilterPicker";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
+import { SelectPicker, type PickOption } from "../SelectPicker";
 import { Reveal } from "../motion";
 import { AdminActions, useAdmin } from "./admin";
 import { FieldCount } from "./FieldCount";
-import { CategoryTag } from "./CategoryTag";
+import { CategoryTag, categoryIcon } from "./CategoryTag";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
 import { useVote } from "./useVote";
@@ -32,6 +33,12 @@ const byVotes = (a: FeedbackItem, b: FeedbackItem) =>
 const byDate = (a: FeedbackItem, b: FeedbackItem) => b.createdAt - a.createdAt;
 const iconOf = (slug: IdeaType) => ideaTypes.find((type) => type.slug === slug)?.icon ?? "sparkle";
 const isVideo = (type: string) => type.startsWith("video/");
+// The platforms (Reflet's categories) in the idea form, in this order; any other category after them.
+const platformOrder = ["launcher", "game", "website", "servers"];
+const platformRank = (category: Category) => {
+  const rank = platformOrder.indexOf(category.name.toLowerCase());
+  return rank < 0 ? platformOrder.length : rank;
+};
 
 async function upload(feedbackId: string, file: File) {
   const post = (body: object) =>
@@ -73,6 +80,9 @@ export function IdeasBoard({
   const [sort, setSort] = useState<Sort>("top");
   const [filter, setFilter] = useState<Filter>("all");
   const [kind, setKind] = useState<IdeaType | null>(types.find((type) => type.slug === "feature-request")?.slug ?? types[0]?.slug ?? null);
+  // A category id, or "other" (none).
+  const [platform, setPlatform] = useState<string | null>(null);
+  const [picking, setPicking] = useState<"type" | "platform" | null>(null);
   const [title, setTitle] = useState("");
   const [details, setDetails] = useState("");
   const [form, setForm] = useState<FormState>("idle");
@@ -107,6 +117,16 @@ export function IdeasBoard({
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const next = localeHref(locale, "/ideas");
   const available = ideaTypes.filter((type) => type.slug === "other" || types.some((tag) => tag.slug === type.slug));
+  const platformName = (name: string) => {
+    const key = name.toLowerCase();
+    return key in r.platforms ? r.platforms[key as keyof typeof r.platforms] : name;
+  };
+  const platforms: PickOption<string>[] = [
+    ...[...categories]
+      .sort((a, b) => platformRank(a) - platformRank(b))
+      .map((category) => ({ key: category.id, label: platformName(category.name), icon: categoryIcon(category.name) })),
+    { key: "other", label: r.platforms.other, icon: "other" },
+  ];
   const filters: FilterOption<Filter>[] = [
     { key: "all", label: r.filterAll, icon: "layers" },
     ...available.map((type) => ({ key: type.slug, label: r.types[type.slug], icon: type.icon })),
@@ -152,6 +172,8 @@ export function IdeasBoard({
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (form === "sending" || atLimit) return;
+    // The platform has no default: left empty, its picker opens.
+    if (platforms.length > 1 && !platform) return setPicking("platform");
     const ok = await ask({
       title: r.confirmTitle,
       body: r.confirmBody,
@@ -165,7 +187,7 @@ export function IdeasBoard({
       const response = await fetch("/api/roadmap/ideas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description: details, type: kind }),
+        body: JSON.stringify({ title, description: details, type: kind, platform: platform === "other" ? null : platform }),
       });
       if (response.status === 401) return signIn(next);
       if (response.status === 429) {
@@ -184,6 +206,7 @@ export function IdeasBoard({
       setComposing(false);
       setTitle("");
       setDetails("");
+      setPlatform(null);
       setFiles([]);
       setFileError(null);
       if (!viewer?.admin) setMine((count) => count + 1);
@@ -368,22 +391,25 @@ export function IdeasBoard({
               )}
               <fieldset className="idea-form__fields" disabled={atLimit || sending}>
               {available.length > 1 && (
-                <fieldset className="idea-form__types">
-                  <legend>{r.typeLabel}</legend>
-                  {available.map((type) => (
-                    <label key={type.slug} className={kind === type.slug ? "is-active" : undefined}>
-                      <input
-                        type="radio"
-                        name="type"
-                        value={type.slug}
-                        checked={kind === type.slug}
-                        onChange={() => setKind(type.slug)}
-                      />
-                      <Icon name={type.icon} />
-                      {r.types[type.slug]}
-                    </label>
-                  ))}
-                </fieldset>
+                <SelectPicker
+                  label={r.typeLabel}
+                  options={available.map((type) => ({ key: type.slug, label: r.types[type.slug], icon: type.icon }))}
+                  value={kind}
+                  onChange={setKind}
+                  open={picking === "type"}
+                  onOpen={(open) => setPicking(open ? "type" : null)}
+                />
+              )}
+              {platforms.length > 1 && (
+                <SelectPicker
+                  label={r.platformLabel}
+                  options={platforms}
+                  value={platform}
+                  onChange={setPlatform}
+                  placeholder={r.platformPlaceholder}
+                  open={picking === "platform"}
+                  onOpen={(open) => setPicking(open ? "platform" : null)}
+                />
               )}
               <label>
                 <span className="field-label">

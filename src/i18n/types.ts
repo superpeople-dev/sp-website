@@ -118,6 +118,9 @@ export type Dictionary = {
     pending: string;
     error: string;
     typeLabel: string;
+    platformLabel: string;
+    platformPlaceholder: string;
+    platforms: Record<"launcher" | "game" | "website" | "servers" | "other", string>;
     types: Record<IdeaType, string>;
     filterAll: string;
     confirmTitle: string;

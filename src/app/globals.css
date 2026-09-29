@@ -1124,29 +1124,31 @@ button.votes__down:disabled { cursor: default; }
 .idea-form input::placeholder,
 .idea-form textarea::placeholder { color: var(--muted); }
 .idea-form .btn { width: 100%; }
-.idea-form__types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; border: 0; }
-.idea-form__types legend { margin-bottom: 6px; padding: 0; color: var(--muted); font: 700 12px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
-.idea-form .idea-form__types label {
+.picker { display: grid; gap: 8px; }
+.picker__btn {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: var(--r);
   background: var(--ink);
-  color: var(--paper-dim);
-  font: 700 13px var(--display);
-  letter-spacing: 0.08em;
+  color: var(--paper);
+  font: 700 14px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition: border-color 0.2s;
 }
-.idea-form .idea-form__types label:hover { border-color: rgba(255, 248, 244, 0.3); color: var(--paper); }
-.idea-form .idea-form__types label.is-active { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); color: var(--paper); }
-.idea-form__types input { position: absolute; opacity: 0; pointer-events: none; }
-.idea-form__types label:has(input:focus-visible) { outline: 2px solid var(--signal); outline-offset: 2px; }
-.idea-form__types svg { width: 17px; height: 17px; flex: none; }
-.idea-form__types label:last-of-type:nth-of-type(odd) { grid-column: 1 / -1; }
+.picker__btn:hover { border-color: rgba(255, 248, 244, 0.3); }
+.picker__btn:focus-visible { outline: none; border-color: var(--signal); }
+.picker__btn.is-empty { color: var(--muted); font: 400 16px var(--body); letter-spacing: 0; text-transform: none; }
+.picker__btn > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picker__btn svg { width: 17px; height: 17px; flex: none; }
+.picker__btn .picker__chevron { margin-left: auto; color: var(--muted); }
 .idea-form__note { margin: 0; color: var(--green); font-size: 15px; }
 .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .field-count { color: var(--muted); font: 600 12px var(--body); letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
