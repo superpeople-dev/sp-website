@@ -143,7 +143,8 @@ function ItemBody({
   const [bannedIds, setBannedIds] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
-  const [failed, setFailed] = useState(false);
+  // Why the last comment wasn't posted.
+  const [failed, setFailed] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(viewer?.banned ?? false);
 
   const format = useMemo(() => {
@@ -252,7 +253,7 @@ function ItemBody({
     const body = draft.trim();
     if (sending || !body) return;
     setSending(true);
-    setFailed(false);
+    setFailed(null);
     try {
       const response = await fetch("/api/roadmap/comments", {
         method: "POST",
@@ -263,15 +264,17 @@ function ItemBody({
       if (response.status === 403) {
         const { error } = (await response.json().catch(() => ({}))) as { error?: string };
         if (error === "off") return setThread((current) => ({ ...current, off: true }));
+        if (error === "name") return setFailed(b.nameBlocked);
         return setBlocked(true);
       }
+      if (response.status === 422) return setFailed(b.offensiveText);
       if (!response.ok) throw new Error(String(response.status));
       const { comment } = (await response.json()) as { comment: CommentView };
       setThread((current) => ({ ...current, comments: [...current.comments, comment] }));
       setDraft("");
       onPatch(item.id, { commentCount: item.commentCount + 1 });
     } catch {
-      setFailed(true);
+      setFailed(b.commentFailed);
     } finally {
       setSending(false);
     }
@@ -467,6 +470,14 @@ function ItemBody({
         </p>
       );
     }
+    if (viewer.nameBlocked) {
+      return (
+        <p className="thread__banned" role="status">
+          <Icon name="ban" />
+          {b.nameBlocked}
+        </p>
+      );
+    }
     return (
       <>
         {closed}
@@ -488,7 +499,7 @@ function ItemBody({
             <div className="composer__foot">
               {failed ? (
                 <span className="composer__error" role="status">
-                  {b.commentFailed}
+                  {failed}
                 </span>
               ) : (
                 <span className="composer__count">

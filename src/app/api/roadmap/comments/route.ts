@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import type { Comment, FeedbackAuthor } from "reflet-sdk";
 import { can, type Author, type CommentView, type MediaView } from "@/lib/board";
 import { logEvent } from "@/lib/events";
+import { isOffensive, offensiveName } from "@/lib/moderation";
 import { addComment, deleteComment, failure, getIdea, listComments, listMedia, refletTag, userToken } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits, mediaLimits } from "@/lib/site";
@@ -74,10 +75,12 @@ export async function POST(request: NextRequest) {
   const user = await readSession(request);
   if (!user) return Response.json({ error: "auth" }, { status: 401 });
   if (await isBanned(user.id)) return Response.json({ error: "banned" }, { status: 403 });
+  if (offensiveName(user)) return Response.json({ error: "name" }, { status: 403 });
   const body = (await request.json().catch(() => ({}))) as { feedbackId?: unknown; body?: unknown };
   const feedbackId = typeof body.feedbackId === "string" ? body.feedbackId : "";
   const text = typeof body.body === "string" ? body.body.trim() : "";
   if (!feedbackId || !text || text.length > ideaLimits.comment) return Response.json({ error: "invalid" }, { status: 400 });
+  if (isOffensive(text)) return Response.json({ error: "offensive" }, { status: 422 });
   // Comments turned off: only admins who moderate comments can still answer.
   if (!can(user, "comments") && (await commentsOff(feedbackId))) return Response.json({ error: "off" }, { status: 403 });
   try {

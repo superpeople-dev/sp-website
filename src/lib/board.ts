@@ -19,6 +19,8 @@ export type Viewer = {
   permissions: Permission[];
   banned: boolean;
   canBan: boolean;
+  // Their Discord name has words that aren't allowed (lib/moderation.ts): they can't post or comment.
+  nameBlocked: boolean;
 };
 
 export const can = (viewer: Pick<Viewer, "permissions"> | null | undefined, permission: Permission) =>

@@ -424,6 +424,8 @@ export const fr: Dictionary = {
     unban: "Débannir",
     bannedOn: "Banni le {date} par {name}",
     bannedNotice: "Votre compte ne peut pas publier, voter ni commenter. Si vous pensez que c'est une erreur, contactez-nous sur Discord.",
+    offensiveText: "Votre message contient des mots qui ne sont pas autorisés ici. Merci de le reformuler.",
+    nameBlocked: "Votre nom Discord contient des mots qui ne sont pas autorisés ici, vous ne pouvez donc pas publier d'idées ni de commentaires. Changez-le sur Discord, puis déconnectez-vous et reconnectez-vous.",
     commentsOff: "Désactiver les commentaires",
     commentsOn: "Réactiver les commentaires",
     commentsOffNotice: "Les commentaires sont désactivés pour cet élément.",

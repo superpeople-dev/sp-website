@@ -422,6 +422,8 @@ export const zh: Dictionary = {
     unban: "解除封禁",
     bannedOn: "{date} 由 {name} 封禁",
     bannedNotice: "你的账号无法发布、投票或评论。如果你认为这是误判，请在 Discord 上联系我们。",
+    offensiveText: "你的消息包含此处不允许使用的词语，请修改后再发。",
+    nameBlocked: "你的 Discord 名称包含此处不允许使用的词语，因此无法发布想法或评论。请在 Discord 中修改名称，然后退出并重新登录。",
     commentsOff: "关闭评论",
     commentsOn: "重新开启评论",
     commentsOffNotice: "此条目的评论已关闭。",

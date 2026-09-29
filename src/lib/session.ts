@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import type { Permission, Viewer } from "./board";
+import { offensiveName } from "./moderation";
 import { accessOf } from "./staff";
 
 export { isListedAdmin } from "./staff";
@@ -64,6 +65,7 @@ export const viewerOf = (session: SessionUser | null, { banned = false, moderati
         permissions: session.permissions,
         banned,
         canBan: session.permissions.includes("bans") && moderation,
+        nameBlocked: offensiveName(session),
       }
     : null;
 

@@ -4,6 +4,7 @@ import { pendingCount } from "@/lib/authorship";
 import { logEvent } from "@/lib/events";
 import { createIdea, failure, getIdeaFor, getTags, refletTag, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
+import { isOffensive, offensiveName } from "@/lib/moderation";
 import { ideaLimits } from "@/lib/site";
 import { isBanned, profileOf, rememberAuthor } from "@/lib/store";
 
@@ -12,6 +13,7 @@ export async function POST(request: NextRequest) {
   const user = await readSession(request);
   if (!user) return Response.json({ error: "auth" }, { status: 401 });
   if (await isBanned(user.id)) return Response.json({ error: "banned" }, { status: 403 });
+  if (offensiveName(user)) return Response.json({ error: "name" }, { status: 403 });
   if (!user.admin && (await pendingCount(user).catch(() => 0)) >= ideaLimits.pending) {
     return Response.json({ error: "limit" }, { status: 429 });
   }
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
   if (title.length < 3 || title.length > ideaLimits.title || description.length > ideaLimits.description) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
+  if (isOffensive(title) || isOffensive(description)) return Response.json({ error: "offensive" }, { status: 422 });
   try {
     const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
     const tagId = types.find((type) => type.slug === body.type)?.id;

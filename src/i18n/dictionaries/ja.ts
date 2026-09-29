@@ -424,6 +424,8 @@ export const ja: Dictionary = {
     unban: "BAN を解除",
     bannedOn: "{date} に {name} が BAN",
     bannedNotice: "このアカウントでは投稿、投票、コメントができません。誤りだと思われる場合は Discord でご連絡ください。",
+    offensiveText: "メッセージに使用できない言葉が含まれています。言い換えてください。",
+    nameBlocked: "Discord の名前に使用できない言葉が含まれているため、アイデアやコメントを投稿できません。Discord で名前を変更してから、一度ログアウトして再度ログインしてください。",
     commentsOff: "コメントをオフにする",
     commentsOn: "コメントを再びオンにする",
     commentsOffNotice: "この項目のコメントはオフになっています。",

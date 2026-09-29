@@ -276,6 +276,8 @@ export type Dictionary = {
     unban: string;
     bannedOn: string;
     bannedNotice: string;
+    offensiveText: string;
+    nameBlocked: string;
     commentsOff: string;
     commentsOn: string;
     commentsOffNotice: string;

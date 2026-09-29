@@ -26,7 +26,7 @@ import { useItemUrl } from "./useItemUrl";
 
 type Sort = "top" | "new";
 type Filter = IdeaType | "all";
-type FormState = "idle" | "sending" | "pending" | "partial" | "limit" | "error";
+type FormState = "idle" | "sending" | "pending" | "partial" | "limit" | "error" | "offensive" | "name";
 
 const byVotes = (a: FeedbackItem, b: FeedbackItem) =>
   Number(b.isPinned) - Number(a.isPinned) || b.voteCount - a.voteCount || b.createdAt - a.createdAt;
@@ -190,6 +190,11 @@ export function IdeasBoard({
         body: JSON.stringify({ title, description: details, type: kind, platform: platform === "other" ? null : platform }),
       });
       if (response.status === 401) return signIn(next);
+      if (response.status === 403 || response.status === 422) {
+        const { error } = (await response.json().catch(() => ({}))) as { error?: string };
+        if (error === "offensive" || error === "name") return setForm(error);
+        throw new Error(String(response.status));
+      }
       if (response.status === 429) {
         setMine(ideaLimits.pending);
         return setForm("limit");
@@ -285,7 +290,9 @@ export function IdeasBoard({
   const sentNotes: Partial<Record<FormState, string>> = { pending: r.pending, partial: r.mediaFailed };
   const sent = sentNotes[form] ?? null;
   const sending = form === "sending";
-  const canPost = viewer && !viewer.banned;
+  const canPost = viewer && !viewer.banned && !viewer.nameBlocked;
+  const formErrors: Partial<Record<FormState, string>> = { error: r.error, offensive: t.board.offensiveText, name: t.board.nameBlocked };
+  const formError = formErrors[form] ?? null;
   const openForm = () => {
     if (sent) setForm("idle");
     setComposing(true);
@@ -298,6 +305,12 @@ export function IdeasBoard({
           <p className="thread__banned ideas__banned" role="status">
             <Icon name="ban" />
             {t.board.bannedNotice}
+          </p>
+        )}
+        {viewer?.nameBlocked && !viewer.banned && (
+          <p className="thread__banned ideas__banned" role="status">
+            <Icon name="ban" />
+            {t.board.nameBlocked}
           </p>
         )}
 
@@ -378,9 +391,9 @@ export function IdeasBoard({
           </div>
           <div className="sheet__body">
             <form className="idea-form" onSubmit={(e) => void submit(e)}>
-              {form === "error" && (
+              {formError && (
                 <p className="idea-form__note is-error" role="status">
-                  {r.error}
+                  {formError}
                 </p>
               )}
               {atLimit && (

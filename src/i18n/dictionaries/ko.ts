@@ -424,6 +424,8 @@ export const ko: Dictionary = {
     unban: "차단 해제",
     bannedOn: "{date} - {name} 님이 차단",
     bannedNotice: "이 계정으로는 게시, 투표, 댓글 작성을 할 수 없습니다. 오류라고 생각되면 Discord로 문의해 주세요.",
+    offensiveText: "메시지에 허용되지 않는 단어가 포함되어 있습니다. 다시 작성해 주세요.",
+    nameBlocked: "Discord 이름에 허용되지 않는 단어가 포함되어 있어 아이디어나 댓글을 올릴 수 없습니다. Discord에서 이름을 바꾼 뒤 로그아웃했다가 다시 로그인해 주세요.",
     commentsOff: "댓글 끄기",
     commentsOn: "댓글 다시 켜기",
     commentsOffNotice: "이 항목의 댓글이 꺼져 있습니다.",
