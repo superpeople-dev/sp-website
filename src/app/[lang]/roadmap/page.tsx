@@ -10,16 +10,18 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { getTags, listByStatus, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
+import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/roadmap">): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps<"/[lang]/roadmap">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/roadmap");
+  const shared = await sharedItem(itemParam((await searchParams).item));
+  return pageMetadata(lang, "/roadmap", sharedPreview(shared));
 }
 
-export default async function RoadmapPage({ params }: PageProps<"/[lang]/roadmap">) {
+export default async function RoadmapPage({ params, searchParams }: PageProps<"/[lang]/roadmap">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
@@ -39,6 +41,7 @@ export default async function RoadmapPage({ params }: PageProps<"/[lang]/roadmap
     session ? isBanned(session.id) : false,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
+  if (items) await followItem(lang, "/roadmap", itemParam((await searchParams).item), (id) => items.some((item) => item.id === id));
   const categories = tags?.categories;
   const types = tags?.types;
 

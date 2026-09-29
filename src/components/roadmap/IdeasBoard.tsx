@@ -20,6 +20,7 @@ import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
 import { useVote } from "./useVote";
 import { signIn } from "./viewer";
+import { useItemUrl } from "./useItemUrl";
 
 type Sort = "top" | "new";
 type Filter = IdeaType | "all";
@@ -82,6 +83,7 @@ export function IdeasBoard({
   const [ask, dialog] = useConfirm();
   const admin = useAdmin(setItems);
   const [opened, setOpened] = useState<Opened | null>(null);
+  useItemUrl(opened?.id ?? null, (id) => setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null));
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
   const close = useCallback(() => setOpened(null), []);
   const closeForm = useCallback(() => setComposing(false), []);

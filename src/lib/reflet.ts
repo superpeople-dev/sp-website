@@ -157,8 +157,8 @@ export const saveMedia = (feedbackId: string, storageId: string, mimeType: strin
 export const deleteMedia = (screenshotId: string) =>
   call("/api/v1/admin/screenshot/delete", { method: "POST", admin: true, body: { screenshotId } });
 
-export const getIdea = (feedbackId: string) =>
-  call<FeedbackItem>(`/api/v1/feedback/item?id=${encodeURIComponent(feedbackId)}`);
+export const getIdea = (feedbackId: string, cache?: number) =>
+  call<FeedbackItem>(`/api/v1/feedback/item?id=${encodeURIComponent(feedbackId)}`, { cache });
 
 export const updateTags = (feedbackId: string, addTagIds: string[], removeTagIds: string[]) =>
   call("/api/v1/admin/feedback/update-tags", { method: "POST", admin: true, body: { feedbackId, addTagIds, removeTagIds } });

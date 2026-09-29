@@ -35,3 +35,10 @@ export function typeOf(item: FeedbackItem, types: TypeTag[]): IdeaType {
 }
 
 export const doneAt = (item: FeedbackItem) => item.completedAt ?? item.updatedAt;
+
+// Characters that draw nothing: spaces, controls, format and unassigned code points, and the blank
+// "letters" (Hangul fillers, blank braille, Khmer inherent vowels) people use for an invisible Discord name.
+const invisible = /[\s\p{Cc}\p{Cf}\p{Cn}\p{Co}ᅟᅠ឴឵⠀ㅤﾠ]/gu;
+
+// The name to show: the display name, or the username when the display name is invisible.
+export const shownName = (name: string, username?: string) => (name.replace(invisible, "") ? name : username || name);

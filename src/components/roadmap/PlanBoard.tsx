@@ -25,6 +25,7 @@ import { AddTask } from "./AddTask";
 import { useAdmin } from "./admin";
 import { useVote } from "./useVote";
 import { WorkCard } from "./WorkCard";
+import { useItemUrl } from "./useItemUrl";
 
 const recentDone = 6;
 
@@ -62,6 +63,7 @@ export function PlanBoard({
   const [items, setItems] = useState(initial);
   const admin = useAdmin(setItems);
   const [opened, setOpened] = useState<Opened | null>(null);
+  useItemUrl(opened?.id ?? null, (id) => setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null));
   const [dragging, setDragging] = useState<string | null>(null);
   const justDropped = useRef(false);
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;

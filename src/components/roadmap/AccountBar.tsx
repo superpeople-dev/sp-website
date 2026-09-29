@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { fill } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
+import { shownName, type Viewer } from "@/lib/board";
+import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
-import type { Viewer } from "@/lib/board";
 import { AdminPanel } from "./AdminPanel";
 import { loginHref, signOut } from "./viewer";
 
@@ -13,6 +13,7 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
   const { t } = useI18n();
   const [ask, dialog] = useConfirm();
   if (!authReady) return null;
+  const name = viewer ? shownName(viewer.name, viewer.username) : "";
 
   const confirmSignOut = async () => {
     const ok = await ask({
@@ -40,12 +41,12 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
   return (
     <div className="account-bar">
       <div className="account-bar__who">
-        <Image className="account-bar__avatar" src={viewer.avatar} alt="" width={40} height={40} unoptimized />
+        <Avatar className="account-bar__avatar" src={viewer.avatar} size={40} />
         {/* Desktop shows the sentence; phones show a small label over the name, so the name never gets cut. */}
         <span className="account-bar__id">
-          <span className="account-bar__name">{fill(t.board.signedInAs, { name: viewer.name })}</span>
+          <span className="account-bar__name">{fill(t.board.signedInAs, { name })}</span>
           <span className="account-bar__label">{t.board.signedIn}</span>
-          <b className="account-bar__user">{viewer.name}</b>
+          <b className="account-bar__user">{name}</b>
           {viewer.admin && <span className="account-bar__badge">{t.board.admin}</span>}
         </span>
         <button

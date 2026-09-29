@@ -9,6 +9,7 @@ import type { IdeaType } from "@/i18n/types";
 import {
   categoryOf,
   doneAt,
+  shownName,
   typeOf,
   type Author,
   type Category,
@@ -18,6 +19,7 @@ import {
   type Viewer,
 } from "@/lib/board";
 import { ideaLimits, ideaTypes } from "@/lib/site";
+import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
@@ -25,6 +27,7 @@ import type { EditValues, useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
+import { itemUrl } from "./useItemUrl";
 import { loginHref, signIn } from "./viewer";
 
 export type Opened = { id: string; mode: "view" | "edit" };
@@ -66,14 +69,42 @@ export function ItemDialog(props: Props) {
   );
 }
 
-function Avatar({ author, size = 36 }: { author: Pick<Author, "name" | "avatar">; size?: number }) {
-  if (author.avatar) {
-    return <Image className="avatar" src={author.avatar} alt="" width={size} height={size} unoptimized />;
-  }
+// The name and @username to show; the @username only when it adds something.
+function names(author: Pick<Author, "name" | "username">) {
+  const name = shownName(author.name, author.username);
+  return { name, user: author.username && author.username !== name ? author.username : null };
+}
+
+// The item's link (the page with ?item=<id>): the phone's share sheet on touch screens, copied on desktop.
+function ShareButton({ item }: { item: FeedbackItem }) {
+  const { t } = useI18n();
+  const b = t.board;
+  const [copied, setCopied] = useState(false);
+  const share = async () => {
+    const url = itemUrl(item.id);
+    if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+      await navigator.share({ title: item.title, url }).catch(() => null);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt(b.shareItem, url);
+    }
+  };
   return (
-    <span className="avatar avatar--blank" style={{ width: size, height: size }} aria-hidden="true">
-      {author.name.slice(0, 1).toUpperCase()}
-    </span>
+    <button
+      type="button"
+      className={`share-btn${copied ? " is-copied" : ""}`}
+      onClick={() => void share()}
+      aria-label={copied ? b.linkCopied : b.shareItem}
+      title={b.shareItem}
+    >
+      <Icon name={copied ? "check" : "share"} />
+      <span>{copied ? b.linkCopied : b.shareItem}</span>
+    </button>
   );
 }
 
@@ -237,11 +268,12 @@ function ItemBody({
 
   const who = (author: Author | null) => {
     if (!author) return <span className="who__team">{b.team}</span>;
+    const { name, user } = names(author);
     return (
       <span className="who">
-        <Avatar author={author} size={28} />
-        <b>{author.name}</b>
-        {author.username && author.username !== author.name && <span className="who__user">@{author.username}</span>}
+        <Avatar src={author.avatar} size={28} />
+        <b>{name}</b>
+        {user && <span className="who__user">@{user}</span>}
         {author.admin && <span className="who__badge">{b.admin}</span>}
       </span>
     );
@@ -257,15 +289,15 @@ function ItemBody({
     );
   };
 
+  const commentAuthor = (comment: CommentView) => (comment.author ? names(comment.author) : null);
+
   const renderComment = (comment: CommentView) => (
     <li key={comment.id} className="comment">
-      <Avatar author={comment.author ?? { name: "?" }} />
+      <Avatar src={comment.author?.avatar} size={36} />
       <div className="comment__main">
         <div className="comment__head">
-          <b>{comment.author?.name ?? b.team}</b>
-          {comment.author?.username && comment.author.username !== comment.author.name && (
-            <span className="comment__user">@{comment.author.username}</span>
-          )}
+          <b>{commentAuthor(comment)?.name ?? b.team}</b>
+          {commentAuthor(comment)?.user && <span className="comment__user">@{commentAuthor(comment)?.user}</span>}
           {comment.author?.admin && <span className="who__badge">{b.admin}</span>}
           <time dateTime={new Date(comment.createdAt).toISOString()}>{format.stamp.format(comment.createdAt)}</time>
           {isAdmin && (
@@ -370,7 +402,7 @@ function ItemBody({
     }
     return (
       <form className="composer" onSubmit={(e) => void post(e)}>
-        <Avatar author={viewer} />
+        <Avatar src={viewer.avatar} size={36} />
         <div className="composer__main">
           <textarea
             value={draft}
@@ -419,6 +451,7 @@ function ItemBody({
           {category && <CategoryTag category={category} />}
         </div>
         <div className="sheet__actions">
+          {mode === "view" && <ShareButton item={item} />}
           {isAdmin && mode === "view" && (
             <ItemMenu item={item} admin={admin} onEdit={() => onMode("edit")} removeLabel={removeLabel} />
           )}

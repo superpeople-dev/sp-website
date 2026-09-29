@@ -42,20 +42,25 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   }
 }
 
-export function pageMetadata(locale: Locale, page: PagePath = ""): Metadata {
+// A shared item link (?item=<id>) previews the item itself: its title and description.
+export type SharedItem = { id: string; title: string; preview: string };
+
+export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null): Metadata {
   const d = dictionaries[locale];
   const t = d.seo;
   const info = localeInfo[locale];
   const sub = page ? subpageSeo(locale, page) : null;
-  const title = sub ? `${sub.title} · ${siteName}` : t.title;
-  const description = sub ? sub.description : t.description;
-  const share = sub ? sub.description : t.shareDescription;
+  const pageTitle = sub ? `${sub.title} · ${siteName}` : t.title;
+  const title = item ? `${item.title} · ${siteName}` : pageTitle;
+  const description = item?.preview || (sub ? sub.description : t.description);
+  const share = item?.preview || (sub ? sub.description : t.shareDescription);
+  const url = item ? `${localeHref(locale, page)}?item=${encodeURIComponent(item.id)}` : localeHref(locale, page);
   const image = sub
-    ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: title, type: "image/png" }
+    ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
     : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
   return {
     metadataBase: new URL(siteUrl),
-    title: sub ? sub.title : { default: t.title, template: `%s · ${siteName}` },
+    title: item ? item.title : sub ? sub.title : { default: t.title, template: `%s · ${siteName}` },
     description,
     applicationName: siteName,
     keywords: t.keywords,
@@ -66,7 +71,7 @@ export function pageMetadata(locale: Locale, page: PagePath = ""): Metadata {
     alternates: { canonical: localeHref(locale, page), languages: languageAlternates(false, page) },
     openGraph: {
       type: "website",
-      url: localeHref(locale, page),
+      url,
       siteName,
       locale: info.og,
       alternateLocale: locales.filter((l) => l !== locale).map((l) => localeInfo[l].og),

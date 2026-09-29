@@ -11,16 +11,18 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { getTags, getChangelog, listByStatus, safely } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
+import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/completed">): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps<"/[lang]/completed">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/completed");
+  const shared = await sharedItem(itemParam((await searchParams).item));
+  return pageMetadata(lang, "/completed", sharedPreview(shared));
 }
 
-export default async function CompletedPage({ params }: PageProps<"/[lang]/completed">) {
+export default async function CompletedPage({ params, searchParams }: PageProps<"/[lang]/completed">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
@@ -33,6 +35,7 @@ export default async function CompletedPage({ params }: PageProps<"/[lang]/compl
     safely(getChangelog),
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
+  if (items) await followItem(lang, "/completed", itemParam((await searchParams).item), (id) => items.some((item) => item.id === id));
   const categories = tags?.categories;
   const types = tags?.types;
 

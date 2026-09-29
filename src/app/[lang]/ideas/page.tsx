@@ -11,16 +11,18 @@ import { getLatestRelease } from "@/lib/github";
 import { pendingCount } from "@/lib/authorship";
 import { getTags, listIdeas, listPending, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
+import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/ideas">): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps<"/[lang]/ideas">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/ideas");
+  const shared = await sharedItem(itemParam((await searchParams).item));
+  return pageMetadata(lang, "/ideas", sharedPreview(shared));
 }
 
-export default async function IdeasPage({ params }: PageProps<"/[lang]/ideas">) {
+export default async function IdeasPage({ params, searchParams }: PageProps<"/[lang]/ideas">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
@@ -34,6 +36,7 @@ export default async function IdeasPage({ params }: PageProps<"/[lang]/ideas">) 
     session && !session.admin ? pendingCount(session).catch(() => 0) : 0,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
+  if (ideas) await followItem(lang, "/ideas", itemParam((await searchParams).item), (id) => [...ideas.items, ...(pending ?? [])].some((item) => item.id === id));
 
   return (
     <>

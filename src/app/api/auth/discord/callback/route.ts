@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { shownName } from "@/lib/board";
 import {
   authReady,
   oauthCookie,
@@ -58,7 +59,7 @@ async function discordUser(code: string, redirectUri: string): Promise<SessionUs
     : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(user.id) >> BigInt(22)) % BigInt(6))}.png`;
   return {
     id: user.id,
-    name: user.global_name || user.username,
+    name: shownName(user.global_name || user.username, user.username),
     username: user.username,
     avatar,
     admin: await hasAdminRole(accessToken),

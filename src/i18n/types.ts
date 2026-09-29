@@ -231,6 +231,8 @@ export type Dictionary = {
     deleteCommentTitle: string;
     deleteCommentBody: string;
     ban: string;
+    shareItem: string;
+    linkCopied: string;
     banTitle: string;
     banBody: string;
     banYes: string;

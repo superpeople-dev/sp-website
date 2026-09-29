@@ -1,11 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { fill, localeHref, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
+import { shownName } from "@/lib/board";
 import type { Ban } from "@/lib/store";
+import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
@@ -34,9 +35,15 @@ export function AdminPanel() {
 
   return (
     <>
-      <button type="button" className="btn btn--sm account-bar__admin" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="btn btn--sm account-bar__admin"
+        onClick={() => setOpen(true)}
+        aria-label={t.board.adminPanel}
+        title={t.board.adminPanel}
+      >
         <Icon name="shield" />
-        {t.board.adminPanel}
+        <span className="account-bar__admin-label">{t.board.adminPanel}</span>
       </button>
       <Modal open={open} onClose={close} labelledBy="admin-title" className="sheet--admin">
         <AdminBody
@@ -186,17 +193,11 @@ function AdminBody({
       <ul className="bans">
         {data.bans.map((ban) => (
           <li key={ban.id} className="bans__row">
-            {ban.avatar ? (
-              <Image className="avatar" src={ban.avatar} alt="" width={36} height={36} unoptimized />
-            ) : (
-              <span className="avatar avatar--blank" style={{ width: 36, height: 36 }} aria-hidden="true">
-                {ban.name.slice(0, 1).toUpperCase()}
-              </span>
-            )}
+            <Avatar src={ban.avatar} size={36} />
             <div className="bans__who">
               <b>
-                {ban.name}
-                {ban.username && ban.username !== ban.name && <span className="who__user">@{ban.username}</span>}
+                {shownName(ban.name, ban.username)}
+                {ban.username && ban.username !== shownName(ban.name, ban.username) && <span className="who__user">@{ban.username}</span>}
               </b>
               <span>{fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}</span>
             </div>
