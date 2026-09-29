@@ -1,22 +1,27 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-import type { Viewer } from "./board";
-import { admins } from "./admins";
+import type { Permission, Viewer } from "./board";
+import { accessOf } from "./staff";
 
-export type SessionUser = { id: string; name: string; username: string; avatar: string; admin: boolean };
+export { isListedAdmin } from "./staff";
+
+// admin, owner and permissions come from lib/staff.ts on every request. In the cookie, admin only
+// records whether they had the Discord admin role when they signed in.
+export type SessionUser = {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  admin: boolean;
+  owner: boolean;
+  permissions: Permission[];
+};
 
 export const sessionCookie = "sp_session";
 export const oauthCookie = "sp_oauth";
 
 const maxAge = 60 * 60 * 24 * 30;
 
-const envAdmins = (process.env.ADMIN_DISCORD_IDS ?? "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
-
-export const isListedAdmin = (discordId: string) =>
-  envAdmins.includes(discordId) || admins.some((admin) => admin.discordId === discordId);
 const secure = process.env.NODE_ENV === "production";
 const encoder = new TextEncoder();
 
@@ -55,8 +60,10 @@ export const viewerOf = (session: SessionUser | null, { banned = false, moderati
         username: session.username,
         avatar: session.avatar,
         admin: session.admin,
+        owner: session.owner,
+        permissions: session.permissions,
         banned,
-        canBan: session.admin && moderation,
+        canBan: session.permissions.includes("bans") && moderation,
       }
     : null;
 
@@ -76,12 +83,15 @@ async function verifySession(value: string | undefined): Promise<SessionUser | n
     if (typeof data.exp !== "number" || data.exp < Date.now()) return null;
     const id = String(data.id);
     const name = String(data.name);
+    const access = await accessOf(id, data.admin === true);
     return {
       id,
       name,
       username: typeof data.username === "string" ? data.username : name,
       avatar: String(data.avatar),
-      admin: data.admin === true || isListedAdmin(id),
+      admin: access !== null,
+      owner: access?.owner ?? false,
+      permissions: access?.permissions ?? [],
     };
   } catch {
     return null;

@@ -60,7 +60,7 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
           <span className="account-bar__out-label">{t.board.signOut}</span>
         </button>
       </div>
-      {viewer.admin && <AdminPanel />}
+      {viewer.admin && <AdminPanel viewer={viewer} />}
       {dialog}
     </div>
   );

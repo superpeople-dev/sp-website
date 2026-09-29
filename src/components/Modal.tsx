@@ -69,6 +69,10 @@ export function Modal({
     document.body.style.overflow = "hidden";
     (panel.current?.querySelector<HTMLElement>("[data-autofocus]") ?? panel.current)?.focus();
     const onKey = (e: globalThis.KeyboardEvent) => {
+      // Only the dialog on top closes (one can open over another, like an admin's settings).
+      const roots = document.querySelectorAll(".sheet-root");
+      const top = roots[roots.length - 1];
+      if (top && panel.current && !top.contains(panel.current)) return;
       if (e.key === "Escape" && !document.querySelector(".confirm-root, .item-menu.is-open, .lightbox")) onClose();
     };
     document.addEventListener("keydown", onKey);

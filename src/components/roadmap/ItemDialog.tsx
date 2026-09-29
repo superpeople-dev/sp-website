@@ -7,6 +7,7 @@ import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { IdeaType } from "@/i18n/types";
 import {
+  can,
   categoryOf,
   doneAt,
   shownName,
@@ -174,7 +175,8 @@ function ItemBody({
 
   const type = typeOf(item, types);
   const category = categoryOf(item, categories);
-  const isAdmin = viewer?.admin === true;
+  const canManage = can(viewer, "manage");
+  const canModerate = can(viewer, "comments");
   const inReview = item.status === "under_review";
   const count = thread.status === "ready" ? countAll(thread.comments) : item.commentCount;
 
@@ -210,10 +212,10 @@ function ItemBody({
       danger: true,
     });
     if (!ok) return;
-    const response = await fetch("/api/admin/comments", {
-      method: "POST",
+    const response = await fetch("/api/roadmap/comments", {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ commentId: comment.id }),
+      body: JSON.stringify({ feedbackId: item.id, commentId: comment.id }),
     }).catch(() => null);
     if (!response?.ok) return window.alert(b.actionFailed);
     setThread((current) => ({ ...current, comments: prune(current.comments, comment.id) }));
@@ -266,15 +268,35 @@ function ItemBody({
     const response = await fetch("/api/admin/media", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mediaId: file.id }),
+      body: JSON.stringify({ mediaId: file.id, feedbackId: item.id }),
     }).catch(() => null);
     if (!response?.ok) return window.alert(b.actionFailed);
     setThread((current) => ({ ...current, media: current.media.filter((entry) => entry.id !== file.id) }));
   };
 
+  // A banned person keeps their name, struck through and followed by "(banned)", with Discord's
+  // default picture instead of theirs.
+  const isBanned = (author: Author | null) => Boolean(author?.banned || (author?.id && bannedIds.includes(author.id)));
+  const banned = (name: string) => (
+    <>
+      <b className="is-banned">
+        <s>{name}</s>
+      </b>
+      <span className="who__banned-tag">({t.admin.banned})</span>
+    </>
+  );
+
   const who = (author: Author | null) => {
     if (!author) return <span className="who__team">{b.team}</span>;
     const { name, user } = names(author);
+    if (isBanned(author)) {
+      return (
+        <span className="who">
+          <Avatar src={author.avatar} size={28} blank />
+          {banned(name)}
+        </span>
+      );
+    }
     return (
       <span className="who">
         <Avatar src={author.avatar} size={28} />
@@ -299,25 +321,33 @@ function ItemBody({
 
   const renderComment = (comment: CommentView) => (
     <li key={comment.id} className="comment">
-      <Avatar src={comment.author?.avatar} size={36} />
+      <Avatar src={comment.author?.avatar} size={36} blank={isBanned(comment.author)} />
       <div className="comment__main">
         <div className="comment__head">
-          <b>{commentAuthor(comment)?.name ?? b.team}</b>
-          {commentAuthor(comment)?.user && <span className="comment__user">@{commentAuthor(comment)?.user}</span>}
-          {comment.author?.admin && <span className="who__badge">{b.admin}</span>}
+          {isBanned(comment.author) ? (
+            banned(commentAuthor(comment)?.name ?? "")
+          ) : (
+            <>
+              <b>{commentAuthor(comment)?.name ?? b.team}</b>
+              {commentAuthor(comment)?.user && <span className="comment__user">@{commentAuthor(comment)?.user}</span>}
+              {comment.author?.admin && <span className="who__badge">{b.admin}</span>}
+            </>
+          )}
           <time dateTime={new Date(comment.createdAt).toISOString()}>{format.stamp.format(comment.createdAt)}</time>
-          {isAdmin && (
+          {(comment.mine || canModerate || viewer?.canBan) && (
             <span className="comment__tools">
               {banControl(comment.author)}
-              <button
-                type="button"
-                className="icon-btn icon-btn--danger"
-                onClick={() => void removeComment(comment)}
-                aria-label={b.deleteComment}
-                title={b.deleteComment}
-              >
-                <Icon name="trash" />
-              </button>
+              {(comment.mine || canModerate) && (
+                <button
+                  type="button"
+                  className="icon-btn icon-btn--danger"
+                  onClick={() => void removeComment(comment)}
+                  aria-label={b.deleteComment}
+                  title={b.deleteComment}
+                >
+                  <Icon name="trash" />
+                </button>
+              )}
             </span>
           )}
         </div>
@@ -454,7 +484,7 @@ function ItemBody({
         </div>
         <div className="sheet__actions">
           {mode === "view" && <ShareButton item={item} />}
-          {isAdmin && mode === "view" && (
+          {canManage && mode === "view" && (
             <ItemMenu item={item} admin={admin} onEdit={() => onMode("edit")} removeLabel={removeLabel} />
           )}
           <button type="button" className="icon-btn" onClick={onClose} aria-label={b.close} title={b.close}>
@@ -464,7 +494,7 @@ function ItemBody({
       </div>
 
       <div className="sheet__body">
-        {isAdmin && mode === "edit" ? (
+        {canManage && mode === "edit" ? (
           <EditForm item={item} categories={categories} types={types} admin={admin} onDone={() => onMode("view")} />
         ) : (
           <>
@@ -488,7 +518,7 @@ function ItemBody({
                         <Image src={file.url} alt="" width={480} height={300} unoptimized />
                       </button>
                     )}
-                    {isAdmin && (
+                    {canManage && (
                       <button
                         type="button"
                         className="icon-btn icon-btn--danger media-grid__delete"

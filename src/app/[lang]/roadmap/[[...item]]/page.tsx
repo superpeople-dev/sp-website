@@ -11,7 +11,7 @@ import { getLatestRelease } from "@/lib/github";
 import { getTags, listByStatus, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
 import { itemSegments, settleItem, sharedItem, sharedPreview } from "@/lib/share";
-import { withDownvotes } from "@/lib/votes";
+import { forBoard } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
@@ -44,7 +44,7 @@ export default async function RoadmapPage({ params, searchParams }: PageProps<"/
     session ? isBanned(session.id) : false,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
-  const board = items && (await withDownvotes(items, session?.id));
+  const board = items && (await forBoard(items, session?.id));
   if (board) await settleItem(lang, "/roadmap", wanted, (id) => board.find((entry) => entry.id === id));
   const categories = tags?.categories;
   const types = tags?.types;

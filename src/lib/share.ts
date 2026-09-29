@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
+import type { FeedbackItem } from "reflet-sdk";
 import { localeHref, type Locale } from "@/i18n/config";
-import { itemPath, slugOf } from "./board";
+import { boardOf, itemPath, slugOf, type BoardPath } from "./board";
 import { getIdea, safely } from "./reflet";
 import type { SharedItem } from "./seo";
 import { downvoteCounts } from "./store";
@@ -9,12 +9,11 @@ import { downvoteCounts } from "./store";
 // Item pages: /ideas/<id>/<slug>, /roadmap/<id>/<slug>, /completed/<id>/<slug> show that board with
 // the item's dialog open, and have the item's own title, description and preview image.
 
-export type BoardPage = "/ideas" | "/roadmap" | "/completed";
+export type BoardPage = BoardPath;
 
 const idPattern = /^[A-Za-z0-9_-]{6,64}$/;
 
-export const pageOf = (status: FeedbackStatus): BoardPage =>
-  status === "completed" ? "/completed" : status === "planned" || status === "in_progress" ? "/roadmap" : "/ideas";
+export const pageOf = boardOf;
 
 const isPublic = (item: FeedbackItem) => item.status !== "under_review" && item.status !== "closed";
 

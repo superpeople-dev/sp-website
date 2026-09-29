@@ -1,3 +1,5 @@
+import type { EventRange, EventType, Permission } from "@/lib/board";
+
 export type IdeaStatus = "open" | "under_review" | "planned" | "in_progress" | "completed" | "closed";
 
 export type IdeaType = "bug-report" | "feature-request" | "enhancement" | "question" | "other";
@@ -183,6 +185,29 @@ export type Dictionary = {
     updated: string;
     empty: string;
     unavailable: string;
+  };
+  admin: {
+    tabActivity: string;
+    owner: string;
+    permissions: Record<Permission, { label: string; hint: string }>;
+    noPermissions: string;
+    options: string;
+    manageTitle: string;
+    addTitle: string;
+    add: string;
+    discordId: string;
+    discordIdHint: string;
+    name: string;
+    save: string;
+    remove: string;
+    removeTitle: string;
+    removeBody: string;
+    ranges: Record<EventRange, string>;
+    search: string;
+    empty: string;
+    more: string;
+    events: Record<EventType, string>;
+    banned: string;
   };
   board: {
     status: Record<IdeaStatus, string>;

@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import type { ActivityEvent, Permission } from "./board";
 import type { SessionUser } from "./session";
 
 const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
@@ -94,3 +95,51 @@ export async function setDownvote(itemId: string, userId: string, on: boolean) {
   }
   return redis.scard(downByItem(itemId));
 }
+
+// Admins as the owners set them (lib/staff.ts): their permissions, or "removed" for someone who is
+// no longer an admin even if they are on the list in lib/admins.ts or have the Discord role.
+export type StaffEntry = { id: string; name: string; permissions: Permission[]; removed?: boolean; by: string; at: number };
+const staffKey = "sp:staff";
+
+export const staffEntry = (id: string) =>
+  attempt("staff lookup", null as StaffEntry | null, (client) => client.hget<StaffEntry>(staffKey, id));
+
+export const staffEntries = () =>
+  attempt("staff list", {} as Record<string, StaffEntry>, async (client) => (await client.hgetall<Record<string, StaffEntry>>(staffKey)) ?? {});
+
+export async function saveStaff(entry: StaffEntry) {
+  if (!redis) throw new Error("Store is not configured");
+  await redis.hset(staffKey, { [entry.id]: entry });
+}
+
+// Everyone's Discord profile as of their last sign-in, for the admins list's pictures.
+const profilesKey = "sp:profiles";
+
+export const rememberProfile = (profile: Profile) =>
+  attempt("profile save", undefined, async (client) => {
+    await client.hset(profilesKey, { [profile.id]: profile });
+  });
+
+export const profilesOf = (ids: string[]) =>
+  attempt("profile lookup", {} as Record<string, Profile>, async (client) => {
+    if (!ids.length) return {};
+    const found = await client.hmget<Record<string, Profile | null>>(profilesKey, ...ids);
+    return Object.fromEntries(Object.entries(found ?? {}).filter((entry): entry is [string, Profile] => entry[1] !== null));
+  });
+
+// The profiles saved with ideas and comments (older than sp:profiles), to find someone's picture.
+export const allAuthors = () =>
+  attempt("author list", [] as Profile[], async (client) => Object.values((await client.hgetall<Record<string, Profile>>(authorsKey)) ?? {}));
+
+// The activity log: newest first, the last 5,000 events.
+const eventsKey = "sp:events";
+const keptEvents = 5000;
+
+export const saveEvent = (event: ActivityEvent) =>
+  attempt("event save", undefined, async (client) => {
+    await client.lpush(eventsKey, event);
+    await client.ltrim(eventsKey, 0, keptEvents - 1);
+  });
+
+export const readEvents = () =>
+  attempt("event list", [] as ActivityEvent[], (client) => client.lrange<ActivityEvent>(eventsKey, 0, keptEvents - 1));

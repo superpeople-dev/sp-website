@@ -6,13 +6,14 @@ import { AccountBar } from "@/components/roadmap/AccountBar";
 import { IdeasBoard } from "@/components/roadmap/IdeasBoard";
 import { PageHead } from "@/components/roadmap/PageHead";
 import { isLocale, localeHref } from "@/i18n/config";
+import { can } from "@/lib/board";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { pendingCount } from "@/lib/authorship";
 import { getTags, listIdeas, listPending, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
 import { itemSegments, settleItem, sharedItem, sharedPreview } from "@/lib/share";
-import { withDownvotes } from "@/lib/votes";
+import { forBoard } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
@@ -34,12 +35,12 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
     getLatestRelease(),
     safely(async () => listIdeas(session ? await userToken(session) : undefined)),
     safely(getTags),
-    session?.admin ? safely(listPending) : null,
+    session && can(session, "review") ? safely(listPending) : null,
     session ? isBanned(session.id) : false,
     session && !session.admin ? pendingCount(session).catch(() => 0) : 0,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
-  const board = ideas && (await withDownvotes([...ideas.items.filter((entry) => entry.status === "open"), ...(pending ?? [])], session?.id));
+  const board = ideas && (await forBoard([...ideas.items.filter((entry) => entry.status === "open"), ...(pending ?? [])], session?.id));
   if (board) await settleItem(lang, "/ideas", wanted, (id) => board.find((entry) => entry.id === id));
 
   return (

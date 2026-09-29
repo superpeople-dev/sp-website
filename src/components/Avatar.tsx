@@ -28,8 +28,10 @@ function isBlank(img: HTMLImageElement) {
   }
 }
 
-export function Avatar({ src, size, className = "avatar" }: { src?: string; size: number; className?: string }) {
-  const [fallback, setFallback] = useState(!src);
+// blank: always Discord's default picture (a banned user's).
+export function Avatar({ src, size, className = "avatar", blank }: { src?: string; size: number; className?: string; blank?: boolean }) {
+  const [broken, setFallback] = useState(!src);
+  const fallback = broken || blank === true;
   const onLoad = (event: SyntheticEvent<HTMLImageElement>) => {
     if (!fallback && isBlank(event.currentTarget)) setFallback(true);
   };

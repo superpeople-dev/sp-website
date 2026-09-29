@@ -1,15 +1,25 @@
 import type { FeedbackItem } from "reflet-sdk";
 import type { BoardItem } from "./board";
-import { downvoteCounts, downvotedBy } from "./store";
+import { authorsOf, downvoteCounts, downvotedBy, listBans } from "./store";
 
-// Folds this site's downvotes into items from Reflet: voteCount becomes upvotes minus downvotes, and
-// hasDownvoted says whether this user downvoted the item.
-export async function withDownvotes<T extends FeedbackItem>(items: T[], userId?: string): Promise<(T & BoardItem)[]> {
+// Items from Reflet as the boards show them: voteCount becomes upvotes minus this site's downvotes,
+// hasDownvoted says whether this user downvoted the item, and authorBanned marks an item whose
+// author is banned (their name is shown struck through).
+export async function forBoard<T extends FeedbackItem>(items: T[], userId?: string): Promise<(T & BoardItem)[]> {
   if (!items.length) return items;
-  const [counts, mine] = await Promise.all([
-    downvoteCounts(items.map((item) => item.id)),
+  const ids = items.map((item) => item.id);
+  const [counts, mine, authors, bans] = await Promise.all([
+    downvoteCounts(ids),
     userId ? downvotedBy(userId) : Promise.resolve([] as string[]),
+    authorsOf(ids),
+    listBans(),
   ]);
   const own = new Set(mine);
-  return items.map((item) => ({ ...item, voteCount: item.voteCount - (counts[item.id] ?? 0), hasDownvoted: own.has(item.id) }));
+  const banned = new Set(bans.map((ban) => ban.id));
+  return items.map((item) => ({
+    ...item,
+    voteCount: item.voteCount - (counts[item.id] ?? 0),
+    hasDownvoted: own.has(item.id),
+    authorBanned: Boolean(authors[item.id] && banned.has(authors[item.id].id)),
+  }));
 }

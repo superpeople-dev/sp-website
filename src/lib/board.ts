@@ -1,19 +1,30 @@
-import type { FeedbackItem } from "reflet-sdk";
+import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import type { IdeaType } from "@/i18n/types";
 
 export type Category = { id: string; name: string; color: string };
 export type TypeTag = { id: string; slug: IdeaType };
+
+// What an admin may do. Owners (lib/admins.ts) have everything and are the only ones who manage the
+// other admins; each other admin has the permissions an owner gave them (lib/staff.ts).
+export type Permission = "review" | "manage" | "comments" | "bans";
+export const allPermissions: Permission[] = ["review", "manage", "comments", "bans"];
+
 export type Viewer = {
   id: string;
   name: string;
   username: string;
   avatar: string;
   admin: boolean;
+  owner: boolean;
+  permissions: Permission[];
   banned: boolean;
   canBan: boolean;
 };
 
-export type Author = { id?: string; name: string; username?: string; avatar?: string; admin?: boolean };
+export const can = (viewer: Pick<Viewer, "permissions"> | null | undefined, permission: Permission) =>
+  viewer?.permissions.includes(permission) === true;
+
+export type Author = { id?: string; name: string; username?: string; avatar?: string; admin?: boolean; banned?: boolean };
 
 export type MediaView = { id: string; url: string; type: string; name: string };
 
@@ -22,7 +33,52 @@ export type CommentView = {
   body: string;
   createdAt: number;
   author: Author | null;
+  // Written by the viewer, who may delete it.
+  mine?: boolean;
   replies: CommentView[];
+};
+
+// The board an item is on, by status.
+export type BoardPath = "/ideas" | "/roadmap" | "/completed";
+export const boardOf = (status: FeedbackStatus): BoardPath =>
+  status === "completed" ? "/completed" : status === "planned" || status === "in_progress" ? "/roadmap" : "/ideas";
+
+// One line of the admins' activity log (lib/events.ts): what happened in the community, who did it
+// and to what.
+export type EventType =
+  | "idea.posted"
+  | "idea.approved"
+  | "idea.rejected"
+  | "item.created"
+  | "item.moved"
+  | "item.edited"
+  | "item.deleted"
+  | "comment.posted"
+  | "comment.deleted"
+  | "media.deleted"
+  | "user.banned"
+  | "user.unbanned"
+  | "staff.added"
+  | "staff.changed"
+  | "staff.removed";
+
+// The activity log's periods.
+export const eventRanges = ["24h", "7d", "30d", "all"] as const;
+export type EventRange = (typeof eventRanges)[number];
+
+export type ActivityEvent = {
+  id: string;
+  at: number;
+  type: EventType;
+  actor: { id: string; name: string; avatar?: string };
+  item?: { id: string; title: string; status?: FeedbackStatus };
+  // The other person: the banned user, the admin who was changed, a deleted comment's author.
+  user?: { id: string; name: string };
+  // A comment's text (also kept once it is deleted).
+  text?: string;
+  // Where an item was moved.
+  to?: FeedbackStatus;
+  permissions?: Permission[];
 };
 
 export function categoryOf(item: FeedbackItem, categories: Category[]): Category | null {
@@ -45,7 +101,7 @@ export const shownName = (name: string, username?: string) => (name.replace(invi
 
 // Items as the boards show them: voteCount is upvotes (Reflet) minus downvotes (lib/store.ts), and
 // hasDownvoted says whether the viewer downvoted (hasVoted stays "upvoted").
-export type BoardItem = FeedbackItem & { hasDownvoted?: boolean };
+export type BoardItem = FeedbackItem & { hasDownvoted?: boolean; authorBanned?: boolean };
 export type VoteDirection = "up" | "down";
 export const downvoted = (item: FeedbackItem) => (item as BoardItem).hasDownvoted === true;
 

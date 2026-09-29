@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import { pendingCount } from "@/lib/authorship";
+import { logEvent } from "@/lib/events";
 import { createIdea, failure, getIdeaFor, getTags, refletTag, setStatus, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
     await getIdeaFor(feedbackId, token)
       .then((item) => (item.hasVoted ? null : voteIdea(feedbackId, token)))
       .catch(() => null);
+    await logEvent(user, { type: "idea.posted", item: { id: feedbackId, title, status: "under_review" } });
     revalidateTag(refletTag, { expire: 0 });
     return Response.json({ pending: true, feedbackId });
   } catch (error) {

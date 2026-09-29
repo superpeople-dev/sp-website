@@ -17,7 +17,7 @@ import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import { doneAt, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
+import { can, doneAt, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
@@ -84,7 +84,7 @@ export function PlanBoard({
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 6 } }),
   );
-  const canDrag = viewer?.admin === true;
+  const canDrag = can(viewer, "manage");
   const next = localeHref(locale, "/roadmap");
   const { vote, pending, prompt: signInPrompt } = useVote({ patch, viewer, authReady, next });
   const add = (item: FeedbackItem) => setItems((list) => [...list.filter((entry) => entry.id !== item.id), item]);

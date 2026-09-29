@@ -6,7 +6,7 @@ import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { IdeaType } from "@/i18n/types";
-import { categoryOf, typeOf, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
+import { can, categoryOf, typeOf, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { FilterPicker, type FilterOption } from "../FilterPicker";
@@ -228,9 +228,16 @@ export function IdeasBoard({
                 {item.commentCount}
               </span>
             )}
-            {item.author?.name && <span className="idea__author">{item.author.name}</span>}
+            {item.author?.name &&
+              ((item as BoardItem).authorBanned ? (
+                <span className="idea__author is-banned">
+                  <s>{item.author.name}</s> ({t.admin.banned})
+                </span>
+              ) : (
+                <span className="idea__author">{item.author.name}</span>
+              ))}
           </div>
-          {viewer?.admin && inReview && (
+          {can(viewer, "review") && inReview && (
             <AdminActions
               item={item}
               admin={admin}
@@ -239,7 +246,7 @@ export function IdeasBoard({
             />
           )}
         </div>
-        {viewer?.admin && (
+        {can(viewer, "manage") && (
           <ItemMenu
             className="idea__tools"
             item={item}
@@ -271,7 +278,7 @@ export function IdeasBoard({
           </p>
         )}
 
-        {viewer?.admin && review.length > 0 && (
+        {can(viewer, "review") && review.length > 0 && (
           <Reveal className="review" y={16}>
             <p className="panel__title review__title">
               <span className="review__icon" aria-hidden="true">

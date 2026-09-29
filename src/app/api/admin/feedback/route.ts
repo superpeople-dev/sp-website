@@ -13,6 +13,8 @@ import {
   updateTags,
   userToken,
 } from "@/lib/reflet";
+import { can } from "@/lib/board";
+import { logEvent } from "@/lib/events";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { profileOf, rememberAuthor } from "@/lib/store";
@@ -42,6 +44,7 @@ async function create(user: SessionUser, body: Body) {
     const { feedbackId } = await createIdea(title, "", await userToken(user));
     await Promise.all([setStatus(feedbackId, status), rememberAuthor(feedbackId, profileOf(user))]);
     revalidateTag(refletTag, { expire: 0 });
+    await logEvent(user, { type: "item.created", item: { id: feedbackId, title, status }, to: status });
     const item = await getIdea(feedbackId);
     return Response.json({ item: { ...item, status } });
   } catch (error) {
@@ -67,21 +70,36 @@ async function edit(feedbackId: string, body: Body) {
   return true;
 }
 
+// Approving or rejecting a new idea (still under review) needs "review"; anything else "manage".
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) return Response.json({ error: "forbidden" }, { status: 403 });
   const user = await readSession(request);
   if (!user?.admin) return Response.json({ error: "forbidden" }, { status: user ? 403 : 401 });
   const body = (await request.json().catch(() => ({}))) as Body;
-  if (body.action === "create") return create(user, body);
+  if (body.action === "create") {
+    return can(user, "manage") ? create(user, body) : Response.json({ error: "forbidden" }, { status: 403 });
+  }
   const feedbackId = typeof body.feedbackId === "string" ? body.feedbackId : "";
   if (!feedbackId) return Response.json({ error: "invalid" }, { status: 400 });
 
   try {
-    if (body.action === "status" && statuses.includes(body.status as FeedbackStatus)) {
-      await setStatus(feedbackId, body.status as FeedbackStatus);
+    const item = await getIdea(feedbackId);
+    const inReview = item.status === "under_review";
+    const to = body.status as FeedbackStatus;
+    const approving = inReview && body.action === "status" && to === "open";
+    const rejecting = inReview && body.action === "delete";
+    if (!can(user, approving || rejecting ? "review" : "manage")) return Response.json({ error: "forbidden" }, { status: 403 });
+    const target = { id: feedbackId, title: item.title, status: item.status };
+
+    if (body.action === "status" && statuses.includes(to)) {
+      await setStatus(feedbackId, to);
+      await logEvent(user, approving ? { type: "idea.approved", item: target } : { type: "item.moved", item: target, to });
     } else if (body.action === "delete") {
       await deleteIdea(feedbackId);
-    } else if (body.action !== "edit" || !(await edit(feedbackId, body))) {
+      await logEvent(user, { type: rejecting ? "idea.rejected" : "item.deleted", item: target });
+    } else if (body.action === "edit" && (await edit(feedbackId, body))) {
+      await logEvent(user, { type: "item.edited", item: { ...target, title: text(body.title) } });
+    } else {
       return Response.json({ error: "invalid" }, { status: 400 });
     }
     revalidateTag(refletTag, { expire: 0 });

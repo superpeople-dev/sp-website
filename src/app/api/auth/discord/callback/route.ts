@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { shownName } from "@/lib/board";
+import { allPermissions, shownName } from "@/lib/board";
 import {
   authReady,
   oauthCookie,
@@ -10,6 +10,8 @@ import {
   sessionCookieOptions,
   type SessionUser,
 } from "@/lib/session";
+import { isOwner } from "@/lib/staff";
+import { profileOf, rememberProfile, saveStaff, staffEntry } from "@/lib/store";
 
 type DiscordUser = { id: string; username: string; global_name?: string | null; avatar?: string | null };
 
@@ -63,7 +65,18 @@ async function discordUser(code: string, redirectUri: string): Promise<SessionUs
     username: user.username,
     avatar,
     admin: await hasAdminRole(accessToken),
+    owner: false,
+    permissions: [],
   };
+}
+
+// Their Discord profile is kept for the admins list's pictures; someone with the Discord admin role
+// gets an entry in the admins list the first time, which owners can then change or remove.
+async function remember(user: SessionUser) {
+  await rememberProfile(profileOf(user));
+  if (user.admin && !isOwner(user.id) && !(await staffEntry(user.id))) {
+    await saveStaff({ id: user.id, name: user.name, permissions: allPermissions, by: "Discord role", at: Date.now() }).catch(() => null);
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -77,6 +90,9 @@ export async function GET(request: NextRequest) {
   if (!authReady || !state || !code || params.get("state") !== state) return response;
 
   const user = await discordUser(code, `${request.nextUrl.origin}/api/auth/discord/callback`).catch(() => null);
-  if (user) response.cookies.set(sessionCookie, await sealSession(user), sessionCookieOptions);
+  if (user) {
+    response.cookies.set(sessionCookie, await sealSession(user), sessionCookieOptions);
+    await remember(user).catch(() => null);
+  }
   return response;
 }

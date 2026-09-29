@@ -60,19 +60,37 @@ const continentOf = new Map(
   ),
 );
 
+// A region at the start of the name ("EU SOLO", "NA-DUO"), chosen by whoever runs the server. It
+// beats the address lookup: a server behind a tunnel (playit.gg) has the tunnel's address, often on
+// another continent. SA is South America here, as in games.
+const nameRegions: [RegExp, Continent][] = [
+  [/^(eu|euw|eune|europe)\b/i, "europe"],
+  [/^(na|nae|naw|us|usa|north america)\b/i, "northAmerica"],
+  [/^(sa|br|latam|south america)\b/i, "southAmerica"],
+  [/^(asia|sea|jp|kr)\b/i, "asia"],
+  [/^(oce|au|oceania)\b/i, "oceania"],
+  [/^(africa)\b/i, "africa"],
+];
+
 function toServer(raw: RawServer): GameServer {
   const online = raw.online === true;
-  const country = typeof raw.country === "string" && /^[A-Z]{2}$/.test(raw.country) ? raw.country : null;
+  const name = String(raw.name ?? "").trim() || "Server";
+  const found = typeof raw.country === "string" && /^[A-Z]{2}$/.test(raw.country) ? raw.country : null;
+  const named = nameRegions.find(([pattern]) => pattern.test(name))?.[1] ?? null;
+  const located = found ? (continentOf.get(found) ?? null) : null;
+  // A country on another continent than the name says is the tunnel's, not the server's: rather
+  // show only the name's region than a wrong country (backend: country= in listen-servers.txt).
+  const country = named && located && named !== located ? null : found;
   const players = Number.isInteger(raw.players) && (raw.players as number) >= 0 ? (raw.players as number) : null;
   return {
-    name: String(raw.name ?? "").trim() || "Server",
+    name,
     online,
     mode: modes.has(raw.mode as Mode) ? (raw.mode as Mode) : "any",
     view: views.has(raw.view as View) ? (raw.view as View) : "any",
     match: online ? matchOf(raw.state_index, raw.map) : null,
     players: online ? players : null,
     country,
-    continent: country ? (continentOf.get(country) ?? null) : null,
+    continent: named ?? located,
   };
 }
 

@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import { categoryOf, doneAt, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
+import { can, categoryOf, doneAt, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
@@ -89,7 +89,7 @@ export function CompletedList({
                   key={item.id}
                   item={item}
                   categories={categories}
-                  admin={viewer?.admin ? admin : null}
+                  admin={can(viewer, "manage") ? admin : null}
                   showDate
                   onOpen={(mode) => setOpened({ id: item.id, mode })}
                 />

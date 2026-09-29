@@ -1321,8 +1321,59 @@ button.votes__down:disabled { cursor: default; }
 .admin-review__icon svg { width: 17px; height: 17px; }
 .admin-review__actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .btn.admin-review__reject:hover:not(:disabled) { border-color: var(--signal); color: var(--signal-hi); }
-.admin-names { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
-.admin-names li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); font-weight: 600; }
+/* Admin panel: the admins, with their permissions; owners get a menu on everyone else's card. */
+.staff { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.staff__card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); }
+.staff__who { display: grid; gap: 5px; min-width: 0; }
+.staff__who b { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.staff__perms { display: flex; flex-wrap: wrap; gap: 4px; }
+.staff__perms > span { padding: 2px 6px; border: 1px solid var(--line); border-radius: 2px; color: var(--paper-dim); font: 700 10px var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.staff__perms > .staff__owner { border-color: rgba(240, 183, 25, 0.5); color: var(--gold); }
+.staff__perms > .staff__none { border-style: dashed; color: var(--muted); }
+.staff__menu { align-self: start; }
+.staff__add { margin-bottom: 12px; }
+.perm-list { display: grid; gap: 6px; margin: 0; padding: 0; border: 0; }
+.sheet-form .perm { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ink); color: var(--paper); letter-spacing: normal; text-transform: none; cursor: pointer; }
+.sheet-form .perm input { width: 18px; height: 18px; margin: 2px 0 0; padding: 0; accent-color: var(--signal); }
+.perm span { display: grid; gap: 3px; }
+.perm b { font: 700 13px var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.perm small { color: var(--muted); font: 14px/1.4 var(--body); }
+.perm:has(input:checked) { border-color: rgba(239, 68, 56, 0.55); }
+.staff-form small { color: var(--muted); font: 13px/1.4 var(--body); letter-spacing: normal; text-transform: none; }
+.staff__remove { margin-right: auto; }
+
+/* Admin panel: the activity log. */
+.activity { display: grid; gap: 14px; }
+.activity__filters { display: flex; align-items: center; gap: 10px; }
+.activity__search { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ink); color: var(--muted); }
+.activity__search svg { width: 15px; height: 15px; flex: none; }
+.activity__search input { width: 100%; min-width: 0; border: 0; outline: none; background: none; color: var(--paper); font: 15px var(--body); }
+.activity__search:has(input:focus) { border-color: var(--signal); }
+.activity__list { display: grid; margin: 0; padding: 0; list-style: none; }
+.activity__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line-soft); }
+.activity__row:first-child { border-top: 0; }
+.activity__icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--r); background: var(--surface-3); color: var(--paper-dim); }
+.activity__icon svg { width: 15px; height: 15px; }
+.activity__row--comment-deleted .activity__icon,
+.activity__row--item-deleted .activity__icon,
+.activity__row--idea-rejected .activity__icon,
+.activity__row--user-banned .activity__icon,
+.activity__row--staff-removed .activity__icon { background: rgba(239, 68, 56, 0.14); color: var(--signal-hi); }
+.activity__main { display: grid; gap: 6px; min-width: 0; }
+.activity__main p { margin: 0; color: var(--paper-dim); overflow-wrap: anywhere; }
+.activity__main b { color: var(--paper); font-weight: 600; }
+.activity__main a { color: var(--paper); font-weight: 600; }
+.activity__main blockquote { margin: 0; padding: 6px 10px; border-left: 2px solid var(--line); color: var(--muted); font-size: 15px; white-space: pre-line; overflow-wrap: anywhere; }
+.activity__row--comment-deleted blockquote { border-left-color: var(--signal); }
+.activity__row time { padding-top: 5px; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.activity__more { margin: 0; color: var(--muted); font-size: 14px; text-align: center; }
+@media (max-width: 700px) {
+  .activity__filters { flex-direction: column; align-items: stretch; }
+  .activity__filters .ideas__sort { justify-content: space-between; }
+  .activity__filters .ideas__sort button { flex: 1; padding: 0 6px; }
+  .activity__row { grid-template-columns: auto minmax(0, 1fr); }
+  .activity__row time { grid-column: 2; padding-top: 0; }
+}
 @media (max-width: 600px) {
   .admin-review { grid-template-columns: 36px minmax(0, 1fr); }
   .admin-review__actions { grid-column: 1 / -1; }
@@ -1680,6 +1731,10 @@ button.votes__down:disabled { cursor: default; }
 }
 .who__team { color: var(--paper-dim); }
 .who__banned { color: var(--signal-hi); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+/* A banned person: the same name, struck through, then "(banned)". */
+.is-banned { color: var(--muted); }
+.is-banned s { text-decoration-thickness: 2px; text-decoration-color: var(--signal); }
+.who__banned-tag { color: var(--signal-hi); font-size: 14px; }
 
 .thread { margin-top: 32px; padding: 0; }
 .thread__title { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 20px; letter-spacing: 0.08em; }
