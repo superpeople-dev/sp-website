@@ -41,8 +41,14 @@ async function create(user: SessionUser, body: Body) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
   try {
-    const { feedbackId } = await createIdea(title, "", await userToken(user));
-    await Promise.all([setStatus(feedbackId, status), rememberAuthor(feedbackId, profileOf(user))]);
+    // Reflet no longer creates an item without a description, and a roadmap task has only a title:
+    // it is created with the title as its description, which is then cleared (kept if Reflet refuses).
+    const { feedbackId } = await createIdea(title, title, await userToken(user));
+    await Promise.all([
+      setStatus(feedbackId, status),
+      rememberAuthor(feedbackId, profileOf(user)),
+      updateIdea(feedbackId, title, "").catch(() => null),
+    ]);
     revalidateTag(refletTag, { expire: 0 });
     await logEvent(user, { type: "item.created", item: { id: feedbackId, title, status }, to: status });
     const item = await getIdea(feedbackId);
