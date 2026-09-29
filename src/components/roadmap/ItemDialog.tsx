@@ -369,7 +369,6 @@ function ItemBody({
     item.status === "completed" ? null : vote && !inReview ? (
       <VoteControl
         item={item}
-        layout="row"
         onVote={(direction) => vote(item, direction)}
         disabled={!authReady || votePending || viewer?.banned}
       />

@@ -50,7 +50,7 @@ export function WorkCard({
       <div className="work__top">
         {item.status !== "completed" &&
           (overlay || onVote ? (
-            <VoteControl item={item} layout="row" className="votes--small" onVote={overlay ? undefined : onVote} disabled={voteDisabled} />
+            <VoteControl item={item} className="votes--small" onVote={overlay ? undefined : onVote} disabled={voteDisabled} />
           ) : (
             <span className={`work__votes${item.hasVoted ? " is-voted" : ""}`}>
               <Icon name="up" />

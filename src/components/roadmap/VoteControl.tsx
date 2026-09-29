@@ -6,18 +6,15 @@ import { useI18n } from "@/i18n/context";
 import { downvoted, type VoteDirection } from "@/lib/board";
 import { Icon } from "../Icon";
 
-// ▲ score ▼, where the score is upvotes minus downvotes. "column" stands on the left of an idea card,
-// "row" is the pill on roadmap cards and in the item dialog. Without onVote (a card being dragged)
-// it only shows the same look.
+// ⇧ score ⇩ in a pill like Reddit's, where the score is upvotes minus downvotes. Without onVote (a
+// card being dragged) it only shows the same look.
 export function VoteControl({
   item,
-  layout,
   onVote,
   disabled,
   className,
 }: {
   item: FeedbackItem;
-  layout: "column" | "row";
   onVote?: (direction: VoteDirection) => void;
   disabled?: boolean;
   className?: string;
@@ -26,17 +23,17 @@ export function VoteControl({
   const r = t.ideas;
   const up = item.hasVoted;
   const down = downvoted(item);
-  const classes = ["votes", `votes--${layout}`, up && "is-up", down && "is-down", className].filter(Boolean).join(" ");
+  const classes = ["votes", up && "is-up", down && "is-down", className].filter(Boolean).join(" ");
 
   if (!onVote) {
     return (
       <span className={classes} aria-hidden="true">
         <span className="votes__up">
-          <Icon name="up" />
+          <Icon name="vote" />
         </span>
         <b className="votes__count">{item.voteCount}</b>
         <span className="votes__down">
-          <Icon name="up" />
+          <Icon name="vote" />
         </span>
       </span>
     );
@@ -52,7 +49,7 @@ export function VoteControl({
         disabled={disabled}
         onClick={() => onVote("up")}
       >
-        <Icon name="up" />
+        <Icon name="vote" />
       </button>
       <b className="votes__count">{item.voteCount}</b>
       <button
@@ -63,7 +60,7 @@ export function VoteControl({
         disabled={disabled}
         onClick={() => onVote("down")}
       >
-        <Icon name="up" />
+        <Icon name="vote" />
       </button>
     </div>
   );

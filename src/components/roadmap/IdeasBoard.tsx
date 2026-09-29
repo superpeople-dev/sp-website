@@ -209,7 +209,6 @@ export function IdeasBoard({
       <li key={item.id} className={`idea card${inReview ? " idea--review" : ""}`}>
         <VoteControl
           item={item}
-          layout="column"
           onVote={(direction) => void vote(item, direction)}
           disabled={!authReady || inReview || viewer?.banned}
         />

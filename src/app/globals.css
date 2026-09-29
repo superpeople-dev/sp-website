@@ -925,6 +925,7 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .review__icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--r); background: rgba(240, 183, 25, 0.14); color: var(--gold); }
 .review__icon svg { width: 17px; height: 17px; }
 .idea--review .votes { opacity: 0.5; }
+.idea .votes { justify-self: start; }
 .ideas__empty,
 .servers__empty { margin: 0; padding: 32px; border: 1px dashed var(--line); border-radius: var(--r); color: var(--muted); text-align: center; }
 
@@ -976,21 +977,24 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .idea-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .idea {
   display: grid;
-  grid-template-columns: 60px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--r);
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
 }
-/* Voting (VoteControl): ▲ score ▼, the score being upvotes minus downvotes. Up is blue, down is
-   red, and the score takes the colour of your vote. On phones and touch screens the buttons are
-   finger-sized. */
+/* Voting (VoteControl): a rounded pill like Reddit's, ⇧ score ⇩, the score being upvotes minus
+   downvotes. Up is blue, down is red: your vote fills its arrow and colours the score. On phones and
+   touch screens the buttons are finger-sized. */
 .votes {
   display: inline-flex;
   align-items: center;
+  gap: 2px;
+  height: 34px;
+  padding: 2px;
   border: 1px solid var(--line);
-  border-radius: var(--r);
+  border-radius: 999px;
   background: var(--surface);
   color: var(--paper-dim);
   transition: border-color 0.2s, background 0.2s;
@@ -999,9 +1003,11 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .votes__down {
   display: grid;
   place-items: center;
+  width: 30px;
+  height: 100%;
   padding: 0;
   border: 0;
-  border-radius: 2px;
+  border-radius: 999px;
   background: none;
   color: inherit;
   transition: color 0.2s, background 0.2s;
@@ -1010,9 +1016,10 @@ button.votes__up,
 button.votes__down { cursor: pointer; }
 button.votes__up:disabled,
 button.votes__down:disabled { cursor: default; }
-.votes svg { width: 16px; height: 16px; }
+.votes svg { width: 18px; height: 18px; }
+.votes svg path { transition: fill 0.2s; }
 .votes__down svg { transform: rotate(180deg); }
-.votes__count { min-width: 2ch; color: var(--paper); font: 800 17px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
+.votes__count { min-width: 2ch; padding: 0 2px; color: var(--paper); font: 800 16px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
 /* Hover only where a pointer really hovers (a phone keeps :hover on the last tapped button), and
    only the arrow takes the colour: a red or blue background under the mouse right after taking a
    vote back looked as if the vote were still there. */
@@ -1028,31 +1035,23 @@ button.votes__down:disabled { cursor: default; }
 .votes.is-down { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); }
 .votes.is-down .votes__down,
 .votes.is-down .votes__count { color: var(--signal-hi); }
-.votes--column { flex-direction: column; align-self: start; gap: 2px; width: 100%; padding: 3px; }
-.votes--column .votes__up,
-.votes--column .votes__down { width: 100%; height: 22px; }
-.votes--row { gap: 2px; height: 32px; padding: 2px; }
-.votes--row .votes__up,
-.votes--row .votes__down { width: 26px; height: 100%; }
-.votes--row .votes__count { padding: 0 2px; font-size: 16px; }
-.votes--small { height: 26px; }
+.votes.is-up .votes__up path,
+.votes.is-down .votes__down path { fill: currentColor; }
+.votes--small { height: 28px; }
 .votes--small .votes__up,
-.votes--small .votes__down { width: 22px; }
-.votes--small svg { width: 13px; height: 13px; }
+.votes--small .votes__down { width: 24px; }
+.votes--small svg { width: 15px; height: 15px; }
 .votes--small .votes__count { font-size: 13px; }
-@media (pointer: coarse) {
-  .votes--column .votes__up,
-  .votes--column .votes__down { height: 32px; }
-}
 @media (max-width: 700px), (pointer: coarse) {
-  .votes--row { height: 40px; }
-  .votes--row .votes__up,
-  .votes--row .votes__down { width: 44px; }
-  .votes--row .votes__count { font-size: 17px; }
+  .votes { height: 40px; }
+  .votes__up,
+  .votes__down { width: 44px; }
+  .votes svg { width: 20px; height: 20px; }
+  .votes__count { font-size: 17px; }
   .votes--small { height: 36px; }
   .votes--small .votes__up,
   .votes--small .votes__down { width: 40px; }
-  .votes--small svg { width: 15px; height: 15px; }
+  .votes--small svg { width: 17px; height: 17px; }
   .votes--small .votes__count { font-size: 15px; }
 }
 .idea__body h3 { margin: 2px 0 6px; font-size: 19px; line-height: 1.15; letter-spacing: 0.04em; overflow-wrap: anywhere; }
@@ -1904,10 +1903,6 @@ button.votes__down:disabled { cursor: default; }
 
 @media (max-width: 700px) {
   .idea { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px; }
-  .idea .votes--column { flex-direction: row; justify-self: start; width: auto; height: 40px; padding: 2px; }
-  .idea .votes--column .votes__up,
-  .idea .votes--column .votes__down { width: 44px; height: 100%; }
-  .idea .votes--column .votes__count { padding: 0 4px; }
   .change { grid-template-columns: 1fr; gap: 8px; }
 }
 
