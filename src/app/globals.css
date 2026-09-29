@@ -1865,7 +1865,7 @@ button.votes__down:hover:not(:disabled) { background: rgba(239, 68, 56, 0.14); c
 
 @media (max-width: 700px) {
   .idea { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px; }
-  .idea .votes--column { order: 1; flex-direction: row; justify-self: start; width: auto; height: 40px; padding: 2px; }
+  .idea .votes--column { flex-direction: row; justify-self: start; width: auto; height: 40px; padding: 2px; }
   .idea .votes--column .votes__up,
   .idea .votes--column .votes__down { width: 44px; height: 100%; }
   .idea .votes--column .votes__count { padding: 0 4px; }
