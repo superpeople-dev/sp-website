@@ -1752,6 +1752,9 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .lang__name { display: flex; align-items: center; gap: 10px; }
 .lang__button .lang__chevron { width: 14px; height: 14px; opacity: 0.7; transition: transform 0.2s; }
 .lang__button[aria-expanded="true"] .lang__chevron { transform: rotate(180deg); }
+@media (max-width: 700px) {
+  .lang__button { padding-right: 3px; }
+}
 .lang__button:hover .lang__chevron,
 .lang__button[aria-expanded="true"] .lang__chevron { opacity: 1; }
 .lang__menu {
