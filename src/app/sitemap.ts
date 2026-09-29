@@ -31,6 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency,
       priority: locale === "en" ? priority : priority - 0.1,
       alternates: { languages: languageAlternates(true, path) },
+      images: [`${siteUrl}${ogImagePath(locale, path)}`],
     })),
   );
   return [...home, ...pages];

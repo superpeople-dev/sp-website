@@ -558,11 +558,33 @@ section.flush { padding-top: 0; }
   .help__card .btn { width: 100%; padding: 14px 12px; font-size: 14px; letter-spacing: 0.05em; }
 }
 
-.progress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 44px; }
+.playtest { margin-top: 44px; }
+.playtest .bar { margin-bottom: 0; }
+/* Same number of rows on both sides (lib/progress.ts), so the two panels line up. */
+.progress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.progress__panel { display: flex; flex-direction: column; }
+.progress__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--paper-dim);
+  font: 700 13px var(--display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.progress__link svg { width: 16px; height: 16px; flex: none; transition: transform 0.2s; }
+.progress__link:hover { color: var(--paper); }
+.progress__link:hover svg { transform: translateX(3px); }
 .rows { list-style: none; margin: 0; padding: 0; }
 .rows li {
   display: grid;
-  grid-template-columns: 20px 1fr auto;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: start;
   padding: 11px 0;
@@ -570,6 +592,7 @@ section.flush { padding-top: 0; }
   font-size: 16px;
 }
 .rows li:last-child { border: 0; }
+.rows__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rows small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
 .rows__check { width: 18px; height: 18px; margin-top: 3px; fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .rows__dot { width: 10px; height: 10px; margin: 8px 0 0 4px; border-radius: 50%; }
@@ -585,7 +608,11 @@ section.flush { padding-top: 0; }
 .st--next { color: var(--muted); }
 .pct { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .pct b { font: 900 clamp(32px, 4vw, 44px)/1 var(--display); text-transform: uppercase; }
-.pct span { font: 600 13px var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.pct span { font: 600 13px var(--display); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; color: var(--gold); }
+/* Phone: the status goes over the title instead of squeezing next to it. */
+@media (max-width: 700px) {
+  .pct { flex-direction: column-reverse; align-items: flex-start; gap: 8px; }
+}
 .bar { height: 5px; background: var(--surface-3); border-radius: 3px; margin: 10px 0 20px; overflow: hidden; }
 .bar i {
   position: relative;
@@ -603,7 +630,10 @@ section.flush { padding-top: 0; }
   animation: shimmer 2.6s 2s ease-in-out infinite;
 }
 @keyframes shimmer { to { transform: translateX(100%); } }
-@media (max-width: 860px) { .progress-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1140px) {
+  .progress-grid { grid-template-columns: 1fr; }
+  .rows__title { white-space: normal; }
+}
 
 .gallery { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: clamp(140px, 17vw, 220px); gap: 8px; margin-top: 44px; }
 .gallery__item {
@@ -737,7 +767,6 @@ section.flush { padding-top: 0; }
 .ico svg { width: 20px; height: 20px; }
 @media (max-width: 1140px) { .help { grid-template-columns: minmax(0, 1fr); } }
 
-.progress__more { display: flex; justify-content: center; margin-top: 28px; }
 
 .page-head { position: relative; isolation: isolate; overflow-x: clip; padding: calc(var(--nav-h) + clamp(48px, 8vw, 100px)) 0 20px; }
 .page-head::before,
@@ -1789,7 +1818,6 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
   .idea { grid-template-columns: 52px minmax(0, 1fr); gap: 14px; padding: 14px; }
   .vote { height: 56px; }
   .change { grid-template-columns: 1fr; gap: 8px; }
-  .progress__more .btn { width: 100%; }
 }
 
 .faq { margin-top: 36px; }

@@ -12,6 +12,7 @@ import { Story } from "@/components/Story";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
+import { fallbackProgress, getProgress } from "@/lib/progress";
 import { structuredData } from "@/lib/seo";
 
 export const revalidate = 300;
@@ -20,7 +21,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const release = await getLatestRelease();
+  const [release, progress] = await Promise.all([getLatestRelease(), getProgress()]);
 
   return (
     <>
@@ -33,7 +34,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <main>
         <Story />
         <Steps downloadUrl={release.downloadUrl} />
-        <Progress />
+        <Progress lists={progress ?? fallbackProgress(t.progress)} />
         <Gallery />
         <Help />
         <Faq />

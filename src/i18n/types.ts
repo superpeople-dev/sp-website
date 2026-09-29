@@ -57,13 +57,14 @@ export type Dictionary = {
   progress: {
     title: string;
     lead: string;
-    doneTitle: string;
+    recentTitle: string;
     workingTitle: string;
     nextPlaytest: string;
     inProgress: string;
     upNext: string;
     done: string;
     roadmapCta: string;
+    viewCompleted: string;
     doneItems: string[];
     openItems: { title: string; note?: string }[];
   };

@@ -24,8 +24,6 @@ export const history: { date: string; tone?: "off" | "on" }[] = [
   { date: "2026-09", tone: "on" },
 ];
 
-export const progressMonth = "2026-09";
-
 export const openStatuses: ("wip" | "next")[] = ["wip", "wip", "wip", "next", "next"];
 
 export const nextPlaytestProgress = 70;

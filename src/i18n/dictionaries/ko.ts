@@ -79,13 +79,14 @@ export const ko: Dictionary = {
   progress: {
     title: "지금까지 고친 것들",
     lead: "여기 있는 항목은 모두 처음 시작할 때 고장 났거나 없던 기능입니다. 새 소식은 완성되는 대로 Discord에 올립니다.",
-    doneTitle: "완료 · {month}",
+    recentTitle: "최근 수정",
     workingTitle: "진행 중인 작업",
     nextPlaytest: "다음 플레이테스트",
     inProgress: "진행 중",
     upNext: "예정",
     done: "완료",
     roadmapCta: "로드맵 보고 투표하기",
+    viewCompleted: "완료된 항목 모두 보기",
     doneItems: [
       "문 열기와 닫기",
       "관전 모드",
@@ -139,7 +140,7 @@ export const ko: Dictionary = {
     share: "이 페이지 공유하기",
     copied: "링크 복사됨",
     shareTitle: "슈퍼피플이 돌아왔습니다",
-    shareText: "커뮤니티가 되살린 슈퍼피플(SUPER PEOPLE)이 돌아왔습니다. 무료, Steam 없이 플레이.",
+    shareText: "커뮤니티가 되살린 슈퍼피플(SUPER PEOPLE)이 돌아왔습니다. 무료로 플레이하세요.",
     github: "GitHub에서 보기",
   },
   faq: {
@@ -376,9 +377,9 @@ export const ko: Dictionary = {
   seo: {
     title: "슈퍼피플(SUPER PEOPLE) 부활 - 커뮤니티 서버와 런처",
     description:
-      "슈퍼피플이 2026년 서비스를 종료하자 팬들이 서버를 다시 만들고 있습니다. 오픈 소스 런처를 받고 다시 플레이하세요. Steam 없이 플레이.",
+      "슈퍼피플이 2026년 서비스를 종료하자 팬들이 서버를 다시 만들고 있습니다. 오픈 소스 런처를 받고 다시 플레이하세요.",
     shareDescription:
-      "초능력 배틀로얄 슈퍼피플이 돌아옵니다. 오픈 소스 런처, 커뮤니티가 다시 만든 서버, Steam 없이 플레이. Discord에서 플레이테스트에 참여하세요.",
+      "초능력 배틀로얄 슈퍼피플이 돌아옵니다. 오픈 소스 런처와 커뮤니티가 다시 만든 서버. Discord에서 플레이테스트에 참여하세요.",
     keywords: [
       "슈퍼피플",
       "SUPER PEOPLE",

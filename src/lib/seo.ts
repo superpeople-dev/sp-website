@@ -13,7 +13,8 @@ export const siteName = "SUPER PEOPLE Revival";
 export const localeUrl = (locale: Locale, page: PagePath = "") =>
   locale === "en" && !page ? siteUrl : `${siteUrl}${localeHref(locale, page)}`;
 
-export const ogImagePath = (locale: Locale) => `/og/${locale}.jpg`;
+// Home keeps its hand-made image; every other page has one built by app/og/[lang]/[image]/route.tsx.
+export const ogImagePath = (locale: Locale, page: PagePath = "") => (page ? `/og/${locale}${page}.png` : `/og/${locale}.jpg`);
 
 export function languageAlternates(absolute = false, page: PagePath = ""): Record<string, string> {
   const link = (l: Locale) => (absolute ? localeUrl(l, page) : localeHref(l, page));
@@ -49,7 +50,9 @@ export function pageMetadata(locale: Locale, page: PagePath = ""): Metadata {
   const title = sub ? `${sub.title} · ${siteName}` : t.title;
   const description = sub ? sub.description : t.description;
   const share = sub ? sub.description : t.shareDescription;
-  const image = { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
+  const image = sub
+    ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: title, type: "image/png" }
+    : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
   return {
     metadataBase: new URL(siteUrl),
     title: sub ? sub.title : { default: t.title, template: `%s · ${siteName}` },
@@ -177,7 +180,6 @@ export function llmsTxt() {
 ## Key facts
 
 - Status: playable during scheduled community playtests. Always-online servers are in progress.
-- No Steam account is needed.
 - Platform: Windows 10 or 11, 64-bit. About 64 GB of disk space needed while installing.
 - The official game never supported community servers, so the team is rebuilding login, the lobby and the game servers.
 - Not affiliated with or endorsed by Wonder People.

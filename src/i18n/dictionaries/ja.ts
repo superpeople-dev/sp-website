@@ -79,13 +79,14 @@ export const ja: Dictionary = {
   progress: {
     title: "ここまで直したもの",
     lead: "ここに並んでいるのは、開発を始めた時点で壊れていたか、存在しなかった機能です。新しい進捗は完成しだい Discord で発表しています。",
-    doneTitle: "完了 · {month}",
+    recentTitle: "最近の修正",
     workingTitle: "現在の作業",
     nextPlaytest: "次回のプレイテスト",
     inProgress: "進行中",
     upNext: "予定",
     done: "完了",
     roadmapCta: "ロードマップを見て投票する",
+    viewCompleted: "完了した項目をすべて見る",
     doneItems: [
       "ドアの開閉",
       "観戦モード",
@@ -139,7 +140,7 @@ export const ja: Dictionary = {
     share: "このページをシェア",
     copied: "リンクをコピーしました",
     shareTitle: "SUPER PEOPLE が帰ってきた",
-    shareText: "コミュニティの手で SUPER PEOPLE が帰ってきました。無料・Steam 不要。",
+    shareText: "コミュニティの手で SUPER PEOPLE が帰ってきました。無料でプレイできます。",
     github: "GitHub で見る",
   },
   faq: {
@@ -376,9 +377,9 @@ export const ja: Dictionary = {
   seo: {
     title: "SUPER PEOPLE 復活 - コミュニティサーバーとランチャー",
     description:
-      "2026年にサービスを終了した SUPER PEOPLE のサーバーを、ファンがゼロから作り直しています。オープンソースのランチャーで、もう一度プレイしよう。Steam 不要。",
+      "2026年にサービスを終了した SUPER PEOPLE のサーバーを、ファンがゼロから作り直しています。オープンソースのランチャーで、もう一度プレイしよう。",
     shareDescription:
-      "超能力バトルロイヤル SUPER PEOPLE が帰ってくる。オープンソースのランチャー、コミュニティが作り直したサーバー、Steam 不要。Discord でプレイテストに参加しよう。",
+      "超能力バトルロイヤル SUPER PEOPLE が帰ってくる。オープンソースのランチャーと、コミュニティが作り直したサーバー。Discord でプレイテストに参加しよう。",
     keywords: [
       "SUPER PEOPLE",
       "スーパーピープル",

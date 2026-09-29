@@ -79,13 +79,14 @@ export const zh: Dictionary = {
   progress: {
     title: "我们已经修好了这些",
     lead: "这里列出的每一项，在我们刚开始时要么坏了，要么根本没有。新进展一出来，我们就会发到 Discord。",
-    doneTitle: "已完成 · {month}",
+    recentTitle: "最近修复",
     workingTitle: "正在进行",
     nextPlaytest: "下一次测试",
     inProgress: "进行中",
     upNext: "即将开始",
     done: "已完成",
     roadmapCta: "查看路线图并投票",
+    viewCompleted: "查看全部已完成",
     doneItems: [
       "门可以正常开关",
       "观战模式",
@@ -137,7 +138,7 @@ export const zh: Dictionary = {
     share: "分享此页面",
     copied: "链接已复制",
     shareTitle: "SUPER PEOPLE 回来了",
-    shareText: "SUPER PEOPLE 回来了，由社区运营。免费，无需 Steam。",
+    shareText: "SUPER PEOPLE 回来了，由社区运营。免费畅玩。",
     github: "在 GitHub 上查看",
   },
   faq: {
@@ -374,9 +375,9 @@ export const zh: Dictionary = {
   seo: {
     title: "SUPER PEOPLE 回来了 - 社区复活服务器与启动器",
     description:
-      "SUPER PEOPLE 于 2026 年停服，粉丝们正在从零重建它的服务器。下载开源启动器，重新开玩。无需 Steam。",
+      "SUPER PEOPLE 于 2026 年停服，粉丝们正在从零重建它的服务器。下载开源启动器，重新开玩。",
     shareDescription:
-      "超能力大逃杀 SUPER PEOPLE 即将回归。开源启动器、社区重建的服务器、无需 Steam。在 Discord 上加入测试。",
+      "超能力大逃杀 SUPER PEOPLE 即将回归。开源启动器，社区重建的服务器。在 Discord 上加入测试。",
     keywords: [
       "SUPER PEOPLE",
       "SUPER PEOPLE 私服",

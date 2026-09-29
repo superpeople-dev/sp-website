@@ -79,13 +79,14 @@ export const en: Dictionary = {
   progress: {
     title: "What we've fixed so far",
     lead: "Every item here was broken or missing when we started. We post updates as they land in the Discord.",
-    doneTitle: "Done · {month}",
+    recentTitle: "Recently fixed",
     workingTitle: "Working on now",
     nextPlaytest: "Next playtest",
     inProgress: "In progress",
     upNext: "Up next",
     done: "Done",
     roadmapCta: "See the roadmap & vote",
+    viewCompleted: "View all completed",
     doneItems: [
       "Doors open and close",
       "Spectating",
@@ -139,7 +140,7 @@ export const en: Dictionary = {
     share: "Share this page",
     copied: "Link copied",
     shareTitle: "SUPER PEOPLE is back",
-    shareText: "SUPER PEOPLE is back, run by the community. Free, no Steam needed.",
+    shareText: "SUPER PEOPLE is back, run by the community. Free to play.",
     github: "View on GitHub",
   },
   faq: {
@@ -376,9 +377,9 @@ export const en: Dictionary = {
   seo: {
     title: "SUPER PEOPLE Is Back - Community Revival & Launcher",
     description:
-      "SUPER PEOPLE was shut down in 2026, so fans are rebuilding its servers from scratch. Get the open-source launcher and play again. No Steam needed.",
+      "SUPER PEOPLE was shut down in 2026, so fans are rebuilding its servers from scratch. Get the open-source launcher and play again.",
     shareDescription:
-      "The superpowered battle royale is coming back. Open-source launcher, community-rebuilt servers, no Steam needed. Join the playtests on Discord.",
+      "The superpowered battle royale is coming back. Open-source launcher and community-rebuilt servers. Join the playtests on Discord.",
     keywords: [
       "SUPER PEOPLE",
       "Super People game",
