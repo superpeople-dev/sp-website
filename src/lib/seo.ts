@@ -52,8 +52,8 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   }
 }
 
-// An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description (with a
-// capital first letter) and a preview image that also shows its score (upvotes minus downvotes) and
+// An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description (lib/share.ts
+// itemPreview) and a preview image that also shows its score (upvotes minus downvotes) and
 // comment count like a Reddit post (app/og/[lang]/item/[id]/route.tsx).
 export type SharedItem = { id: string; title: string; slug: string; preview: string; score: number; comments: number };
 
@@ -67,8 +67,7 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const title = item ? `${item.title} - ${siteName}` : pageTitle;
   const suffix = item ? `/${item.id}${item.slug ? `/${item.slug}` : ""}` : "";
   const url = `${localeHref(locale, page)}${suffix}`;
-  const preview = item?.preview ? item.preview.charAt(0).toLocaleUpperCase(locale) + item.preview.slice(1) : "";
-  const description = preview || (sub ? sub.description : t.description);
+  const description = item?.preview || (sub ? sub.description : t.description);
   const share = item ? description : sub ? sub.description : t.shareDescription;
   const image = item
     ? { url: versioned(`/og/${locale}/item/${item.id}.png`, `${item.score}.${item.comments}`), width: 1200, height: 630, alt: item.title, type: "image/png" }

@@ -8,6 +8,7 @@ import {
   getIdea,
   getTags,
   refletTag,
+  RefletRequestError,
   setStatus,
   updateIdea,
   updateTags,
@@ -17,7 +18,7 @@ import { can } from "@/lib/board";
 import { logEvent } from "@/lib/events";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
-import { profileOf, rememberAuthor } from "@/lib/store";
+import { markCreated, profileOf, rememberAuthor } from "@/lib/store";
 
 const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
 const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
@@ -44,6 +45,8 @@ async function create(user: SessionUser, body: Body) {
     // Reflet no longer creates an item without a description, and a roadmap task has only a title:
     // it is created with the title as its description, which is then cleared (kept if Reflet refuses).
     const { feedbackId } = await createIdea(title, title, await userToken(user));
+    // Before the status is set: Reflet reports it as a status change (api/webhooks/reflet).
+    await markCreated(feedbackId);
     await Promise.all([
       setStatus(feedbackId, status),
       rememberAuthor(feedbackId, profileOf(user)),
@@ -89,7 +92,16 @@ export async function POST(request: NextRequest) {
   if (!feedbackId) return Response.json({ error: "invalid" }, { status: 400 });
 
   try {
-    const item = await getIdea(feedbackId);
+    // Deleting something Reflet no longer has is done already (it can remove an item on its own).
+    const item = await getIdea(feedbackId).catch((error: unknown) => {
+      if (body.action === "delete" && error instanceof RefletRequestError && error.status === 404) return null;
+      throw error;
+    });
+    if (!item) {
+      if (!can(user, "manage") && !can(user, "review")) return Response.json({ error: "forbidden" }, { status: 403 });
+      revalidateTag(refletTag, { expire: 0 });
+      return Response.json({ ok: true });
+    }
     const inReview = item.status === "under_review";
     const to = body.status as FeedbackStatus;
     const approving = inReview && body.action === "status" && to === "open";

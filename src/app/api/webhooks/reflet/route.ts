@@ -5,7 +5,7 @@ import { itemPath } from "@/lib/board";
 import { getIdea, refletTag } from "@/lib/reflet";
 import { reporterIds } from "@/lib/reporters";
 import { siteUrl } from "@/lib/seo";
-import { authorsOf } from "@/lib/store";
+import { authorsOf, justCreated } from "@/lib/store";
 
 type Payload = { event?: string; data?: { feedback?: Partial<FeedbackItem> } };
 type Announcement = { label: string; color: number; path: string };
@@ -24,8 +24,16 @@ function verified(body: string, signature: string | null) {
   return expected.length === signature.length && timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 }
 
-function announcementFor(event: string | undefined, status: FeedbackStatus | undefined) {
-  return event === "feedback.status_changed" && status ? (statusAnnouncements[status] ?? null) : null;
+// A task an admin creates straight in a roadmap column arrives as a status change too: it is new there.
+const createdAnnouncements: Partial<Record<FeedbackStatus, Announcement>> = {
+  planned: { label: "New task in To do", color: 0xf0b719, path: "/roadmap" },
+  in_progress: { label: "New task in In progress", color: 0xef4438, path: "/roadmap" },
+  completed: { label: "New task in Completed", color: 0x3ddc84, path: "/completed" },
+};
+
+function announcementFor(event: string | undefined, status: FeedbackStatus | undefined, created: boolean) {
+  if (event !== "feedback.status_changed" || !status) return null;
+  return (created ? createdAnnouncements[status] : undefined) ?? statusAnnouncements[status] ?? null;
 }
 
 const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
@@ -63,7 +71,8 @@ export async function POST(request: Request) {
 
   const discord = process.env.DISCORD_WEBHOOK_URL;
   const feedback = payload.data?.feedback;
-  const announcement = announcementFor(payload.event, feedback?.status);
+  const created = payload.event === "feedback.status_changed" && feedback?.id ? await justCreated(feedback.id) : false;
+  const announcement = announcementFor(payload.event, feedback?.status, created);
   if (!discord || !feedback?.title || !announcement) return Response.json({ ok: true });
 
   const categories = (feedback.tags ?? []).map((tag) => tag.name).join(", ");

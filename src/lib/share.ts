@@ -21,14 +21,23 @@ const isPublic = (item: FeedbackItem) => item.status !== "under_review" && item.
 export const sharedItem = (id: string | null | undefined) =>
   id && idPattern.test(id) ? safely(() => getIdea(id, 60)) : Promise.resolve(null);
 
-// The text under an item's link preview: its description on one line, without the bot's
-// "Reported on Discord by …" footer, cut to a preview's length.
+// Emoji and what glues them together (skin tones, variation selectors, joiners, keycaps, flags).
+const emoji = /[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}‍️⃣]/gu;
+
+// The text under an item's link preview (and in its image): its description on one line, without the
+// bot's "Reported on Discord by …" footer or emoji, with a capital first letter, cut to a preview's length.
 export function itemPreview(item: FeedbackItem, length = 180) {
   const text = item.description
     .replace(/\s*Reported on Discord by [\s\S]+$/, "")
+    .replace(emoji, "")
     .replace(/\s+/g, " ")
     .trim();
-  return text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text;
+  const capital = text.charAt(0).toUpperCase() + text.slice(1);
+  if (capital.length <= length) return capital;
+  // Cut after a whole word ("doesn't seem to be…", not "workin…"); text without spaces (CJK) anywhere.
+  const cut = capital.slice(0, length - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > length * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,;:-]+$/, "")}…`;
 }
 
 // What pageMetadata() needs for an item page; nothing for items that aren't public.

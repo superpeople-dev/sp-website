@@ -155,3 +155,11 @@ export async function setCommentsOff(itemId: string, off: boolean) {
   if (off) await redis.sadd(lockedKey, itemId);
   else await redis.srem(lockedKey, itemId);
 }
+
+// Tasks an admin just created on the site (app/api/admin/feedback): Reflet reports the status the task
+// was created in as a status change, and the Discord post should say "New task", not "Moved to".
+const createdKey = (itemId: string) => `sp:created:${itemId}`;
+export const markCreated = (itemId: string) =>
+  attempt("created mark", null, (client) => client.set(createdKey(itemId), 1, { ex: 600 }));
+export const justCreated = (itemId: string) =>
+  attempt("created check", false, async (client) => (await client.exists(createdKey(itemId))) === 1);

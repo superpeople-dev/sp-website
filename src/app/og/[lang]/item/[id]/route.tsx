@@ -97,7 +97,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
           <div style={{ display: "flex", flexDirection: "column", marginTop: "auto", maxWidth: 1072 }}>
             <div style={{ fontSize: titleSize(title), fontWeight: 800, lineHeight: 1.02 }}>{title}</div>
             {preview && (
-              <div style={{ marginTop: 18, fontFamily: "Barlow", fontSize: 28, fontWeight: 500, lineHeight: 1.35, color: c.muted }}>
+              <div style={{ maxWidth: 960, marginTop: 18, fontFamily: "Barlow", fontSize: 28, fontWeight: 500, lineHeight: 1.35, color: c.muted }}>
                 {preview}
               </div>
             )}
