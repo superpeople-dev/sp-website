@@ -1339,11 +1339,15 @@ button.votes__down:disabled { cursor: default; }
 
 /* Admin panel: the activity log. */
 .activity { display: grid; gap: 14px; }
-.activity__filters { display: flex; align-items: center; gap: 10px; }
-.activity__search { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ink); color: var(--muted); }
-.activity__search svg { width: 15px; height: 15px; flex: none; }
-.activity__search input { width: 100%; min-width: 0; border: 0; outline: none; background: none; color: var(--paper); font: 15px var(--body); }
+/* The search is a field like the site's other ones (padding, text size); the periods under it. */
+.activity__filters { display: grid; gap: 10px; }
+.activity__search { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ink); color: var(--muted); transition: border-color 0.2s; }
+.activity__search svg { width: 17px; height: 17px; flex: none; }
+.activity__search input { width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: none; background: none; color: var(--paper); font: 16px/1.4 var(--body); }
+.activity__search input::placeholder { color: var(--muted); }
 .activity__search:has(input:focus) { border-color: var(--signal); }
+.activity__filters .ideas__sort { display: flex; }
+.activity__filters .ideas__sort button { flex: 1; }
 .activity__list { display: grid; margin: 0; padding: 0; list-style: none; }
 .activity__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line-soft); }
 .activity__row:first-child { border-top: 0; }
@@ -1363,9 +1367,7 @@ button.votes__down:disabled { cursor: default; }
 .activity__row time { padding-top: 5px; color: var(--muted); font-size: 13px; white-space: nowrap; }
 .activity__more { margin: 0; color: var(--muted); font-size: 14px; text-align: center; }
 @media (max-width: 700px) {
-  .activity__filters { flex-direction: column; align-items: stretch; }
-  .activity__filters .ideas__sort { justify-content: space-between; }
-  .activity__filters .ideas__sort button { flex: 1; padding: 0 6px; }
+  .activity__filters .ideas__sort button { padding: 0 6px; }
   .activity__row { grid-template-columns: auto minmax(0, 1fr); }
   .activity__row time { grid-column: 2; padding-top: 0; }
 }

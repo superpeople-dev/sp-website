@@ -546,6 +546,10 @@ function ActivityLog() {
   return (
     <div className="activity">
       <div className="activity__filters">
+        <label className="activity__search">
+          <Icon name="search" />
+          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={a.search} aria-label={a.search} />
+        </label>
         <div className="ideas__sort" role="group" aria-label={a.tabActivity}>
           {eventRanges.map((key) => (
             <button key={key} type="button" className={range === key ? "is-active" : undefined} aria-pressed={range === key} onClick={() => setRange(key)}>
@@ -553,10 +557,6 @@ function ActivityLog() {
             </button>
           ))}
         </div>
-        <label className="activity__search">
-          <Icon name="filter" />
-          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={a.search} aria-label={a.search} />
-        </label>
       </div>
       {failed ? (
         <p className="thread__note">{t.board.actionFailed}</p>
