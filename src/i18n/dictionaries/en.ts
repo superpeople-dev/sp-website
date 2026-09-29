@@ -248,6 +248,7 @@ export const en: Dictionary = {
     offline: "Offline",
     summary: "{online} of {total} online",
     allOnline: "All servers online",
+    allOperational: "All servers operational",
     players: "{count} players",
     onePlayer: "1 player",
     modes: { any: "All modes", solo: "Solo", duo: "Duo", trio: "Trio", squad: "Squad" },

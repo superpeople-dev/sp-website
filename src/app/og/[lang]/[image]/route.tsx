@@ -1,13 +1,15 @@
 import { ImageResponse } from "next/og";
-import { isLocale, locales, type Locale } from "@/i18n/config";
+import { fill, isLocale, locales, type Locale } from "@/i18n/config";
 import { dictionaries } from "@/i18n/dictionaries";
 import type { Dictionary } from "@/i18n/types";
 import { assetDataUrl, googleFont, imageLocale } from "@/lib/og";
+import { getServers } from "@/lib/servers";
 
-// The link preview (og:image) of every page except home, which keeps its hand-made /og/<lang>.jpg.
-// All of them are built at deploy time: /og/<lang>/<page>.png.
+// The link preview (og:image) of every page except home, which keeps its hand-made /og/<lang>.jpg:
+// /og/<lang>/<page>.png. Built at deploy time and redrawn at most once a minute, so the Servers one
+// shows the live status (a green dot and "All servers operational", or how many are online).
 
-export const dynamic = "force-static";
+export const revalidate = 60;
 export const dynamicParams = false;
 
 type Page = { art: string; title: (d: Dictionary) => string; line?: (d: Dictionary) => string };
@@ -49,8 +51,16 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
   const tagline = upper(d.nav.tagline);
   const title = upper(page.title(d));
   const line = page.line ? upper(page.line(d)) : null;
-  const footer = "SUPER PEOPLE · OPEN SOURCE";
-  const text = [tagline, title, line, footer].join("");
+  const servers = image === "servers.png" ? await getServers() : null;
+  const online = servers?.servers.filter((server) => server.online).length ?? 0;
+  const total = servers?.servers.length ?? 0;
+  const status = servers
+    ? {
+        text: upper(online > 0 && online === total ? d.servers.allOperational : fill(d.servers.summary, { online: String(online), total: String(total) })),
+        dot: online === 0 ? "#ef4438" : online === total ? "#3ddc84" : "#f0b719",
+      }
+    : null;
+  const text = [tagline, title, line, status?.text].join("");
 
   const script = scriptFont[locale];
   const [latin, latinBold, own, art, logo] = await Promise.all([
@@ -94,7 +104,12 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
               </div>
             )}
           </div>
-          <div style={{ display: "flex", marginTop: 40, fontSize: 30, fontWeight: 700, letterSpacing: 1.5, color: "#d9d4cf" }}>{footer}</div>
+          {status && (
+            <div style={{ display: "flex", alignItems: "center", marginTop: 40, fontSize: 34, fontWeight: 700, letterSpacing: 1.5 }}>
+              <div style={{ width: 22, height: 22, marginRight: 16, borderRadius: 11, background: status.dot, boxShadow: `0 0 0 7px ${status.dot}33` }} />
+              {status.text}
+            </div>
+          )}
         </div>
       </div>
     ),

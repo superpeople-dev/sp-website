@@ -248,6 +248,7 @@ export const ko: Dictionary = {
     offline: "오프라인",
     summary: "{total}개 중 {online}개 온라인",
     allOnline: "모든 서버 온라인",
+    allOperational: "모든 서버 정상 작동",
     players: "플레이어 {count}명",
     onePlayer: "플레이어 1명",
     modes: { any: "모든 모드", solo: "솔로", duo: "듀오", trio: "트리오", squad: "스쿼드" },

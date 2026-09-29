@@ -248,6 +248,7 @@ export const hi: Dictionary = {
     offline: "ऑफ़लाइन",
     summary: "{total} में से {online} ऑनलाइन",
     allOnline: "सभी सर्वर ऑनलाइन",
+    allOperational: "सभी सर्वर चालू हैं",
     players: "{count} खिलाड़ी",
     onePlayer: "1 खिलाड़ी",
     modes: { any: "सभी मोड", solo: "सोलो", duo: "डुओ", trio: "ट्रायो", squad: "स्क्वाड" },
