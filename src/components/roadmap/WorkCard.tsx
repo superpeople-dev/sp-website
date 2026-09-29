@@ -48,7 +48,12 @@ export function WorkCard({
     <li ref={drag?.ref} className={classes.filter(Boolean).join(" ")} {...drag?.listeners}>
       <div className="work__top">
         {item.status !== "completed" &&
-          (onVote && !overlay ? (
+          (overlay ? (
+            <span className={`work__vote${item.hasVoted ? " is-voted" : ""}`}>
+              <Icon name="up" />
+              {item.voteCount}
+            </span>
+          ) : onVote ? (
             <button
               type="button"
               className={`work__vote${item.hasVoted ? " is-voted" : ""}`}

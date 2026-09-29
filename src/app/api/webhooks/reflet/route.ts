@@ -1,8 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
-import { refletTag } from "@/lib/reflet";
+import { getIdea, refletTag } from "@/lib/reflet";
+import { reporterIds } from "@/lib/reporters";
 import { siteUrl } from "@/lib/seo";
+import { authorsOf } from "@/lib/store";
 
 type Payload = { event?: string; data?: { feedback?: Partial<FeedbackItem> } };
 type Announcement = { label: string; color: number; path: string };
@@ -10,7 +12,7 @@ type Announcement = { label: string; color: number; path: string };
 const statusAnnouncements: Partial<Record<FeedbackStatus, Announcement>> = {
   open: { label: "New idea", color: 0x8fb0ff, path: "/ideas" },
   planned: { label: "Added to the roadmap", color: 0xf0b719, path: "/roadmap" },
-  in_progress: { label: "Now in progress", color: 0xef4438, path: "/roadmap" },
+  in_progress: { label: "Moved to In progress", color: 0xef4438, path: "/roadmap" },
   completed: { label: "Completed", color: 0x3ddc84, path: "/completed" },
 };
 
@@ -26,6 +28,22 @@ function announcementFor(event: string | undefined, status: FeedbackStatus | und
 }
 
 const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
+
+const reportedLine = /\s*Reported on Discord by (.+?)\.?\s*$/;
+
+async function reporterOf(feedback: Partial<FeedbackItem>) {
+  const author = feedback.id ? (await authorsOf([feedback.id]))[feedback.id] : undefined;
+  if (author) return `<@${author.id}>`;
+  const name = feedback.description?.match(reportedLine)?.[1];
+  if (!name) return null;
+  return reporterIds[name] ? `<@${reporterIds[name]}>` : name;
+}
+
+async function votesOf(feedback: Partial<FeedbackItem>) {
+  if (typeof feedback.voteCount === "number") return feedback.voteCount;
+  if (!feedback.id) return null;
+  return (await getIdea(feedback.id).catch(() => null))?.voteCount ?? null;
+}
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -48,6 +66,13 @@ export async function POST(request: Request) {
   if (!discord || !feedback?.title || !announcement) return Response.json({ ok: true });
 
   const categories = (feedback.tags ?? []).map((tag) => tag.name).join(", ");
+  const [reporter, votes] = await Promise.all([reporterOf(feedback), votesOf(feedback)]);
+  const description = feedback.description?.replace(reportedLine, "");
+  const fields = [
+    categories && { name: "Category", value: clip(categories, 1024), inline: true },
+    votes !== null && { name: "Upvotes", value: String(votes), inline: true },
+    reporter && { name: "Reported by", value: clip(reporter, 1024), inline: true },
+  ].filter(Boolean);
   const response = await fetch(discord, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -59,9 +84,9 @@ export async function POST(request: Request) {
           author: { name: announcement.label },
           title: clip(feedback.title, 256),
           url: `${siteUrl}${announcement.path}`,
-          description: feedback.description ? clip(feedback.description, 400) : undefined,
+          description: description ? clip(description, 400) : undefined,
           color: announcement.color,
-          fields: categories ? [{ name: "Category", value: clip(categories, 1024), inline: true }] : undefined,
+          fields: fields.length ? fields : undefined,
           footer: { text: "superpeople.dev" },
           timestamp: new Date().toISOString(),
         },
