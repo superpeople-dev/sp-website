@@ -454,7 +454,7 @@ function ItemBody({
           {isAdmin && mode === "view" && (
             <ItemMenu item={item} admin={admin} onEdit={() => onMode("edit")} removeLabel={removeLabel} />
           )}
-          <button type="button" className="icon-btn" onClick={onClose} aria-label={b.close} title={b.close} data-autofocus>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={b.close} title={b.close}>
             <Icon name="close" />
           </button>
         </div>

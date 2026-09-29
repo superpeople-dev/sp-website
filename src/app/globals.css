@@ -983,8 +983,9 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
   border-radius: var(--r);
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
 }
-/* Voting (VoteControl): ▲ score ▼, the score being upvotes minus downvotes. Up is red, down is
-   blue, and the score takes the colour of your vote. */
+/* Voting (VoteControl): ▲ score ▼, the score being upvotes minus downvotes. Up is blue, down is
+   red, and the score takes the colour of your vote. On phones and touch screens the buttons are
+   finger-sized. */
 .votes {
   display: inline-flex;
   align-items: center;
@@ -1012,14 +1013,14 @@ button.votes__down:disabled { cursor: default; }
 .votes svg { width: 16px; height: 16px; }
 .votes__down svg { transform: rotate(180deg); }
 .votes__count { min-width: 2ch; color: var(--paper); font: 800 17px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
-button.votes__up:hover:not(:disabled) { background: rgba(239, 68, 56, 0.14); color: var(--signal-hi); }
-button.votes__down:hover:not(:disabled) { background: rgba(143, 176, 255, 0.14); color: #8fb0ff; }
-.votes.is-up { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); }
+button.votes__up:hover:not(:disabled) { background: rgba(143, 176, 255, 0.14); color: #8fb0ff; }
+button.votes__down:hover:not(:disabled) { background: rgba(239, 68, 56, 0.14); color: var(--signal-hi); }
+.votes.is-up { border-color: rgba(143, 176, 255, 0.6); background: rgba(143, 176, 255, 0.1); }
 .votes.is-up .votes__up,
-.votes.is-up .votes__count { color: var(--signal-hi); }
-.votes.is-down { border-color: rgba(143, 176, 255, 0.6); background: rgba(143, 176, 255, 0.1); }
+.votes.is-up .votes__count { color: #8fb0ff; }
+.votes.is-down { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); }
 .votes.is-down .votes__down,
-.votes.is-down .votes__count { color: #8fb0ff; }
+.votes.is-down .votes__count { color: var(--signal-hi); }
 .votes--column { flex-direction: column; align-self: start; gap: 2px; width: 100%; padding: 3px; }
 .votes--column .votes__up,
 .votes--column .votes__down { width: 100%; height: 22px; }
@@ -1032,6 +1033,21 @@ button.votes__down:hover:not(:disabled) { background: rgba(143, 176, 255, 0.14);
 .votes--small .votes__down { width: 22px; }
 .votes--small svg { width: 13px; height: 13px; }
 .votes--small .votes__count { font-size: 13px; }
+@media (pointer: coarse) {
+  .votes--column .votes__up,
+  .votes--column .votes__down { height: 32px; }
+}
+@media (max-width: 700px), (pointer: coarse) {
+  .votes--row { height: 40px; }
+  .votes--row .votes__up,
+  .votes--row .votes__down { width: 44px; }
+  .votes--row .votes__count { font-size: 17px; }
+  .votes--small { height: 36px; }
+  .votes--small .votes__up,
+  .votes--small .votes__down { width: 40px; }
+  .votes--small svg { width: 15px; height: 15px; }
+  .votes--small .votes__count { font-size: 15px; }
+}
 .idea__body h3 { margin: 2px 0 6px; font-size: 19px; line-height: 1.15; letter-spacing: 0.04em; overflow-wrap: anywhere; }
 .idea__body p {
   display: -webkit-box;
@@ -1848,7 +1864,11 @@ button.votes__down:hover:not(:disabled) { background: rgba(143, 176, 255, 0.14);
 .change__related { color: var(--muted); font-size: 15px; }
 
 @media (max-width: 700px) {
-  .idea { grid-template-columns: 52px minmax(0, 1fr); gap: 14px; padding: 14px; }
+  .idea { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px; }
+  .idea .votes--column { order: 1; flex-direction: row; justify-self: start; width: auto; height: 40px; padding: 2px; }
+  .idea .votes--column .votes__up,
+  .idea .votes--column .votes__down { width: 44px; height: 100%; }
+  .idea .votes--column .votes__count { padding: 0 4px; }
   .change { grid-template-columns: 1fr; gap: 8px; }
 }
 
