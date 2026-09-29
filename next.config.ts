@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const pages = ["servers", "ideas", "roadmap", "completed", "terms", "privacy"];
+// Boards whose items have their own pages: /ideas/<id>/<slug> and so on.
+const boards = ["ideas", "roadmap", "completed"];
 
 const nextConfig: NextConfig = {
   images: {
@@ -14,12 +16,14 @@ const nextConfig: NextConfig = {
     return [
       { source: "/", destination: "/en" },
       ...pages.map((page) => ({ source: `/${page}`, destination: `/en/${page}` })),
+      ...boards.map((board) => ({ source: `/${board}/:path+`, destination: `/en/${board}/:path+` })),
     ];
   },
   async redirects() {
     return [
       { source: "/en", destination: "/", permanent: true },
       ...pages.map((page) => ({ source: `/en/${page}`, destination: `/${page}`, permanent: true })),
+      ...boards.map((board) => ({ source: `/en/${board}/:path+`, destination: `/${board}/:path+`, permanent: true })),
     ];
   },
 };

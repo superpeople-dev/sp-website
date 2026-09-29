@@ -1,8 +1,14 @@
 import type { MetadataRoute } from "next";
 import hero from "@/assets/hero.jpg";
 import { locales } from "@/i18n/config";
+import { slugOf } from "@/lib/board";
+import { listByStatus, safely } from "@/lib/reflet";
 import { languageAlternates, localeUrl, ogImagePath, siteUrl } from "@/lib/seo";
+import { pageOf } from "@/lib/share";
 import { galleryImages } from "@/lib/site";
+
+// The sitemap is rebuilt at most every hour, so new ideas and roadmap items show up in it.
+export const revalidate = 3600;
 
 const subpages = [
   { path: "/servers", changeFrequency: "always", priority: 0.8 },
@@ -13,7 +19,7 @@ const subpages = [
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
 ] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const languages = languageAlternates(true);
   const shared = [`${siteUrl}${hero.src}`, ...galleryImages.map((img) => `${siteUrl}${img.src}`)];
   const home = locales.map((locale) => ({
@@ -34,5 +40,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [`${siteUrl}${ogImagePath(locale, path)}`],
     })),
   );
-  return [...home, ...pages];
+  // Every public idea and roadmap item has its own page (/ideas/<id>/<slug> and so on).
+  const lists = await safely(() =>
+    Promise.all((["open", "planned", "in_progress", "completed"] as const).map((status) => listByStatus(status))),
+  );
+  const items = (lists ?? []).flat().map((item) => {
+    const slug = slugOf(item.title);
+    const suffix = `/${item.id}${slug ? `/${slug}` : ""}`;
+    const page = pageOf(item.status);
+    return {
+      url: `${localeUrl("en", page)}${suffix}`,
+      lastModified: new Date(item.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+      alternates: { languages: languageAlternates(true, page, suffix) },
+      images: [`${siteUrl}/og/en/item/${item.id}.png`],
+    };
+  });
+  return [...home, ...pages, ...items];
 }

@@ -11,21 +11,23 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { getTags, getChangelog, listByStatus, safely } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
-import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
+import { itemSegments, settleItem, sharedItem, sharedPreview } from "@/lib/share";
 import { withDownvotes } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
-export async function generateMetadata({ params, searchParams }: PageProps<"/[lang]/completed">): Promise<Metadata> {
-  const { lang } = await params;
+export async function generateMetadata({ params }: PageProps<"/[lang]/completed/[[...item]]">): Promise<Metadata> {
+  const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
-  const shared = await sharedItem(itemParam((await searchParams).item));
-  return pageMetadata(lang, "/completed", sharedPreview(shared));
+  return pageMetadata(lang, "/completed", await sharedPreview(await sharedItem(itemSegments(item)?.id)));
 }
 
-export default async function CompletedPage({ params, searchParams }: PageProps<"/[lang]/completed">) {
-  const { lang } = await params;
+export default async function CompletedPage({ params, searchParams }: PageProps<"/[lang]/completed/[[...item]]">) {
+  const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
+  // An item page (/completed/<id>/<slug>), or an old ?item=<id> link that is sent to one.
+  const legacy = (await searchParams).item;
+  const wanted = itemSegments(item) ?? (typeof legacy === "string" ? { id: legacy, slug: "?" } : null);
   const t = getDictionary(lang);
   const session = await currentSession();
   const [release, items, tags, banned, changelog] = await Promise.all([
@@ -37,7 +39,7 @@ export default async function CompletedPage({ params, searchParams }: PageProps<
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
   const board = items && (await withDownvotes(items, session?.id));
-  if (items) await followItem(lang, "/completed", itemParam((await searchParams).item), (id) => items.some((item) => item.id === id));
+  if (board) await settleItem(lang, "/completed", wanted, (id) => board.find((entry) => entry.id === id));
   const categories = tags?.categories;
   const types = tags?.types;
 
@@ -51,6 +53,7 @@ export default async function CompletedPage({ params, searchParams }: PageProps<
         {board && (
           <CompletedList
             initial={board}
+            openId={wanted?.id}
             categories={categories ?? []}
             types={types ?? []}
             viewer={viewer}

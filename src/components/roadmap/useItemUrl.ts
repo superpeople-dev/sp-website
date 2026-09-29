@@ -1,59 +1,52 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { itemPath } from "@/lib/board";
 
-const param = "item";
+// The address of the page being looked at, to share: with an item's dialog open, that item's page.
+export const pageUrl = () => window.location.origin + window.location.pathname;
 
-// The page link for one item, to share: opening it opens that item's dialog.
-export const itemUrl = (id: string) => {
-  const url = new URL(window.location.href);
-  url.search = "";
-  url.hash = "";
-  url.searchParams.set(param, id);
-  return url.toString();
-};
-
-// Keeps ?item=<id> in the address bar while an item's dialog is open, so the address can be shared
-// and opens the same item for whoever follows it. Opening pushes a history entry, so the back button
-// (or back gesture on phones) closes the dialog. onUrl gets the id from the link, or null.
-export function useItemUrl(openedId: string | null, onUrl: (id: string | null) => void) {
+// The item whose dialog is open has its own address, <base>/<id>/<slug> (base is the board's path,
+// like /fr/ideas), so it can be shared and opens the same way for whoever follows it. Opening pushes
+// that address, so the back button (or back gesture on phones) closes the dialog; closing goes back
+// to the board's address. onUrl gets the item id after back/forward, or null.
+export function useItemUrl(base: string, opened: { id: string; title: string } | null, onUrl: (id: string | null) => void) {
   const latest = useRef(onUrl);
   const pushed = useRef(false);
-  const synced = useRef<string | null>(null);
+  // The page arrives with the address already right (an item page is rendered with its dialog open).
+  const synced = useRef<string | null>(opened?.id ?? null);
 
   useEffect(() => {
     latest.current = onUrl;
   });
 
   useEffect(() => {
-    const read = () => latest.current(new URLSearchParams(window.location.search).get(param));
-    read();
     const onPop = () => {
       pushed.current = false;
-      read();
+      const path = window.location.pathname;
+      const id = path.startsWith(`${base}/`) ? path.slice(base.length + 1).split("/")[0] || null : null;
+      synced.current = id;
+      latest.current(id);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, []);
+  }, [base]);
 
+  const id = opened?.id ?? null;
+  const path = opened ? itemPath(base, opened) : base;
   useEffect(() => {
     // Only when the open item changes (not on arrival, and not when React runs effects twice).
-    if (synced.current === openedId) return;
-    synced.current = openedId;
-    const url = new URL(window.location.href);
-    const current = url.searchParams.get(param);
-    if (openedId && current !== openedId) {
-      url.searchParams.set(param, openedId);
-      window.history.pushState(null, "", url);
+    if (synced.current === id) return;
+    synced.current = id;
+    if (window.location.pathname === path) return;
+    if (id) {
+      window.history.pushState(null, "", path);
       pushed.current = true;
-    } else if (!openedId && current) {
-      if (pushed.current) {
-        pushed.current = false;
-        window.history.back();
-      } else {
-        url.searchParams.delete(param);
-        window.history.replaceState(null, "", url);
-      }
+    } else if (pushed.current) {
+      pushed.current = false;
+      window.history.back();
+    } else {
+      window.history.replaceState(null, "", path);
     }
-  }, [openedId]);
+  }, [id, path]);
 }

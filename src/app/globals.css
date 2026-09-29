@@ -1013,8 +1013,15 @@ button.votes__down:disabled { cursor: default; }
 .votes svg { width: 16px; height: 16px; }
 .votes__down svg { transform: rotate(180deg); }
 .votes__count { min-width: 2ch; color: var(--paper); font: 800 17px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
-button.votes__up:hover:not(:disabled) { background: rgba(143, 176, 255, 0.14); color: #8fb0ff; }
-button.votes__down:hover:not(:disabled) { background: rgba(239, 68, 56, 0.14); color: var(--signal-hi); }
+/* Hover only where a pointer really hovers (a phone keeps :hover on the last tapped button), and
+   only the arrow takes the colour: a red or blue background under the mouse right after taking a
+   vote back looked as if the vote were still there. */
+@media (hover: hover) {
+  button.votes__up:hover:not(:disabled),
+  button.votes__down:hover:not(:disabled) { background: rgba(255, 255, 255, 0.06); }
+  button.votes__up:hover:not(:disabled) { color: #8fb0ff; }
+  button.votes__down:hover:not(:disabled) { color: var(--signal-hi); }
+}
 .votes.is-up { border-color: rgba(143, 176, 255, 0.6); background: rgba(143, 176, 255, 0.1); }
 .votes.is-up .votes__up,
 .votes.is-up .votes__count { color: #8fb0ff; }
@@ -1543,7 +1550,10 @@ button.votes__down:hover:not(:disabled) { background: rgba(239, 68, 56, 0.14); c
 }
 
 .sheet-root { position: fixed; inset: 0; z-index: 130; display: grid; place-items: center; padding: 20px; }
+.sheet__veil { position: absolute; inset: 0; }
 .sheet__backdrop { position: absolute; inset: 0; background: rgba(5, 5, 7, 0.76); backdrop-filter: blur(4px); }
+/* The grabber line of the phone sheet (max-width: 600px below); the dialog is not one elsewhere. */
+.sheet__grab { display: none; }
 .sheet {
   position: relative;
   display: flex;
@@ -1796,9 +1806,20 @@ button.votes__down:hover:not(:disabled) { background: rgba(239, 68, 56, 0.14); c
 
 @media (max-width: 600px) {
   .sheet-root { padding: 0; place-items: end stretch; }
-  .sheet { width: 100%; max-height: calc(100svh - 24px); border-radius: 12px 12px 0 0; border-bottom: 0; }
-  .sheet__bar { padding: 12px 12px 12px 18px; }
-  .sheet__body { padding: 20px 18px 28px; }
+  .sheet { width: 100%; max-height: calc(100svh - 24px); border-radius: 16px 16px 0 0; border-bottom: 0; }
+  /* Pull the sheet down by its grabber line or its bar (Modal.tsx). touch-action keeps the browser
+     from scrolling the page instead; the body below scrolls as before. */
+  .sheet__grab {
+    display: flex;
+    flex: none;
+    justify-content: center;
+    padding: 8px 0 2px;
+    touch-action: none;
+    cursor: grab;
+  }
+  .sheet__grab::before { content: ""; width: 36px; height: 4px; border-radius: 999px; background: rgba(244, 241, 234, 0.2); }
+  .sheet__bar { padding: 6px 12px 12px 18px; touch-action: none; }
+  .sheet__body { padding: 20px 18px calc(28px + env(safe-area-inset-bottom)); }
 }
 
 .done-groups { display: grid; gap: 44px; }

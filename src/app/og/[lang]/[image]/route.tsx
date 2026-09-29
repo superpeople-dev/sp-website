@@ -1,9 +1,8 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { isLocale, locales, type Locale } from "@/i18n/config";
 import { dictionaries } from "@/i18n/dictionaries";
 import type { Dictionary } from "@/i18n/types";
+import { assetDataUrl, googleFont, imageLocale } from "@/lib/og";
 
 // The link preview (og:image) of every page except home, which keeps its hand-made /og/<lang>.jpg.
 // All of them are built at deploy time: /og/<lang>/<page>.png.
@@ -34,23 +33,6 @@ const scriptFont: Partial<Record<Locale, { family: string; weight: number }>> = 
   zh: { family: "Noto Sans SC", weight: 900 },
 };
 
-// The image renderer does not shape Devanagari (vowel signs land on the wrong letter), so the
-// Hindi pages get the English image rather than misspelled Hindi.
-const imageLocale = (locale: Locale): Locale => (locale === "hi" ? "en" : locale);
-
-// Only the glyphs in `text`, as TrueType (what Google Fonts serves to a client without a browser user agent).
-async function googleFont(family: string, weight: number, text: string) {
-  const css = await fetch(
-    `https://fonts.googleapis.com/css2?family=${family.replaceAll(" ", "+")}:wght@${weight}&text=${encodeURIComponent(text)}`,
-  ).then((res) => res.text());
-  const src = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
-  if (!src) throw new Error(`No ${family} ${weight} from Google Fonts`);
-  return fetch(src).then((res) => res.arrayBuffer());
-}
-
-const dataUrl = async (file: string, type: string) =>
-  `data:${type};base64,${(await readFile(join(process.cwd(), "src/assets", file))).toString("base64")}`;
-
 // Condensed Latin capitals are about half an em wide, CJK about a full em.
 const widthPerChar = (locale: Locale) => ({ ja: 1, ko: 1, zh: 1, hi: 0.7 })[locale as string] ?? 0.52;
 const fit = (text: string, locale: Locale, max: number, width: number) =>
@@ -75,8 +57,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
     googleFont("Barlow Condensed", 800, text),
     googleFont("Barlow Condensed", 700, text),
     script ? googleFont(script.family, script.weight, text) : null,
-    dataUrl(`og/${page.art}.jpg`, "image/jpeg"),
-    dataUrl("sp-logo.png", "image/png"),
+    assetDataUrl(`og/${page.art}.jpg`, "image/jpeg"),
+    assetDataUrl("sp-logo.png", "image/png"),
   ]);
   const family = script ? `Barlow Condensed, ${script.family}` : "Barlow Condensed";
   const textWidth = 1072;

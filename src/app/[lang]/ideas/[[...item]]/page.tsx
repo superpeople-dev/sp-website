@@ -11,21 +11,23 @@ import { getLatestRelease } from "@/lib/github";
 import { pendingCount } from "@/lib/authorship";
 import { getTags, listIdeas, listPending, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
-import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
+import { itemSegments, settleItem, sharedItem, sharedPreview } from "@/lib/share";
 import { withDownvotes } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
-export async function generateMetadata({ params, searchParams }: PageProps<"/[lang]/ideas">): Promise<Metadata> {
-  const { lang } = await params;
+export async function generateMetadata({ params }: PageProps<"/[lang]/ideas/[[...item]]">): Promise<Metadata> {
+  const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
-  const shared = await sharedItem(itemParam((await searchParams).item));
-  return pageMetadata(lang, "/ideas", sharedPreview(shared));
+  return pageMetadata(lang, "/ideas", await sharedPreview(await sharedItem(itemSegments(item)?.id)));
 }
 
-export default async function IdeasPage({ params, searchParams }: PageProps<"/[lang]/ideas">) {
-  const { lang } = await params;
+export default async function IdeasPage({ params, searchParams }: PageProps<"/[lang]/ideas/[[...item]]">) {
+  const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
+  // An item page (/ideas/<id>/<slug>), or an old ?item=<id> link that is sent to one.
+  const legacy = (await searchParams).item;
+  const wanted = itemSegments(item) ?? (typeof legacy === "string" ? { id: legacy, slug: "?" } : null);
   const t = getDictionary(lang);
   const session = await currentSession();
   const [release, ideas, tags, pending, banned, mine] = await Promise.all([
@@ -37,8 +39,8 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
     session && !session.admin ? pendingCount(session).catch(() => 0) : 0,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
-  if (ideas) await followItem(lang, "/ideas", itemParam((await searchParams).item), (id) => [...ideas.items, ...(pending ?? [])].some((item) => item.id === id));
-  const board = ideas && (await withDownvotes([...ideas.items.filter((item) => item.status === "open"), ...(pending ?? [])], session?.id));
+  const board = ideas && (await withDownvotes([...ideas.items.filter((entry) => entry.status === "open"), ...(pending ?? [])], session?.id));
+  if (board) await settleItem(lang, "/ideas", wanted, (id) => board.find((entry) => entry.id === id));
 
   return (
     <>
@@ -50,6 +52,7 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
         {board && (
           <IdeasBoard
             initial={board}
+            openId={wanted?.id}
             categories={tags?.categories ?? []}
             types={tags?.types ?? []}
             viewer={viewer}

@@ -48,3 +48,20 @@ export const shownName = (name: string, username?: string) => (name.replace(invi
 export type BoardItem = FeedbackItem & { hasDownvoted?: boolean };
 export type VoteDirection = "up" | "down";
 export const downvoted = (item: FeedbackItem) => (item as BoardItem).hasDownvoted === true;
+
+// Item pages are /ideas/<id>/<slug> (or /roadmap/…, /completed/…), like Reddit: the id finds the
+// item, the slug is the title for people and search engines (plain a-z and digits, may be empty).
+export const slugOf = (title: string) =>
+  title
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60)
+    .replace(/-+$/, "");
+
+export const itemPath = (base: string, item: { id: string; title: string }) => {
+  const slug = slugOf(item.title);
+  return `${base}/${item.id}${slug ? `/${slug}` : ""}`;
+};

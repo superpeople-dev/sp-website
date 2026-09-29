@@ -57,6 +57,7 @@ export function IdeasBoard({
   viewer,
   authReady,
   pendingMine,
+  openId,
 }: {
   initial: FeedbackItem[];
   categories: Category[];
@@ -64,6 +65,7 @@ export function IdeasBoard({
   viewer: Viewer | null;
   authReady: boolean;
   pendingMine: number;
+  openId?: string;
 }) {
   const { locale, t } = useI18n();
   const r = t.ideas;
@@ -83,9 +85,12 @@ export function IdeasBoard({
   const previews = useMemo(() => files.map((file) => ({ file, url: URL.createObjectURL(file) })), [files]);
   const [ask, dialog] = useConfirm();
   const admin = useAdmin(setItems);
-  const [opened, setOpened] = useState<Opened | null>(null);
-  useItemUrl(opened?.id ?? null, (id) => setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null));
+  // Opened on arrival when this is an item's page (/ideas/<id>/<slug>).
+  const [opened, setOpened] = useState<Opened | null>(openId ? { id: openId, mode: "view" } : null);
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
+  useItemUrl(localeHref(locale, "/ideas"), current, (id) =>
+    setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null),
+  );
   const close = useCallback(() => setOpened(null), []);
   const closeForm = useCallback(() => setComposing(false), []);
   const unsaved = form !== "sending" && (title.trim() !== "" || details.trim() !== "" || files.length > 0);

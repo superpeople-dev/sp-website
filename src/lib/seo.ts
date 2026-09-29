@@ -16,8 +16,8 @@ export const localeUrl = (locale: Locale, page: PagePath = "") =>
 // Home keeps its hand-made image; every other page has one built by app/og/[lang]/[image]/route.tsx.
 export const ogImagePath = (locale: Locale, page: PagePath = "") => (page ? `/og/${locale}${page}.png` : `/og/${locale}.jpg`);
 
-export function languageAlternates(absolute = false, page: PagePath = ""): Record<string, string> {
-  const link = (l: Locale) => (absolute ? localeUrl(l, page) : localeHref(l, page));
+export function languageAlternates(absolute = false, page: PagePath = "", suffix = ""): Record<string, string> {
+  const link = (l: Locale) => (absolute ? localeUrl(l, page) : localeHref(l, page)) + suffix;
   return {
     ...Object.fromEntries(locales.map((l) => [localeInfo[l].hreflang, link(l)])),
     "x-default": link("en"),
@@ -42,8 +42,9 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   }
 }
 
-// A shared item link (?item=<id>) previews the item itself: its title and description.
-export type SharedItem = { id: string; title: string; preview: string };
+// An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description led
+// by its votes, and a preview image drawn from them (app/og/[lang]/item/[id]/route.tsx).
+export type SharedItem = { id: string; title: string; slug: string; preview: string; up: number; down: number };
 
 export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null): Metadata {
   const d = dictionaries[locale];
@@ -52,12 +53,16 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const sub = page ? subpageSeo(locale, page) : null;
   const pageTitle = sub ? `${sub.title} · ${siteName}` : t.title;
   const title = item ? `${item.title} · ${siteName}` : pageTitle;
-  const description = item?.preview || (sub ? sub.description : t.description);
-  const share = item?.preview || (sub ? sub.description : t.shareDescription);
-  const url = item ? `${localeHref(locale, page)}?item=${encodeURIComponent(item.id)}` : localeHref(locale, page);
-  const image = sub
-    ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
-    : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
+  const suffix = item ? `/${item.id}${item.slug ? `/${item.slug}` : ""}` : "";
+  const url = `${localeHref(locale, page)}${suffix}`;
+  const votes = item ? `▲ ${item.up} · ▼ ${item.down}` : "";
+  const description = item ? [votes, item.preview].filter(Boolean).join(" · ") : sub ? sub.description : t.description;
+  const share = item ? description : sub ? sub.description : t.shareDescription;
+  const image = item
+    ? { url: `/og/${locale}/item/${item.id}.png`, width: 1200, height: 630, alt: item.title, type: "image/png" }
+    : sub
+      ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
+      : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
   return {
     metadataBase: new URL(siteUrl),
     title: item ? item.title : sub ? sub.title : { default: t.title, template: `%s · ${siteName}` },
@@ -68,7 +73,7 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
     creator: `${siteName} team`,
     publisher: siteName,
     category: "games",
-    alternates: { canonical: localeHref(locale, page), languages: languageAlternates(false, page) },
+    alternates: { canonical: url, languages: languageAlternates(false, page, suffix) },
     openGraph: {
       type: "website",
       url,

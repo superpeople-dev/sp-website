@@ -51,22 +51,27 @@ export function PlanBoard({
   types,
   viewer,
   authReady,
+  openId,
 }: {
   initial: FeedbackItem[];
   categories: Category[];
   types: TypeTag[];
   viewer: Viewer | null;
   authReady: boolean;
+  openId?: string;
 }) {
   const { locale, t } = useI18n();
   const p = t.plan;
   const [items, setItems] = useState<BoardItem[]>(initial);
   const admin = useAdmin(setItems);
-  const [opened, setOpened] = useState<Opened | null>(null);
-  useItemUrl(opened?.id ?? null, (id) => setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null));
+  // Opened on arrival when this is an item's page (/roadmap/<id>/<slug>).
+  const [opened, setOpened] = useState<Opened | null>(openId ? { id: openId, mode: "view" } : null);
   const [dragging, setDragging] = useState<string | null>(null);
   const justDropped = useRef(false);
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
+  useItemUrl(localeHref(locale, "/roadmap"), current, (id) =>
+    setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null),
+  );
   const moving = dragging ? (items.find((item) => item.id === dragging) ?? null) : null;
   const close = useCallback(() => setOpened(null), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);

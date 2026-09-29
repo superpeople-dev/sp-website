@@ -28,7 +28,7 @@ import type { EditValues, useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
-import { itemUrl } from "./useItemUrl";
+import { pageUrl } from "./useItemUrl";
 import { VoteControl } from "./VoteControl";
 import { loginHref, signIn } from "./viewer";
 
@@ -83,7 +83,7 @@ function ShareButton({ item }: { item: FeedbackItem }) {
   const b = t.board;
   const [copied, setCopied] = useState(false);
   const share = async () => {
-    const url = itemUrl(item.id);
+    const url = pageUrl();
     if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
       await navigator.share({ title: item.title, url }).catch(() => null);
       return;
