@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { fill } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { Category, TypeTag } from "@/lib/board";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon, type IconName } from "../Icon";
+import { Toast } from "../Toast";
 
 export type Step = { status: FeedbackStatus; label: string; icon: IconName };
 export type EditValues = { title: string; description: string; typeId: string; categoryId: string };
@@ -15,8 +16,23 @@ export function useAdmin(setItems: Dispatch<SetStateAction<FeedbackItem[]>>) {
   const { t } = useI18n();
   const [busy, setBusy] = useState<string | null>(null);
   const [ask, dialog] = useConfirm();
+  const [notice, setNotice] = useState({ show: false, text: "", icon: "check" as IconName });
+  const timer = useRef(0);
+  const flash = (text: string, icon: IconName = "check") => {
+    window.clearTimeout(timer.current);
+    setNotice({ show: true, text, icon });
+    timer.current = window.setTimeout(() => setNotice((current) => ({ ...current, show: false })), 2400);
+  };
+  const b = t.board;
+  const places: Partial<Record<FeedbackStatus, string>> = {
+    open: t.nav.ideas,
+    planned: t.plan.todo,
+    in_progress: t.plan.doing,
+    completed: t.plan.done,
+  };
 
-  const send = async (item: FeedbackItem, body: object, apply: (list: FeedbackItem[]) => FeedbackItem[]) => {
+  // done: the toast once it worked.
+  const send = async (item: FeedbackItem, body: object, apply: (list: FeedbackItem[]) => FeedbackItem[], done: string) => {
     setBusy(item.id);
     try {
       const response = await fetch("/api/admin/feedback", {
@@ -26,9 +42,10 @@ export function useAdmin(setItems: Dispatch<SetStateAction<FeedbackItem[]>>) {
       });
       if (!response.ok) throw new Error(String(response.status));
       setItems(apply);
+      flash(done);
       return true;
     } catch {
-      window.alert(t.board.actionFailed);
+      flash(b.actionFailed, "close");
       return false;
     } finally {
       setBusy(null);
@@ -40,11 +57,20 @@ export function useAdmin(setItems: Dispatch<SetStateAction<FeedbackItem[]>>) {
 
   return {
     busy,
-    dialog,
+    dialog: (
+      <>
+        {dialog}
+        <Toast show={notice.show} icon={notice.icon}>
+          {notice.text}
+        </Toast>
+      </>
+    ),
     move: async (item: FeedbackItem, status: FeedbackStatus) => {
       if (item.status === status) return true;
       setItems(update(item.id, { status, completedAt: status === "completed" ? Date.now() : item.completedAt }));
-      const ok = await send(item, { action: "status", status }, (list) => list);
+      const approved = item.status === "under_review" && status === "open";
+      const done = approved ? b.toastApproved : fill(b.toastMoved, { place: places[status] ?? status });
+      const ok = await send(item, { action: "status", status }, (list) => list, done);
       if (!ok) setItems(update(item.id, { status: item.status, completedAt: item.completedAt }));
       return ok;
     },
@@ -57,7 +83,8 @@ export function useAdmin(setItems: Dispatch<SetStateAction<FeedbackItem[]>>) {
         icon: "trash",
         danger: true,
       });
-      return ok && send(item, { action: "delete" }, (list) => list.filter((i) => i.id !== item.id));
+      const done = item.status === "under_review" ? b.toastRejected : b.toastDeleted;
+      return ok && send(item, { action: "delete" }, (list) => list.filter((i) => i.id !== item.id), done);
     },
     edit: (item: FeedbackItem, values: EditValues, categories: Category[], types: TypeTag[]) => {
       const managed = new Set([...categories, ...types].map((tag) => tag.id));
@@ -72,6 +99,7 @@ export function useAdmin(setItems: Dispatch<SetStateAction<FeedbackItem[]>>) {
         item,
         { action: "edit", ...values },
         update(item.id, { title: values.title.trim(), description: values.description.trim(), tags, updatedAt: Date.now() }),
+        b.toastSaved,
       );
     },
   };

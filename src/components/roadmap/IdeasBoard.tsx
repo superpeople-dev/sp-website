@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
@@ -19,6 +18,7 @@ import { FieldCount } from "./FieldCount";
 import { CategoryTag, categoryIcon } from "./CategoryTag";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
+import { MediaThumb, pickFiles, uploadMedia } from "./media";
 import { useVote } from "./useVote";
 import { VoteControl } from "./VoteControl";
 import { signIn } from "./viewer";
@@ -32,7 +32,6 @@ const byVotes = (a: FeedbackItem, b: FeedbackItem) =>
   Number(b.isPinned) - Number(a.isPinned) || b.voteCount - a.voteCount || b.createdAt - a.createdAt;
 const byDate = (a: FeedbackItem, b: FeedbackItem) => b.createdAt - a.createdAt;
 const iconOf = (slug: IdeaType) => ideaTypes.find((type) => type.slug === slug)?.icon ?? "sparkle";
-const isVideo = (type: string) => type.startsWith("video/");
 // The platforms (Reflet's categories) in the idea form, in this order; any other category after them.
 const platformOrder = ["launcher", "game", "website", "servers"];
 const platformRank = (category: Category) => {
@@ -40,22 +39,6 @@ const platformRank = (category: Category) => {
   return rank < 0 ? platformOrder.length : rank;
 };
 
-async function upload(feedbackId: string, file: File) {
-  const post = (body: object) =>
-    fetch("/api/roadmap/media", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ feedbackId, ...body }),
-    });
-  const target = await post({ action: "url" });
-  if (!target.ok) throw new Error(String(target.status));
-  const { uploadUrl } = (await target.json()) as { uploadUrl: string };
-  const stored = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": file.type }, body: file });
-  if (!stored.ok) throw new Error(String(stored.status));
-  const { storageId } = (await stored.json()) as { storageId: string };
-  const saved = await post({ action: "save", storageId, mimeType: file.type, size: file.size, filename: file.name });
-  if (!saved.ok) throw new Error(String(saved.status));
-}
 
 export function IdeasBoard({
   initial,
@@ -145,21 +128,9 @@ export function IdeasBoard({
 
   const addFiles = (list: FileList | null) => {
     if (!list) return;
-    setFileError(null);
-    const picked = [...files];
-    for (const file of Array.from(list)) {
-      if (picked.length >= mediaLimits.files) break;
-      if (!mediaLimits.types.includes(file.type)) {
-        setFileError(fill(r.mediaType, { name: file.name }));
-        continue;
-      }
-      if (file.size > (isVideo(file.type) ? mediaLimits.video : mediaLimits.image)) {
-        setFileError(fill(r.mediaTooBig, { name: file.name }));
-        continue;
-      }
-      picked.push(file);
-    }
-    setFiles(picked);
+    const { picked, error } = pickFiles(list, mediaLimits.files - files.length, r);
+    setFileError(error);
+    setFiles([...files, ...picked]);
   };
 
   const patch = useCallback(
@@ -204,7 +175,7 @@ export function IdeasBoard({
       let failed = 0;
       for (const [index, file] of files.entries()) {
         setProgress({ current: index + 1, total: files.length });
-        await upload(feedbackId, file).catch(() => failed++);
+        await uploadMedia(feedbackId, file).catch(() => failed++);
       }
       setProgress(null);
       setForm(failed ? "partial" : "pending");
@@ -458,16 +429,7 @@ export function IdeasBoard({
                   <ul className="media-picks">
                     {previews.map(({ file, url }, index) => (
                       <li key={url}>
-                        {isVideo(file.type) ? (
-                          <>
-                            <video src={url} muted playsInline preload="metadata" />
-                            <span className="media-picks__play" aria-hidden="true">
-                              <Icon name="play" />
-                            </span>
-                          </>
-                        ) : (
-                          <Image src={url} alt="" width={160} height={120} unoptimized />
-                        )}
+                        <MediaThumb url={url} type={file.type} />
                         <button
                           type="button"
                           aria-label={fill(r.mediaRemove, { name: file.name })}

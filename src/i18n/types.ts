@@ -237,6 +237,13 @@ export type Dictionary = {
     signOutYes: string;
     removeTitle: string;
     actionFailed: string;
+    toastDeleted: string;
+    toastRejected: string;
+    toastApproved: string;
+    toastMoved: string;
+    toastSaved: string;
+    toastAdded: string;
+    mediaUploadFailed: string;
     close: string;
     edit: string;
     editTitle: string;

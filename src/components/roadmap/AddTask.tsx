@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { useI18n } from "@/i18n/context";
 import { ideaLimits } from "@/lib/site";
 import { Icon } from "../Icon";
+import { Toast } from "../Toast";
 import { FieldCount } from "./FieldCount";
 
 export function AddTask({ status, onAdded }: { status: FeedbackStatus; onAdded: (item: FeedbackItem) => void }) {
@@ -13,6 +14,8 @@ export function AddTask({ status, onAdded }: { status: FeedbackStatus; onAdded: 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "error">("idle");
+  const [added, setAdded] = useState(false);
+  const timer = useRef(0);
 
   const close = () => {
     setOpen(false);
@@ -35,14 +38,22 @@ export function AddTask({ status, onAdded }: { status: FeedbackStatus; onAdded: 
     onAdded(item);
     setTitle("");
     setState("idle");
+    window.clearTimeout(timer.current);
+    setAdded(true);
+    timer.current = window.setTimeout(() => setAdded(false), 2400);
   };
+
+  const toast = <Toast show={added}>{b.toastAdded}</Toast>;
 
   if (!open) {
     return (
-      <button type="button" className="add-task" onClick={() => setOpen(true)}>
-        <Icon name="plus" />
-        {b.addTask}
-      </button>
+      <>
+        <button type="button" className="add-task" onClick={() => setOpen(true)}>
+          <Icon name="plus" />
+          {b.addTask}
+        </button>
+        {toast}
+      </>
     );
   }
 
@@ -79,6 +90,7 @@ export function AddTask({ status, onAdded }: { status: FeedbackStatus; onAdded: 
           {b.actionFailed}
         </p>
       )}
+      {toast}
     </form>
   );
 }

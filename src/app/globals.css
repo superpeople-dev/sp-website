@@ -1196,7 +1196,7 @@ button.votes__down:disabled { cursor: default; }
 }
 .media-picks button svg { width: 12px; height: 12px; }
 .media-picks button:hover { background: var(--signal); }
-.idea-form label.media-add {
+:is(.idea-form, .sheet-form) label.media-add {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1210,8 +1210,8 @@ button.votes__down:disabled { cursor: default; }
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
-.idea-form label.media-add:hover,
-.idea-form label.media-add:has(input:focus-visible) { border-color: var(--signal); background: linear-gradient(rgba(239, 68, 56, 0.06), rgba(239, 68, 56, 0.06)), var(--ink); color: var(--paper); }
+:is(.idea-form, .sheet-form) label.media-add:hover,
+:is(.idea-form, .sheet-form) label.media-add:has(input:focus-visible) { border-color: var(--signal); background: linear-gradient(rgba(239, 68, 56, 0.06), rgba(239, 68, 56, 0.06)), var(--ink); color: var(--paper); }
 .media-add input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .media-add svg { width: 16px; height: 16px; flex: none; }
 .media-add__count { margin-left: auto; color: var(--muted); letter-spacing: 0.04em; }

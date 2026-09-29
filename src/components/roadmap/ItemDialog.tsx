@@ -20,7 +20,7 @@ import {
   type Viewer,
   type VoteDirection,
 } from "@/lib/board";
-import { ideaLimits, ideaTypes } from "@/lib/site";
+import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon, type IconName } from "../Icon";
@@ -30,6 +30,7 @@ import type { EditValues, useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
+import { MediaThumb, pickFiles, uploadMedia } from "./media";
 import { pageUrl } from "./useItemUrl";
 import { VoteControl } from "./VoteControl";
 import { loginHref, signIn } from "./viewer";
@@ -196,6 +197,8 @@ function ItemBody({
     setThread((current) => ({ ...current, status: "loading" }));
     setAttempt((n) => n + 1);
   };
+  // Reads the comments and files again without the loading state (after new files were uploaded).
+  const reload = () => setAttempt((n) => n + 1);
 
   const type = typeOf(item, types);
   const category = categoryOf(item, categories);
@@ -302,8 +305,9 @@ function ItemBody({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mediaId: file.id, feedbackId: item.id }),
     }).catch(() => null);
-    if (!response?.ok) return window.alert(b.actionFailed);
+    if (!response?.ok) return flash(b.actionFailed, "close");
     setThread((current) => ({ ...current, media: current.media.filter((entry) => entry.id !== file.id) }));
+    flash(b.toastDeleted, "trash");
   };
 
   // A banned person keeps their name, struck through and followed by "(banned)", with Discord's
@@ -553,7 +557,16 @@ function ItemBody({
 
       <div className="sheet__body">
         {canManage && mode === "edit" ? (
-          <EditForm item={item} categories={categories} types={types} admin={admin} onDone={() => onMode("view")} />
+          <EditForm
+            item={item}
+            categories={categories}
+            types={types}
+            admin={admin}
+            media={thread.media}
+            onRemoveMedia={removeMedia}
+            onMediaAdded={reload}
+            onDone={() => onMode("view")}
+          />
         ) : (
           <>
             <h2 id="sheet-title" className="sheet__title">
@@ -647,17 +660,25 @@ function ItemBody({
   );
 }
 
+// Editing an item (admins): title, details, its images and videos, type and category. Files are
+// removed at once (after a confirmation); new ones are uploaded when the form is saved.
 function EditForm({
   item,
   categories,
   types,
   admin,
+  media,
+  onRemoveMedia,
+  onMediaAdded,
   onDone,
 }: {
   item: FeedbackItem;
   categories: Category[];
   types: TypeTag[];
   admin: ReturnType<typeof useAdmin>;
+  media: MediaView[];
+  onRemoveMedia: (file: MediaView) => Promise<void>;
+  onMediaAdded: () => void;
   onDone: () => void;
 }) {
   const { t } = useI18n();
@@ -669,12 +690,37 @@ function EditForm({
     typeId: types.find((type) => item.tags.some((tag) => tag.id === type.id))?.id ?? "",
     categoryId: categoryOf(item, categories)?.id ?? "",
   }));
-  const busy = admin.busy === item.id;
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
+  const previews = useMemo(() => files.map((file) => ({ file, url: URL.createObjectURL(file) })), [files]);
+  useEffect(() => () => previews.forEach((preview) => URL.revokeObjectURL(preview.url)), [previews]);
+  const busy = admin.busy === item.id || progress !== null;
+  const room = mediaLimits.files - media.length - files.length;
   const set = (key: keyof EditValues) => (value: string) => setValues((current) => ({ ...current, [key]: value }));
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const { picked, error } = pickFiles(list, room, r);
+    setFileError(error);
+    setFiles([...files, ...picked]);
+  };
 
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (await admin.edit(item, values, categories, types)) onDone();
+    if (!(await admin.edit(item, values, categories, types))) return;
+    if (files.length) {
+      let failed = 0;
+      for (const [index, file] of files.entries()) {
+        setProgress({ current: index + 1, total: files.length });
+        await uploadMedia(item.id, file).catch(() => failed++);
+      }
+      setProgress(null);
+      setFiles([]);
+      onMediaAdded();
+      if (failed) return setFileError(b.mediaUploadFailed);
+    }
+    onDone();
   };
 
   return (
@@ -707,6 +753,63 @@ function EditForm({
           maxLength={ideaLimits.description}
         />
       </label>
+      <div className="idea-form__media">
+        <span className="idea-form__label">{r.mediaLabel}</span>
+        {media.length + files.length > 0 && (
+          <ul className="media-picks">
+            {media.map((file) => (
+              <li key={file.id}>
+                <MediaThumb url={file.url} type={file.type} />
+                <button
+                  type="button"
+                  aria-label={fill(r.mediaRemove, { name: file.name })}
+                  title={fill(r.mediaRemove, { name: file.name })}
+                  disabled={busy}
+                  onClick={() => void onRemoveMedia(file)}
+                >
+                  <Icon name="close" />
+                </button>
+              </li>
+            ))}
+            {previews.map(({ file, url }, index) => (
+              <li key={url}>
+                <MediaThumb url={url} type={file.type} />
+                <button
+                  type="button"
+                  aria-label={fill(r.mediaRemove, { name: file.name })}
+                  title={fill(r.mediaRemove, { name: file.name })}
+                  disabled={busy}
+                  onClick={() => setFiles((list) => list.filter((_, i) => i !== index))}
+                >
+                  <Icon name="close" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {room > 0 && (
+          <label className="media-add">
+            <input
+              type="file"
+              multiple
+              accept={mediaLimits.types.join(",")}
+              disabled={busy}
+              onChange={(e) => {
+                addFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <Icon name="attach" />
+            {r.mediaAdd}
+            <span className="media-add__count">
+              {media.length + files.length}/{mediaLimits.files}
+            </span>
+          </label>
+        )}
+        <p className={`idea-form__hint${fileError ? " is-error" : ""}`} role={fileError ? "status" : undefined}>
+          {fileError ?? fill(r.mediaHint, { count: String(mediaLimits.files) })}
+        </p>
+      </div>
       <div className="sheet-form__row">
         {types.length > 0 && (
           <label>
@@ -741,7 +844,7 @@ function EditForm({
         </button>
         <button type="submit" className="btn btn--primary" disabled={busy}>
           <Icon name="check" />
-          {busy ? b.saving : b.save}
+          {progress ? fill(r.uploading, { current: String(progress.current), total: String(progress.total) }) : busy ? b.saving : b.save}
         </button>
       </div>
     </form>
