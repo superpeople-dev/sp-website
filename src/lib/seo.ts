@@ -185,7 +185,7 @@ export function structuredData(release: Release, locale: Locale) {
         mainEntity: t.faq.items.filter((_, i) => !seoHiddenFaq.includes(i)).map(({ q, a }) => ({
           "@type": "Question",
           name: q,
-          acceptedAnswer: { "@type": "Answer", text: a },
+          acceptedAnswer: { "@type": "Answer", text: plain(a) },
         })),
       },
     ],

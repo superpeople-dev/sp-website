@@ -151,6 +151,14 @@ export const es: Dictionary = {
         a: "Sí. El launcher, los servidores y la descarga del juego son totalmente gratis. Es un proyecto de fans y no vendemos nada.",
       },
       {
+        q: "¿Cuál es el objetivo del proyecto Super People Revival?",
+        a: "Nuestro primer objetivo es la preservación: que la experiencia original de Super People se pueda jugar, sea estable y resulte tan fiel como sea razonablemente posible. Es un proyecto dirigido por la comunidad, no un estudio comercial, así que primero nos centramos en lo fundamental. Las nuevas funciones, los cambios de jugabilidad y otras mejoras podrían plantearse más adelante, cuando el juego base funcione de forma fiable.",
+      },
+      {
+        q: "¿Cómo empiezo?",
+        a: "Consigue el launcher, que puede descargar los archivos compatibles del juego desde archive.org y prepararlos por ti. No necesitas tener el juego instalado. De hecho, si tienes instalada y actualizada la versión anterior de Steam, no funcionará con este proyecto.\n\nPuedes descargar el launcher desde GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nCuando tengas el launcher, también necesitarás una clave de autenticación. Puedes generarla en Discord usando `/authkey` en el canal 🤖・bot.\n\nCuando hace falta, el launcher añade temporalmente entradas a tu archivo hosts de Windows para que el juego se conecte al servidor de la comunidad en lugar de a los servicios originales de Super People. Estos cambios se deshacen al salir del juego.",
+      },
+      {
         q: "¿Necesito tener el juego o Steam?",
         a: "No. El juego se retiró de Steam, así que el launcher puede descargar la última versión del cliente desde Internet Archive. Si ya lo tienes instalado, solo indica esa carpeta en el launcher.",
       },
@@ -165,6 +173,30 @@ export const es: Dictionary = {
       {
         q: "¿Cuándo puedo jugar?",
         a: "Por ahora, las partidas se juegan en playtests programados que anunciamos en Discord. Un servidor siempre activo es uno de nuestros próximos objetivos.",
+      },
+      {
+        q: "¿El servidor multijugador está siempre disponible?",
+        a: "Por ahora no. El servidor de la comunidad solo se pone en marcha durante las sesiones de playtest programadas.",
+      },
+      {
+        q: "¿Cuándo es el próximo playtest multijugador?",
+        a: "Por ahora, los playtests no siguen un calendario fijo. Cuando planeemos una sesión multijugador, la anunciaremos en Discord, así que no pierdas de vista los anuncios de playtests para conocer las próximas fechas y horarios.",
+      },
+      {
+        q: "¿Van a añadir nuevos mapas, vehículos, pases de batalla u otras funciones nuevas?",
+        a: "Nuestra prioridad es recuperar una versión estable y jugable de la experiencia original de Super People, lo más fiel posible.\n\nTrabajamos con una versión precompilada del juego, no con el código fuente original, así que puede que no sea posible añadir funciones completamente nuevas. Cuando se puedan hacer cambios, lo más probable es que sean pequeños ajustes y mejoras de los sistemas que ya existen, más que grandes funciones nuevas.\n\nCuando el juego base funcione de forma fiable, podremos estudiar qué cambios son técnicamente posibles, pero lo primero es preservar el juego original.",
+      },
+      {
+        q: "¿Qué versión de Super People usa este proyecto?",
+        a: "El proyecto se basa en la versión de 2022 de Super People, concretamente la versión 1.3.0.473797.\n\nEsto es importante porque no usamos el relanzamiento de Super People de 2025. Por eso, las funciones y el contenido añadidos para la versión de 2025 no forman parte de nuestra compilación. Es decir, no esperes funciones del lanzamiento de 2025 como:\n\n- La clase Ninja\n- Los rediseños de clases y habilidades de 2025\n- La nueva tienda del juego, la moneda premium y los sistemas de progresión relacionados\n- Los cambios de 2025 en la fabricación y la mejora de objetos\n- Los cambios de equilibrio, habilidades, cosméticos y demás contenido que llegaron más tarde en 2025",
+      },
+      {
+        q: "¿Puedo jugar a Super People contra bots?",
+        a: "Sí. Ya puedes jugar en local contra bots, aunque su comportamiento todavía es bastante básico. De momento, puedes iniciar una partida con bots manualmente cuando tengas el juego abierto.\n\nPulsa F6 para abrir la consola y escribe los siguientes comandos, pulsando Enter después de cada uno:\n\n```\nopen LV-OrbIsland\nCheatable\nAddTestAI 50\nStartGame 5 true\n```\n\nAlgunos ajustes de la IA también se pueden cambiar desde la consola. Escribe `SetAI` para ver las opciones disponibles. Permiten modificar cosas como la visión, la puntería y la vida, lo que puede hacer que los bots sean más difíciles, pero por ahora no mejoran su comportamiento de base.\n\nTambién puedes cambiar de clase con:\n\n```\nchangedeck X\n```\n\nSustituye X por un número del 1 al 12, según la clase que quieras usar.\n\nEstamos trabajando en un modo contra bots completo para que, más adelante, puedas iniciarlo directamente desde el launcher sin usar comandos de consola.",
+      },
+      {
+        q: "¿Por qué mi nivel y mis superhabilidades no funcionan bien en las partidas contra bots?",
+        a: "Algunas partes del juego no funcionan bien por ahora en las partidas locales contra bots. Muchos de estos fallos parecen ser problemas del lado del cliente y puede que requieran más trabajo a medida que avance el desarrollo.",
       },
       {
         q: "¿Tienen relación con Wonder People?",

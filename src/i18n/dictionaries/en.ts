@@ -151,6 +151,14 @@ export const en: Dictionary = {
         a: "Yes. The launcher, the servers and the game download are all free. This is a fan project and we don't sell anything.",
       },
       {
+        q: "What is the goal of the Super People Revival project?",
+        a: "Our first goal is preservation: getting the original Super People experience playable, stable and as faithful as reasonably possible. This is a community-led project rather than a commercial studio, so we're concentrating on the fundamentals first. New features, gameplay changes and other improvements may be considered later once the core game is working reliably.",
+      },
+      {
+        q: "How do I get started?",
+        a: "Get the launcher, which can download the compatible game files from archive.org and set them up for you. You don't need an existing copy of the game installed. In fact, if you do have the previous Steam version installed and updated, it won't work with this project.\n\nYou can download the launcher from GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nOnce you have the launcher, you'll also need an authentication key. You can generate one in Discord by using `/authkey` in the 🤖・bot channel.\n\nWhen required, the launcher temporarily adds entries to your Windows hosts file so the game connects to the community server instead of the original Super People services. These changes are restored when the game exits.",
+      },
+      {
         q: "Do I need to own the game or have Steam?",
         a: "No. The game has been removed from Steam, so the launcher can download the last client build from the Internet Archive. If you already have it installed, just point the launcher at that folder.",
       },
@@ -165,6 +173,30 @@ export const en: Dictionary = {
       {
         q: "When can I play?",
         a: "Right now, matches happen during scheduled playtests, which are announced in the Discord. An always-online server is one of our next goals.",
+      },
+      {
+        q: "Is the multiplayer server always available?",
+        a: "Not at the moment. The community server is currently only brought online during scheduled playtest sessions.",
+      },
+      {
+        q: "When is the next multiplayer playtest?",
+        a: "Playtests don't currently run to a fixed schedule. When a multiplayer session is planned, we'll announce it on Discord, so keep an eye on the playtest announcements for upcoming dates and times.",
+      },
+      {
+        q: "Are you adding new maps, vehicles, battle passes or other new features?",
+        a: "Our priority is to restore a stable, playable version of the original Super People experience as faithfully as possible.\n\nWe are working with a pre-compiled version of the game rather than the original source code, so adding completely new features may not be possible. Where changes are possible, they are more likely to be small tweaks and improvements to existing systems rather than major new functionality.\n\nOnce the core game is working reliably, we can look at what changes are technically possible, but preservation of the original game comes first.",
+      },
+      {
+        q: "What version of Super People is this project using?",
+        a: "The project is based on the 2022 version of Super People, specifically version 1.3.0.473797.\n\nThis is important because we are not using the 2025 re-release of Super People. Features and content introduced for the 2025 version are therefore not included in our build. This means you should not expect features from the 2025 release such as:\n\n- The Ninja class\n- The 2025 class and skill reworks\n- The newer in-game shop, premium currency and related progression systems\n- The 2025 crafting and item-upgrade changes\n- Later 2025 balance changes, skills, cosmetics and other content",
+      },
+      {
+        q: "Can I play Super People against bots?",
+        a: "Yes. You can currently play locally against bots, although the bot behaviour is still fairly basic. For now, you can start a bot match manually when you've got the game open.\n\nPress F6 to open the console, then type in the following commands, pressing Enter after each one:\n\n```\nopen LV-OrbIsland\nCheatable\nAddTestAI 50\nStartGame 5 true\n```\n\nSome AI settings can also be adjusted through the console. Type `SetAI` to see the available options. These can change things like vision, accuracy and health, which can make the bots more challenging, but they do not currently improve their underlying behaviour.\n\nYou can also change your class using:\n\n```\nchangedeck X\n```\n\nReplace X with a number from 1 to 12, depending on which class you want to use.\n\nA proper bot mode is being worked on so this can eventually be launched directly through the launcher without needing console commands.",
+      },
+      {
+        q: "Why aren't my level and super abilities working properly in bot matches?",
+        a: "Some parts of the game do not currently work correctly in local bot matches. Many of these appear to be client-side issues and may need additional work as development continues.",
       },
       {
         q: "Are you affiliated with Wonder People?",
