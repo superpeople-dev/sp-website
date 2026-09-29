@@ -5,9 +5,9 @@ import { assetDataUrl, googleFont, imageLocale, ogColors as c, ogSize } from "@/
 import { itemPreview, pageOf, sharedItem, type BoardPage } from "@/lib/share";
 import { downvoteCounts } from "@/lib/store";
 
-// The link preview of an item page (/ideas/<id>/<slug>…), like Reddit's: the title, the start of
-// the description, the upvotes and downvotes and the status. Drawn on request (votes change), kept
-// by the CDN for five minutes: /og/<lang>/item/<id>.png.
+// The link preview of an item page (/ideas/<id>/<slug>…), like a Reddit post's: the status, the
+// title, the start of the description, then the score (upvotes minus downvotes) and the number of
+// comments. Drawn on request (votes change), kept by the CDN for five minutes: /og/<lang>/item/<id>.png.
 
 const art: Record<BoardPage, string> = { "/ideas": "powers", "/roadmap": "vehicle", "/completed": "tower" };
 const statusColor: Record<string, string> = { open: c.dim, planned: "#f0b719", in_progress: "#ff6d5e", completed: "#3ddc84" };
@@ -15,11 +15,20 @@ const statusColor: Record<string, string> = { open: c.dim, planned: "#f0b719", i
 const titleSize = (title: string) => (title.length <= 28 ? 92 : title.length <= 50 ? 76 : title.length <= 80 ? 62 : 54);
 const cut = (text: string, length: number) => (text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text);
 
-function Chevron({ down, color }: { down?: boolean; color: string }) {
+// Reddit's outlined arrow and speech bubble.
+const icons = {
+  score: "M12 3.5 4 12h5v8.5h6V12h5z",
+  comments: "M12 4c-4.7 0-8.5 3.2-8.5 7.2 0 2.2 1.1 4.1 2.9 5.4L5.7 20.5l4.3-2a10 10 0 0 0 2 .2c4.7 0 8.5-3.2 8.5-7.3S16.7 4 12 4z",
+};
+
+function Stat({ icon, value }: { icon: keyof typeof icons; value: string }) {
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24">
-      <path d={down ? "m6 9 6 6 6-6" : "m6 15 6-6 6 6"} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 42, fontWeight: 700, color: c.paper }}>
+      <svg width="38" height="38" viewBox="0 0 24 24">
+        <path d={icons[icon]} fill="none" stroke={c.muted} strokeWidth="1.8" strokeLinejoin="round" />
+      </svg>
+      {value}
+    </div>
   );
 }
 
@@ -36,10 +45,9 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
   const status = d.board.status[item.status].toLocaleUpperCase(locale);
   const title = cut(item.title, 110).toLocaleUpperCase();
   const preview = itemPreview(item, 150);
-  const up = String(item.voteCount);
-  const down = String((await downvoteCounts([item.id]))[item.id] ?? 0);
-  const footer = "SUPER PEOPLE · OPEN SOURCE";
-  const condensed = [tagline, status, title, up, down, footer].join("");
+  const score = String(item.voteCount - ((await downvoteCounts([item.id]))[item.id] ?? 0));
+  const comments = String(item.commentCount);
+  const condensed = [tagline, status, title, score, comments].join("");
 
   const [heavy, bold, body, picture, logo] = await Promise.all([
     googleFont("Barlow Condensed", 800, condensed),
@@ -48,20 +56,6 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
     assetDataUrl(`og/${art[pageOf(item.status)]}.jpg`, "image/jpeg"),
     assetDataUrl("sp-logo.png", "image/png"),
   ]);
-
-  const pill = (color: string, border: string, fill: string) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    height: 64,
-    padding: "0 22px 0 16px",
-    border: `2px solid ${border}`,
-    borderRadius: 8,
-    background: fill,
-    color,
-    fontSize: 40,
-    fontWeight: 800,
-  });
 
   return new ImageResponse(
     (
@@ -108,16 +102,9 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
               </div>
             )}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 34 }}>
-            <div style={pill(c.blue, "rgba(143,176,255,0.6)", "rgba(143,176,255,0.12)")}>
-              <Chevron color={c.blue} />
-              {up}
-            </div>
-            <div style={pill(c.red, "rgba(239,68,56,0.7)", "rgba(239,68,56,0.12)")}>
-              <Chevron down color={c.red} />
-              {down}
-            </div>
-            <div style={{ marginLeft: "auto", fontSize: 26, fontWeight: 700, letterSpacing: 1.5, color: c.dim }}>{footer}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 40, marginTop: 34 }}>
+            <Stat icon="score" value={score} />
+            <Stat icon="comments" value={comments} />
           </div>
         </div>
       </div>

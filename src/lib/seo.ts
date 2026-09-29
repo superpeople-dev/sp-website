@@ -43,8 +43,9 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
 }
 
 // An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description led
-// by its votes, and a preview image drawn from them (app/og/[lang]/item/[id]/route.tsx).
-export type SharedItem = { id: string; title: string; slug: string; preview: string; up: number; down: number };
+// by its score (upvotes minus downvotes) and comment count like a Reddit post, and a preview image
+// drawn from them (app/og/[lang]/item/[id]/route.tsx).
+export type SharedItem = { id: string; title: string; slug: string; preview: string; score: number; comments: number };
 
 export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null): Metadata {
   const d = dictionaries[locale];
@@ -55,7 +56,7 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const title = item ? `${item.title} · ${siteName}` : pageTitle;
   const suffix = item ? `/${item.id}${item.slug ? `/${item.slug}` : ""}` : "";
   const url = `${localeHref(locale, page)}${suffix}`;
-  const votes = item ? `▲ ${item.up} · ▼ ${item.down}` : "";
+  const votes = item ? `▲ ${item.score} · 💬 ${item.comments}` : "";
   const description = item ? [votes, item.preview].filter(Boolean).join(" · ") : sub ? sub.description : t.description;
   const share = item ? description : sub ? sub.description : t.shareDescription;
   const image = item

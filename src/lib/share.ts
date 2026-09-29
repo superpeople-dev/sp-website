@@ -36,7 +36,8 @@ export function itemPreview(item: FeedbackItem, length = 180) {
 export async function sharedPreview(item: FeedbackItem | null): Promise<SharedItem | null> {
   if (!item || !isPublic(item)) return null;
   const down = (await downvoteCounts([item.id]))[item.id] ?? 0;
-  return { id: item.id, title: item.title, slug: slugOf(item.title), preview: itemPreview(item), up: item.voteCount, down };
+  const score = item.voteCount - down;
+  return { id: item.id, title: item.title, slug: slugOf(item.title), preview: itemPreview(item), score, comments: item.commentCount };
 }
 
 // An item page's id and slug from the route ([[...item]]): none, or <id> and an optional slug.
