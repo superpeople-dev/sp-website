@@ -40,12 +40,20 @@ async function call<T>(path: string, { method = "GET", body, token, admin, cache
   };
   if (token) headers["X-User-Token"] = token;
   const cached = method === "GET" && !token && cache !== undefined;
-  const response = await fetch(`${apiUrl}${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    ...(cached ? { cache: "force-cache", next: { revalidate: cache, tags: [refletTag] } } : { cache: "no-store" }),
-  });
+  const send = () =>
+    fetch(`${apiUrl}${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      ...(cached ? { cache: "force-cache", next: { revalidate: cache, tags: [refletTag] } } : { cache: "no-store" }),
+    });
+  let response = await send();
+  // Many reads at once (a build renders every page together) can make Reflet answer 500 while it
+  // updates the key's usage; reads are safe to repeat, so try those twice more.
+  for (let retry = 1; method === "GET" && response.status >= 500 && retry <= 2; retry++) {
+    await new Promise((resolve) => setTimeout(resolve, 400 * retry));
+    response = await send();
+  }
   const text = await response.text();
   let data: unknown = {};
   try {
