@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Gallery } from "@/components/Gallery";
 import { Help } from "@/components/Help";
 import { Hero } from "@/components/Hero";
+import { JsonLd } from "@/components/JsonLd";
 import { Nav } from "@/components/Nav";
 import { Progress } from "@/components/Progress";
 import { Steps } from "@/components/Steps";
@@ -25,10 +26,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(release, lang)).replace(/</g, "\\u003c") }}
-      />
+      <JsonLd data={structuredData(release, lang)} />
       <Nav downloadUrl={release.downloadUrl} />
       <Hero release={release} />
       <main>

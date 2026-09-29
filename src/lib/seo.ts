@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { FeedbackStatus } from "reflet-sdk";
 import { localeHref, localeInfo, locales, type Locale, type PagePath } from "@/i18n/config";
 import { dictionaries } from "@/i18n/dictionaries";
 import { monthYear } from "./format";
@@ -52,10 +53,46 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   }
 }
 
+// The short name of a page, for breadcrumbs.
+function pageName(locale: Locale, page: Exclude<PagePath, "">) {
+  const d = dictionaries[locale];
+  switch (page) {
+    case "/servers":
+      return d.nav.servers;
+    case "/ideas":
+      return d.nav.ideas;
+    case "/roadmap":
+      return d.nav.roadmap;
+    case "/completed":
+      return d.nav.completed;
+    case "/terms":
+      return d.legal.terms;
+    case "/privacy":
+      return d.legal.privacy;
+  }
+}
+
 // An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description (lib/share.ts
 // itemPreview) and a preview image that also shows its score (upvotes minus downvotes) and
-// comment count like a Reddit post (app/og/[lang]/item/[id]/route.tsx).
-export type SharedItem = { id: string; title: string; slug: string; preview: string; score: number; comments: number };
+// comment count like a Reddit post (app/og/[lang]/item/[id]/route.tsx). Its structured data is a forum
+// post with the whole text, the author and the dates.
+export type SharedItem = {
+  id: string;
+  title: string;
+  slug: string;
+  preview: string;
+  text: string;
+  score: number;
+  comments: number;
+  status: FeedbackStatus;
+  createdAt: number;
+  updatedAt: number;
+  author: string | null;
+};
+
+// An item page's path after its board's: /<id>/<slug>.
+export const itemSuffix = (item: Pick<SharedItem, "id" | "slug">) => `/${item.id}${item.slug ? `/${item.slug}` : ""}`;
+const itemImage = (locale: Locale, item: SharedItem) => versioned(`/og/${locale}/item/${item.id}.png`, `${item.score}.${item.comments}`);
 
 // live: what the page's image shows that changes between deploys (the servers' status), for its link.
 export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null, live = ""): Metadata {
@@ -65,12 +102,12 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const sub = page ? subpageSeo(locale, page) : null;
   const pageTitle = sub ? `${sub.title} - ${siteName}` : t.title;
   const title = item ? `${item.title} - ${siteName}` : pageTitle;
-  const suffix = item ? `/${item.id}${item.slug ? `/${item.slug}` : ""}` : "";
+  const suffix = item ? itemSuffix(item) : "";
   const url = `${localeHref(locale, page)}${suffix}`;
   const description = item?.preview || (sub ? sub.description : t.description);
   const share = item ? description : sub ? sub.description : t.shareDescription;
   const image = item
-    ? { url: versioned(`/og/${locale}/item/${item.id}.png`, `${item.score}.${item.comments}`), width: 1200, height: 630, alt: item.title, type: "image/png" }
+    ? { url: itemImage(locale, item), width: 1200, height: 630, alt: item.title, type: "image/png" }
     : sub
       ? { url: ogImagePath(locale, page, live), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
       : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
@@ -102,6 +139,66 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
       googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
     },
     formatDetection: { telephone: false, email: false, address: false },
+    // Google Search Console's HTML tag check, when the site is verified that way (a DNS record needs nothing).
+    ...(process.env.GOOGLE_SITE_VERIFICATION && { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }),
+  };
+}
+
+// Structured data for every page but home (which has structuredData below): the page and its trail of
+// breadcrumbs and, on an item's page, the item as a forum post (DiscussionForumPosting) with its whole
+// text, its author, its dates, its score and its comment count. Ideas and roadmap items are posted by
+// players, so search engines can list each one as a discussion of its own.
+export function pageStructuredData(locale: Locale, page: Exclude<PagePath, "">, item?: SharedItem | null) {
+  const sub = subpageSeo(locale, page);
+  const pageUrl = localeUrl(locale, page);
+  const url = item ? `${pageUrl}${itemSuffix(item)}` : pageUrl;
+  const image = `${siteUrl}${item ? itemImage(locale, item) : ogImagePath(locale, page)}`;
+  const board = page === "/ideas" || page === "/roadmap" || page === "/completed";
+  const crumbs = [
+    { name: dictionaries[locale].nav.home, url: localeUrl(locale) },
+    { name: pageName(locale, page), url: pageUrl },
+    ...(item ? [{ name: item.title, url }] : []),
+  ];
+  const post = item && {
+    "@type": "DiscussionForumPosting",
+    "@id": `${url}#post`,
+    url,
+    headline: item.title,
+    text: item.text || item.title,
+    image,
+    datePublished: new Date(item.createdAt).toISOString(),
+    dateModified: new Date(item.updatedAt).toISOString(),
+    author: item.author ? { "@type": "Person", name: item.author } : { "@type": "Organization", name: siteName, url: siteUrl },
+    commentCount: item.comments,
+    interactionStatistic: [
+      { "@type": "InteractionCounter", interactionType: "https://schema.org/LikeAction", userInteractionCount: Math.max(item.score, 0) },
+      { "@type": "InteractionCounter", interactionType: "https://schema.org/CommentAction", userInteractionCount: item.comments },
+    ],
+    about: { "@id": `${siteUrl}/#game` },
+  };
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": board && !item ? "CollectionPage" : "WebPage",
+        "@id": `${url}#webpage`,
+        url,
+        name: item ? item.title : sub.title,
+        description: item?.preview || sub.description,
+        inLanguage: localeInfo[locale].htmlLang,
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        about: { "@id": `${siteUrl}/#game` },
+        breadcrumb: { "@id": `${url}#breadcrumb` },
+        primaryImageOfPage: image,
+        ...(post && { mainEntity: { "@id": post["@id"] } }),
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${url}#breadcrumb`,
+        itemListElement: crumbs.map((crumb, i) => ({ "@type": "ListItem", position: i + 1, name: crumb.name, item: crumb.url })),
+      },
+      ...(post ? [post] : []),
+    ],
   };
 }
 

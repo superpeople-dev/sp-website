@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 import { Nav } from "@/components/Nav";
 import { AccountBar } from "@/components/roadmap/AccountBar";
 import { PageHead } from "@/components/roadmap/PageHead";
@@ -9,8 +10,8 @@ import { isLocale, localeHref } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { getTags, listByStatus, safely, userToken } from "@/lib/reflet";
-import { pageMetadata } from "@/lib/seo";
-import { itemSegments, settleItem, sharedItem, sharedPreview } from "@/lib/share";
+import { pageMetadata, pageStructuredData } from "@/lib/seo";
+import { itemSegments, settleItem, sharedPage } from "@/lib/share";
 import { forBoard } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
@@ -18,7 +19,7 @@ import { isBanned, storeReady } from "@/lib/store";
 export async function generateMetadata({ params }: PageProps<"/[lang]/roadmap/[[...item]]">): Promise<Metadata> {
   const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/roadmap", await sharedPreview(await sharedItem(itemSegments(item)?.id)));
+  return pageMetadata(lang, "/roadmap", await sharedPage(itemSegments(item)?.id));
 }
 
 export default async function RoadmapPage({ params, searchParams }: PageProps<"/[lang]/roadmap/[[...item]]">) {
@@ -46,11 +47,14 @@ export default async function RoadmapPage({ params, searchParams }: PageProps<"/
   const viewer = viewerOf(session, { banned, moderation: storeReady });
   const board = items && (await forBoard(items, session?.id));
   if (board) await settleItem(lang, "/roadmap", wanted, (id) => board.find((entry) => entry.id === id));
+  // The item's page describes the item itself to search engines.
+  const shared = wanted ? await sharedPage(wanted.id) : null;
   const categories = tags?.categories;
   const types = tags?.types;
 
   return (
     <>
+      <JsonLd data={pageStructuredData(lang, "/roadmap", shared)} />
       <Nav downloadUrl={release.downloadUrl} page="/roadmap" />
       <main>
         <PageHead title={t.plan.title} lead={t.plan.lead} notice={items ? null : t.board.unavailable}>

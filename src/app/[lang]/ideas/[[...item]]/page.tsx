@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 import { Nav } from "@/components/Nav";
 import { AccountBar } from "@/components/roadmap/AccountBar";
 import { IdeasBoard } from "@/components/roadmap/IdeasBoard";
@@ -11,8 +12,8 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { pendingCount } from "@/lib/authorship";
 import { getTags, listIdeas, listPending, safely, userToken } from "@/lib/reflet";
-import { pageMetadata } from "@/lib/seo";
-import { itemSegments, settleItem, sharedItem, sharedPreview } from "@/lib/share";
+import { pageMetadata, pageStructuredData } from "@/lib/seo";
+import { itemSegments, settleItem, sharedPage } from "@/lib/share";
 import { forBoard } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
@@ -20,7 +21,7 @@ import { isBanned, storeReady } from "@/lib/store";
 export async function generateMetadata({ params }: PageProps<"/[lang]/ideas/[[...item]]">): Promise<Metadata> {
   const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/ideas", await sharedPreview(await sharedItem(itemSegments(item)?.id)));
+  return pageMetadata(lang, "/ideas", await sharedPage(itemSegments(item)?.id));
 }
 
 export default async function IdeasPage({ params, searchParams }: PageProps<"/[lang]/ideas/[[...item]]">) {
@@ -42,9 +43,12 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
   const viewer = viewerOf(session, { banned, moderation: storeReady });
   const board = ideas && (await forBoard([...ideas.items.filter((entry) => entry.status === "open"), ...(pending ?? [])], session?.id));
   if (board) await settleItem(lang, "/ideas", wanted, (id) => board.find((entry) => entry.id === id));
+  // The item's page describes the item itself to search engines.
+  const shared = wanted ? await sharedPage(wanted.id) : null;
 
   return (
     <>
+      <JsonLd data={pageStructuredData(lang, "/ideas", shared)} />
       <Nav downloadUrl={release.downloadUrl} page="/ideas" />
       <main>
         <PageHead title={t.ideas.title} lead={t.ideas.lead} notice={ideas ? null : t.board.unavailable}>

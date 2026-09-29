@@ -18,9 +18,10 @@ const aiCrawlers = [
 
 export default function robots(): MetadataRoute.Robots {
   return {
+    // The API answers the site's own pages; it has nothing to index.
     rules: [
-      { userAgent: "*", allow: "/" },
-      { userAgent: aiCrawlers, allow: "/" },
+      { userAgent: "*", allow: "/", disallow: "/api/" },
+      { userAgent: aiCrawlers, allow: "/", disallow: "/api/" },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
     host: siteUrl,

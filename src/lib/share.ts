@@ -1,10 +1,11 @@
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { localeHref, type Locale } from "@/i18n/config";
-import { boardOf, itemPath, slugOf, type BoardPath } from "./board";
+import { boardOf, itemPath, shownName, slugOf, type BoardPath } from "./board";
 import { getIdea, safely } from "./reflet";
 import type { SharedItem } from "./seo";
-import { downvoteCounts } from "./store";
+import { authorsOf, downvoteCounts } from "./store";
 
 // Item pages: /ideas/<id>/<slug>, /roadmap/<id>/<slug>, /completed/<id>/<slug> show that board with
 // the item's dialog open, and have the item's own title, description and preview image.
@@ -22,7 +23,7 @@ export const sharedItem = (id: string | null | undefined) =>
   id && idPattern.test(id) ? safely(() => getIdea(id, 60)) : Promise.resolve(null);
 
 // Emoji and what glues them together (skin tones, variation selectors, joiners, keycaps, flags).
-const emoji = /[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}‍️⃣]/gu;
+const emoji = /[\p{Extended_Pictographic}\p{Emoji_Modifier}\p{Regional_Indicator}\u200D\uFE0F\u20E3]/gu;
 
 // The text under an item's link preview (and in its image): its description on one line, without the
 // bot's "Reported on Discord by …" footer or emoji, with a capital first letter, cut to a preview's length.
@@ -40,13 +41,31 @@ export function itemPreview(item: FeedbackItem, length = 180) {
   return `${(space > length * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,;:-]+$/, "")}…`;
 }
 
-// What pageMetadata() needs for an item page; nothing for items that aren't public.
+const reporter = /\s*Reported on Discord by (.+?)\.?\s*$/;
+
+// What pageMetadata() and pageStructuredData() need for an item page; nothing for items that aren't
+// public. The author is who posted it on the site, or who reported it on Discord (the bot's footer).
 export async function sharedPreview(item: FeedbackItem | null): Promise<SharedItem | null> {
   if (!item || !isPublic(item)) return null;
-  const down = (await downvoteCounts([item.id]))[item.id] ?? 0;
-  const score = item.voteCount - down;
-  return { id: item.id, title: item.title, slug: slugOf(item.title), preview: itemPreview(item), score, comments: item.commentCount };
+  const [down, authors] = await Promise.all([downvoteCounts([item.id]), authorsOf([item.id])]);
+  const profile = authors[item.id];
+  return {
+    id: item.id,
+    title: item.title,
+    slug: slugOf(item.title),
+    preview: itemPreview(item),
+    text: item.description.replace(reporter, "").replace(emoji, "").trim(),
+    score: item.voteCount - (down[item.id] ?? 0),
+    comments: item.commentCount,
+    status: item.status,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    author: profile ? shownName(profile.name, profile.username) : (item.description.match(reporter)?.[1] ?? null),
+  };
 }
+
+// An item page's item, read once per request for both its metadata and the page.
+export const sharedPage = cache(async (id: string | undefined) => sharedPreview(await sharedItem(id)));
 
 // An item page's id and slug from the route ([[...item]]): none, or <id> and an optional slug.
 export function itemSegments(segments: string[] | undefined) {

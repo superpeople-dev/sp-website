@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 import { LegalPage } from "@/components/LegalPage";
 import { Nav } from "@/components/Nav";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, pageStructuredData } from "@/lib/seo";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/privacy">): Promise<Metadata> {
   const { lang } = await params;
@@ -22,6 +23,7 @@ export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy
 
   return (
     <>
+      <JsonLd data={pageStructuredData(lang, "/privacy")} />
       <Nav downloadUrl={release.downloadUrl} page="/privacy" />
       <main>
         <LegalPage title={t.legal.privacy} updated={t.legal.updated} doc={t.legal.privacyDoc} locale={lang} />
