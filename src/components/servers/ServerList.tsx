@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { Continent, GameServer, ServerList as List } from "@/lib/servers";
+import { FilterPicker } from "../FilterPicker";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 
@@ -21,6 +22,7 @@ export function ServerList({ initial }: { initial: List }) {
   const { locale, t } = useI18n();
   const s = t.servers;
   const [list, setList] = useState(initial);
+  const initialUpdated = initial.updated;
   const [continent, setContinent] = useState<Continent | "all">("all");
   const now = useSyncExternalStore(subscribeClock, clockNow, () => null);
   const intl = localeInfo[locale].intl;
@@ -38,6 +40,8 @@ export function ServerList({ initial }: { initial: List }) {
         // Keep showing the last list; the next poll tries again.
       }
     };
+    // The page can be served from a cache that nobody refreshed for a while: fetch right away then.
+    if (Date.now() - initialUpdated * 1000 > POLL_MS) void load();
     const timer = setInterval(() => void load(), POLL_MS);
     const onVisible = () => {
       if (!document.hidden) void load();
@@ -48,7 +52,7 @@ export function ServerList({ initial }: { initial: List }) {
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [initialUpdated]);
 
   const nameOf = (code: string) => {
     try {
@@ -85,27 +89,25 @@ export function ServerList({ initial }: { initial: List }) {
     <section className="flush">
       <div className="wrap servers">
         <Reveal className="servers__bar" y={16}>
-          <p className="servers__summary">
+          <div className="servers__summary">
             <span className={`servers__pulse${online ? " is-on" : ""}`} aria-hidden="true" />
-            {online > 0 && online === list.servers.length
-              ? s.allOnline
-              : fill(s.summary, { online: String(online), total: String(list.servers.length) })}
-            <span className="servers__updated">{updated()}</span>
-          </p>
+            <p className="servers__count">
+              {online > 0 && online === list.servers.length
+                ? s.allOnline
+                : fill(s.summary, { online: String(online), total: String(list.servers.length) })}
+            </p>
+            <p className="servers__updated">{updated()}</p>
+          </div>
           {continents.length > 1 && (
-            <div className="servers__filters" role="group" aria-label={s.title}>
-              {(["all", ...continents] as const).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={active === key ? "is-active" : undefined}
-                  aria-pressed={active === key}
-                  onClick={() => setContinent(key)}
-                >
-                  {key === "all" ? s.filterAll : s.continents[key]}
-                </button>
-              ))}
-            </div>
+            <FilterPicker
+              label={s.filterLabel}
+              options={[
+                { key: "all", label: s.filterAll, icon: "layers" },
+                ...continents.map((key) => ({ key, label: s.continents[key], icon: "globe" as const })),
+              ]}
+              value={active}
+              onChange={setContinent}
+            />
           )}
         </Reveal>
 

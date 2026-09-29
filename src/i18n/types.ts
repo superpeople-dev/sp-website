@@ -175,6 +175,7 @@ export type Dictionary = {
     continents: Record<"africa" | "asia" | "europe" | "northAmerica" | "southAmerica" | "oceania" | "antarctica", string>;
     unknownLocation: string;
     filterAll: string;
+    filterLabel: string;
     updated: string;
     empty: string;
     unavailable: string;
@@ -186,6 +187,7 @@ export type Dictionary = {
     connectBody: string;
     signOut: string;
     signedInAs: string;
+    signedIn: string;
     signInHint: string;
     unavailable: string;
     admin: string;

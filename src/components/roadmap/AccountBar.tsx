@@ -40,12 +40,23 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
   return (
     <div className="account-bar">
       <div className="account-bar__who">
-        <Image className="account-bar__avatar" src={viewer.avatar} alt="" width={32} height={32} unoptimized />
-        <span className="account-bar__name">{fill(t.board.signedInAs, { name: viewer.name })}</span>
-        {viewer.admin && <span className="account-bar__badge">{t.board.admin}</span>}
-        <button type="button" className="account-bar__out" onClick={() => void confirmSignOut()}>
+        <Image className="account-bar__avatar" src={viewer.avatar} alt="" width={40} height={40} unoptimized />
+        {/* Desktop shows the sentence; phones show a small label over the name, so the name never gets cut. */}
+        <span className="account-bar__id">
+          <span className="account-bar__name">{fill(t.board.signedInAs, { name: viewer.name })}</span>
+          <span className="account-bar__label">{t.board.signedIn}</span>
+          <b className="account-bar__user">{viewer.name}</b>
+          {viewer.admin && <span className="account-bar__badge">{t.board.admin}</span>}
+        </span>
+        <button
+          type="button"
+          className="account-bar__out"
+          onClick={() => void confirmSignOut()}
+          aria-label={t.board.signOut}
+          title={t.board.signOut}
+        >
           <Icon name="logout" />
-          {t.board.signOut}
+          <span className="account-bar__out-label">{t.board.signOut}</span>
         </button>
       </div>
       {viewer.admin && <AdminPanel />}
