@@ -990,7 +990,7 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .votes {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   height: 34px;
   padding: 2px;
   border: 1px solid var(--line);
@@ -1003,8 +1003,9 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .votes__down {
   display: grid;
   place-items: center;
-  width: 30px;
+  /* Square: as wide as the bar is tall. */
   height: 100%;
+  aspect-ratio: 1;
   padding: 0;
   border: 0;
   border-radius: 2px;
@@ -1038,19 +1039,13 @@ button.votes__down:disabled { cursor: default; }
 .votes.is-up .votes__up path,
 .votes.is-down .votes__down path { fill: currentColor; }
 .votes--small { height: 28px; }
-.votes--small .votes__up,
-.votes--small .votes__down { width: 24px; }
 .votes--small svg { width: 15px; height: 15px; }
 .votes--small .votes__count { font-size: 13px; }
 @media (max-width: 700px), (pointer: coarse) {
   .votes { height: 40px; }
-  .votes__up,
-  .votes__down { width: 44px; }
   .votes svg { width: 20px; height: 20px; }
   .votes__count { font-size: 17px; }
   .votes--small { height: 36px; }
-  .votes--small .votes__up,
-  .votes--small .votes__down { width: 40px; }
   .votes--small svg { width: 17px; height: 17px; }
   .votes--small .votes__count { font-size: 15px; }
 }
