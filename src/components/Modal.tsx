@@ -52,7 +52,8 @@ export function Modal({
   const y = useMotionValue<number | string>(0);
   // The backdrop fades with the sheet as it is pulled down.
   const shade = useTransform(y, (v) => {
-    const height = panel.current?.offsetHeight || window.innerHeight;
+    // Also runs while rendering on the server (no window there): nothing is pulled yet, so any height works.
+    const height = panel.current?.offsetHeight || (typeof window === "undefined" ? 1 : window.innerHeight);
     const px = typeof v === "number" ? v : v.endsWith("%") ? (parseFloat(v) / 100) * height : parseFloat(v) || 0;
     return Math.min(1, Math.max(0, 1 - px / height));
   });
