@@ -8,7 +8,8 @@ import { DiscordButton } from "./Buttons";
 import { Icon, type IconName } from "./Icon";
 import { Reveal, inView, rise, stagger } from "./motion";
 
-const card: Variants = { ...rise, hover: { y: -6, transition: { duration: 0.25 } } };
+// Hovering only restyles the border (CSS) and tilts the icon; the card itself stays put.
+const card: Variants = rise;
 const badge: Variants = { hover: { rotate: -10, scale: 1.12 } };
 
 function Card({ icon, title, text, action }: { icon: IconName; title: string; text: string; action: ReactNode }) {

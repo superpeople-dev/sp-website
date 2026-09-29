@@ -21,7 +21,7 @@ export function Steps({ downloadUrl }: { downloadUrl: string }) {
         </Reveal>
         <motion.div className="steps" {...inView} variants={stagger(0.15)}>
           {t.steps.items.map((step, i) => (
-            <motion.div key={i} className="panel step" variants={rise} whileHover={{ y: -6 }}>
+            <motion.div key={i} className="panel step" variants={rise}>
               <span className="step__num">0{i + 1}</span>
               <h3>{step.title}</h3>
               <p>{rich(step.body)}</p>
