@@ -87,7 +87,9 @@ export function ServerList({ initial }: { initial: List }) {
         <Reveal className="servers__bar" y={16}>
           <p className="servers__summary">
             <span className={`servers__pulse${online ? " is-on" : ""}`} aria-hidden="true" />
-            {fill(s.summary, { online: String(online), total: String(list.servers.length) })}
+            {online > 0 && online === list.servers.length
+              ? s.allOnline
+              : fill(s.summary, { online: String(online), total: String(list.servers.length) })}
             <span className="servers__updated">{updated()}</span>
           </p>
           {continents.length > 1 && (

@@ -242,6 +242,7 @@ export const zh: Dictionary = {
     online: "在线",
     offline: "离线",
     summary: "{total} 台中有 {online} 台在线",
+    allOnline: "所有服务器在线",
     players: "{count} 名玩家",
     onePlayer: "1 名玩家",
     modes: { any: "所有模式", solo: "单人", duo: "双人", trio: "三人", squad: "四人小队" },

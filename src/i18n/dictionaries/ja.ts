@@ -244,6 +244,7 @@ export const ja: Dictionary = {
     online: "オンライン",
     offline: "オフライン",
     summary: "{total} 台中 {online} 台がオンライン",
+    allOnline: "すべてのサーバーがオンライン",
     players: "プレイヤー {count} 人",
     onePlayer: "プレイヤー 1 人",
     modes: { any: "全モード", solo: "ソロ", duo: "デュオ", trio: "トリオ", squad: "スクワッド" },

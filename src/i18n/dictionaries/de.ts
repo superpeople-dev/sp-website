@@ -244,6 +244,7 @@ export const de: Dictionary = {
     online: "Online",
     offline: "Offline",
     summary: "{online} von {total} online",
+    allOnline: "Alle Server online",
     players: "{count} Spieler",
     onePlayer: "1 Spieler",
     modes: { any: "Alle Modi", solo: "Solo", duo: "Duo", trio: "Trio", squad: "Squad" },

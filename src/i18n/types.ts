@@ -166,6 +166,7 @@ export type Dictionary = {
     online: string;
     offline: string;
     summary: string;
+    allOnline: string;
     players: string;
     onePlayer: string;
     modes: Record<"any" | "solo" | "duo" | "trio" | "squad", string>;

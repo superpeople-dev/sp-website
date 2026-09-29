@@ -244,6 +244,7 @@ export const ru: Dictionary = {
     online: "Онлайн",
     offline: "Офлайн",
     summary: "Онлайн: {online} из {total}",
+    allOnline: "Все серверы онлайн",
     players: "Игроков: {count}",
     onePlayer: "Игроков: 1",
     modes: { any: "Все режимы", solo: "Соло", duo: "Дуо", trio: "Трио", squad: "Отряд" },
