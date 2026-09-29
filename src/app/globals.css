@@ -1020,7 +1020,7 @@ button.votes__down:disabled { cursor: default; }
 .votes svg { width: 18px; height: 18px; }
 .votes svg path { transition: fill 0.2s; }
 .votes__down svg { transform: rotate(180deg); }
-.votes__count { min-width: 2ch; padding: 0 2px; color: var(--paper); font: 800 16px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
+.votes__count { min-width: 2ch; padding: 0 6px; color: var(--paper); font: 800 16px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
 /* Hover only where a pointer really hovers (a phone keeps :hover on the last tapped button), and
    only the arrow takes the colour: a red or blue background under the mouse right after taking a
    vote back looked as if the vote were still there. */
