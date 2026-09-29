@@ -38,7 +38,13 @@ export const doneAt = (item: FeedbackItem) => item.completedAt ?? item.updatedAt
 
 // Characters that draw nothing: spaces, controls, format and unassigned code points, and the blank
 // "letters" (Hangul fillers, blank braille, Khmer inherent vowels) people use for an invisible Discord name.
-const invisible = /[\s\p{Cc}\p{Cf}\p{Cn}\p{Co}ᅟᅠ឴឵⠀ㅤﾠ]/gu;
+const invisible = /[\s\p{Cc}\p{Cf}\p{Cn}\p{Co}\u115F\u1160\u17B4\u17B5\u2800\u3164\uFFA0]/gu;
 
 // The name to show: the display name, or the username when the display name is invisible.
 export const shownName = (name: string, username?: string) => (name.replace(invisible, "") ? name : username || name);
+
+// Items as the boards show them: voteCount is upvotes (Reflet) minus downvotes (lib/store.ts), and
+// hasDownvoted says whether the viewer downvoted (hasVoted stays "upvoted").
+export type BoardItem = FeedbackItem & { hasDownvoted?: boolean };
+export type VoteDirection = "up" | "down";
+export const downvoted = (item: FeedbackItem) => (item as BoardItem).hasDownvoted === true;

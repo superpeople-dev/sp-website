@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { useI18n } from "@/i18n/context";
-import type { Viewer } from "@/lib/board";
+import { downvoted, type BoardItem, type VoteDirection, type Viewer } from "@/lib/board";
 import { useConfirm } from "../ConfirmDialog";
 import { signIn } from "./viewer";
 
@@ -14,7 +14,7 @@ export function useVote({
   authReady,
   next,
 }: {
-  patch: (id: string, change: Partial<FeedbackItem>) => void;
+  patch: (id: string, change: Partial<BoardItem>) => void;
   viewer: Viewer | null;
   authReady: boolean;
   next: string;
@@ -34,24 +34,33 @@ export function useVote({
       discord: true,
     }).then((ok) => ok && signIn(next));
 
-  const vote = async (item: FeedbackItem) => {
+  // Up and down are exclusive: voting one way takes back a vote the other way; the same way again
+  // takes the vote back. The score is shown at once and corrected by the server's answer.
+  const vote = async (item: FeedbackItem, direction: VoteDirection = "up") => {
     if (!authReady || pending.includes(item.id) || viewer?.banned) return;
-    const before = { hasVoted: item.hasVoted, voteCount: item.voteCount };
-    if (viewer) patch(item.id, { hasVoted: !item.hasVoted, voteCount: item.voteCount + (item.hasVoted ? -1 : 1) });
+    const up = item.hasVoted;
+    const down = downvoted(item);
+    const before = { hasVoted: up, hasDownvoted: down, voteCount: item.voteCount };
+    if (viewer) {
+      const nextUp = direction === "up" && !up;
+      const nextDown = direction === "down" && !down;
+      const score = (nextUp ? 1 : 0) - (nextDown ? 1 : 0) - ((up ? 1 : 0) - (down ? 1 : 0));
+      patch(item.id, { hasVoted: nextUp, hasDownvoted: nextDown, voteCount: item.voteCount + score });
+    }
     setPending((ids) => [...ids, item.id]);
     try {
       const response = await fetch("/api/roadmap/vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ feedbackId: item.id }),
+        body: JSON.stringify({ feedbackId: item.id, direction }),
       });
       if (response.status === 401) {
         patch(item.id, before);
         return offerSignIn();
       }
       if (!response.ok) throw new Error(String(response.status));
-      const result = (await response.json()) as { voteCount: number; voted: boolean };
-      patch(item.id, { hasVoted: result.voted, voteCount: result.voteCount });
+      const result = (await response.json()) as { voteCount: number; voted: boolean; downvoted: boolean };
+      patch(item.id, { hasVoted: result.voted, hasDownvoted: result.downvoted, voteCount: result.voteCount });
       if (!viewer) router.refresh();
     } catch {
       patch(item.id, before);

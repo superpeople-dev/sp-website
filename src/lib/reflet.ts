@@ -160,6 +160,10 @@ export const deleteMedia = (screenshotId: string) =>
 export const getIdea = (feedbackId: string, cache?: number) =>
   call<FeedbackItem>(`/api/v1/feedback/item?id=${encodeURIComponent(feedbackId)}`, { cache });
 
+// The item as one user sees it (hasVoted is theirs).
+export const getIdeaFor = (feedbackId: string, token: string) =>
+  call<FeedbackItem>(`/api/v1/feedback/item?id=${encodeURIComponent(feedbackId)}`, { token });
+
 export const updateTags = (feedbackId: string, addTagIds: string[], removeTagIds: string[]) =>
   call("/api/v1/admin/feedback/update-tags", { method: "POST", admin: true, body: { feedbackId, addTagIds, removeTagIds } });
 

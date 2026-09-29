@@ -178,6 +178,8 @@ export const zh: Dictionary = {
     empty: "还没有想法，来提交第一个吧。",
     vote: "投票：{title}",
     unvote: "取消投票：{title}",
+    downvote: "投反对票：{title}",
+    undownvote: "取消反对票：{title}",
     comments: "评论",
     formTitle: "提交想法",
     titleLabel: "标题",

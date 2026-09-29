@@ -3,6 +3,7 @@ import type { Dictionary } from "@/i18n/types";
 import { doneAt } from "./board";
 import { listByStatus, safely } from "./reflet";
 import { openStatuses } from "./site";
+import { withDownvotes } from "./votes";
 
 export type ProgressRow = { id: string; title: string; status: "done" | "wip" | "next" };
 export type ProgressLists = { done: ProgressRow[]; working: ProgressRow[]; doneTotal: number; wipTotal: number };
@@ -12,12 +13,13 @@ const byVotes = (a: FeedbackItem, b: FeedbackItem) => b.voteCount - a.voteCount;
 const row = (item: FeedbackItem, status: ProgressRow["status"]): ProgressRow => ({ id: item.id, title: item.title, status });
 
 // The home page's two panels, from the roadmap: the latest completed items, and what is in progress
-// followed by the most upvoted planned items. Both get the same number of rows so they end up the
-// same size. Null when the roadmap can't be read; the page then shows the dictionary's lists.
+// followed by the best-scored planned items (upvotes minus downvotes). Both get the same number of
+// rows so they end up the same size. Null when the roadmap can't be read; the page then shows the
+// dictionary's lists.
 export async function getProgress(): Promise<ProgressLists | null> {
   const lists = await safely(() => Promise.all([listByStatus("completed"), listByStatus("in_progress"), listByStatus("planned")]));
   if (!lists) return null;
-  const [completed, inProgress, planned] = lists;
+  const [completed, inProgress, planned] = await Promise.all([lists[0], withDownvotes(lists[1]), withDownvotes(lists[2])]);
   const done = [...completed].sort((a, b) => doneAt(b) - doneAt(a)).map((item) => row(item, "done"));
   const working = [
     ...[...inProgress].sort(byVotes).map((item) => row(item, "wip")),

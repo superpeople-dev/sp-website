@@ -180,6 +180,8 @@ export const ja: Dictionary = {
     empty: "まだアイデアがありません。最初の投稿をしてみましょう。",
     vote: "投票する：{title}",
     unvote: "投票を取り消す：{title}",
+    downvote: "反対票を入れる：{title}",
+    undownvote: "反対票を取り消す：{title}",
     comments: "コメント",
     formTitle: "アイデアを提案",
     titleLabel: "タイトル",

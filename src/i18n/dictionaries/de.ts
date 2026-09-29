@@ -180,6 +180,8 @@ export const de: Dictionary = {
     empty: "Noch keine Ideen. Poste die erste.",
     vote: "Abstimmen: {title}",
     unvote: "Stimme zurückziehen: {title}",
+    downvote: "Dagegen stimmen: {title}",
+    undownvote: "Gegenstimme zurückziehen: {title}",
     comments: "Kommentare",
     formTitle: "Idee vorschlagen",
     titleLabel: "Titel",

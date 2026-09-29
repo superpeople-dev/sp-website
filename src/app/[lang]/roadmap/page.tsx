@@ -11,6 +11,7 @@ import { getLatestRelease } from "@/lib/github";
 import { getTags, listByStatus, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
 import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
+import { withDownvotes } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
@@ -41,6 +42,7 @@ export default async function RoadmapPage({ params, searchParams }: PageProps<"/
     session ? isBanned(session.id) : false,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
+  const board = items && (await withDownvotes(items, session?.id));
   if (items) await followItem(lang, "/roadmap", itemParam((await searchParams).item), (id) => items.some((item) => item.id === id));
   const categories = tags?.categories;
   const types = tags?.types;
@@ -52,9 +54,9 @@ export default async function RoadmapPage({ params, searchParams }: PageProps<"/
         <PageHead title={t.plan.title} lead={t.plan.lead} notice={items ? null : t.board.unavailable}>
           {items && <AccountBar authReady={authReady} next={localeHref(lang, "/roadmap")} viewer={viewer} />}
         </PageHead>
-        {items && (
+        {board && (
           <PlanBoard
-            initial={items}
+            initial={board}
             categories={categories ?? []}
             types={types ?? []}
             viewer={viewer}

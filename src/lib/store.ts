@@ -59,3 +59,38 @@ export const authorsOf = (ids: string[]) =>
     const found = await client.hmget<Record<string, Profile | null>>(authorsKey, ...ids);
     return Object.fromEntries(Object.entries(found ?? {}).filter((entry): entry is [string, Profile] => entry[1] !== null));
   });
+
+// Downvotes. Reflet keeps the upvotes; a downvote is stored here: who downvoted each item (a set per
+// item), what each user downvoted (a set per user, to show their choice) and a count per item (to
+// read many items at once). The score shown everywhere is upvotes minus downvotes.
+const downCountKey = "sp:downvotes";
+const downByItem = (itemId: string) => `sp:downvoters:${itemId}`;
+const downByUser = (userId: string) => `sp:downvoted:${userId}`;
+
+export const downvoteCounts = (ids: string[]) =>
+  attempt("downvote counts", {} as Record<string, number>, async (client) => {
+    if (!ids.length) return {};
+    const found = await client.hmget<Record<string, number | null>>(downCountKey, ...ids);
+    return Object.fromEntries(
+      Object.entries(found ?? {}).flatMap(([id, count]) => (Number(count) > 0 ? [[id, Number(count)]] : [])),
+    );
+  });
+
+export const downvotedBy = (userId: string) =>
+  attempt("user downvotes", [] as string[], (client) => client.smembers(downByUser(userId)));
+
+export const hasDownvoted = (itemId: string, userId: string) =>
+  attempt("downvote check", false, async (client) => (await client.sismember(downByItem(itemId), userId)) === 1);
+
+// Adds or removes one user's downvote; returns the item's downvote count afterwards.
+export async function setDownvote(itemId: string, userId: string, on: boolean) {
+  if (!redis) throw new Error("Store is not configured");
+  const changed = on ? await redis.sadd(downByItem(itemId), userId) : await redis.srem(downByItem(itemId), userId);
+  if (changed) {
+    await Promise.all([
+      on ? redis.sadd(downByUser(userId), itemId) : redis.srem(downByUser(userId), itemId),
+      redis.hincrby(downCountKey, itemId, on ? 1 : -1),
+    ]);
+  }
+  return redis.scard(downByItem(itemId));
+}

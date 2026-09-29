@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import { categoryOf, doneAt, type Category, type TypeTag, type Viewer } from "@/lib/board";
+import { categoryOf, doneAt, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
@@ -27,7 +27,7 @@ export function CompletedList({
   authReady: boolean;
 }) {
   const { locale, t } = useI18n();
-  const [items, setItems] = useState(initial);
+  const [items, setItems] = useState<BoardItem[]>(initial);
   const admin = useAdmin(setItems);
   const [opened, setOpened] = useState<Opened | null>(null);
   useItemUrl(opened?.id ?? null, (id) => setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null));
@@ -35,7 +35,7 @@ export function CompletedList({
   const close = useCallback(() => setOpened(null), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const patch = useCallback(
-    (id: string, change: Partial<FeedbackItem>) =>
+    (id: string, change: Partial<BoardItem>) =>
       setItems((list) => list.map((item) => (item.id === id ? { ...item, ...change } : item))),
     [],
   );

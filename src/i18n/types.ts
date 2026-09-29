@@ -102,6 +102,8 @@ export type Dictionary = {
     empty: string;
     vote: string;
     unvote: string;
+    downvote: string;
+    undownvote: string;
     comments: string;
     formTitle: string;
     titleLabel: string;

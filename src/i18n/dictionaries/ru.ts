@@ -180,6 +180,8 @@ export const ru: Dictionary = {
     empty: "Идей пока нет. Предложите первую.",
     vote: "Проголосовать: {title}",
     unvote: "Отменить голос: {title}",
+    downvote: "Проголосовать против: {title}",
+    undownvote: "Отменить голос против: {title}",
     comments: "Комментарии",
     formTitle: "Предложить идею",
     titleLabel: "Название",

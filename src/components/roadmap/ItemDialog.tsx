@@ -17,6 +17,7 @@ import {
   type MediaView,
   type TypeTag,
   type Viewer,
+  type VoteDirection,
 } from "@/lib/board";
 import { ideaLimits, ideaTypes } from "@/lib/site";
 import { Avatar } from "../Avatar";
@@ -28,6 +29,7 @@ import { CategoryTag } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
 import { itemUrl } from "./useItemUrl";
+import { VoteControl } from "./VoteControl";
 import { loginHref, signIn } from "./viewer";
 
 export type Opened = { id: string; mode: "view" | "edit" };
@@ -51,7 +53,7 @@ type Props = {
   next: string;
   admin: ReturnType<typeof useAdmin>;
   onPatch: (id: string, change: Partial<FeedbackItem>) => void;
-  vote?: (item: FeedbackItem) => void;
+  vote?: (item: FeedbackItem, direction: VoteDirection) => void;
   votePending?: boolean;
   removeLabel?: string;
 };
@@ -361,17 +363,12 @@ function ItemBody({
 
   const votes =
     item.status === "completed" ? null : vote && !inReview ? (
-      <button
-        type="button"
-        className={`sheet__vote${item.hasVoted ? " is-voted" : ""}`}
-        aria-pressed={item.hasVoted}
-        aria-label={fill(item.hasVoted ? r.unvote : r.vote, { title: item.title })}
+      <VoteControl
+        item={item}
+        layout="row"
+        onVote={(direction) => vote(item, direction)}
         disabled={!authReady || votePending || viewer?.banned}
-        onClick={() => vote(item)}
-      >
-        <Icon name="up" />
-        {item.voteCount}
-      </button>
+      />
     ) : (
       <span className="sheet__votes" title={b.votes}>
         <Icon name="up" />
@@ -438,17 +435,19 @@ function ItemBody({
 
   return (
     <>
-      <div className="sheet__bar">
+      <div className="sheet__bar sheet__bar--item">
         <div className="sheet__chips">
           {votes}
-          <span className={`sheet__status sheet__status--${item.status}`}>{b.status[item.status]}</span>
-          {types.length > 0 && (
-            <span className={`idea__type idea__type--${type}`}>
-              <Icon name={iconOf(type)} />
-              {r.types[type]}
-            </span>
-          )}
-          {category && <CategoryTag category={category} />}
+          <span className="sheet__tags">
+            <span className={`sheet__status sheet__status--${item.status}`}>{b.status[item.status]}</span>
+            {types.length > 0 && (
+              <span className={`idea__type idea__type--${type}`}>
+                <Icon name={iconOf(type)} />
+                {r.types[type]}
+              </span>
+            )}
+            {category && <CategoryTag category={category} />}
+          </span>
         </div>
         <div className="sheet__actions">
           {mode === "view" && <ShareButton item={item} />}

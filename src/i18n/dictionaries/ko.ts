@@ -180,6 +180,8 @@ export const ko: Dictionary = {
     empty: "아직 아이디어가 없습니다. 첫 번째로 올려 보세요.",
     vote: "투표하기: {title}",
     unvote: "투표 취소: {title}",
+    downvote: "반대 투표: {title}",
+    undownvote: "반대 투표 취소: {title}",
     comments: "댓글",
     formTitle: "아이디어 제안",
     titleLabel: "제목",

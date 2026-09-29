@@ -180,6 +180,8 @@ export const hi: Dictionary = {
     empty: "अभी कोई आइडिया नहीं है। पहला आप पोस्ट करें।",
     vote: "अपवोट: {title}",
     unvote: "अपना वोट हटाएँ: {title}",
+    downvote: "डाउनवोट: {title}",
+    undownvote: "अपना डाउनवोट हटाएँ: {title}",
     comments: "कमेंट",
     formTitle: "आइडिया सुझाएँ",
     titleLabel: "शीर्षक",

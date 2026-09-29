@@ -6,7 +6,7 @@ import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { IdeaType } from "@/i18n/types";
-import { categoryOf, typeOf, type Category, type TypeTag, type Viewer } from "@/lib/board";
+import { categoryOf, typeOf, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { FilterPicker, type FilterOption } from "../FilterPicker";
@@ -19,6 +19,7 @@ import { CategoryTag } from "./CategoryTag";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
 import { useVote } from "./useVote";
+import { VoteControl } from "./VoteControl";
 import { signIn } from "./viewer";
 import { useItemUrl } from "./useItemUrl";
 
@@ -66,7 +67,7 @@ export function IdeasBoard({
 }) {
   const { locale, t } = useI18n();
   const r = t.ideas;
-  const [items, setItems] = useState(initial);
+  const [items, setItems] = useState<BoardItem[]>(initial);
   const [sort, setSort] = useState<Sort>("top");
   const [filter, setFilter] = useState<Filter>("all");
   const [kind, setKind] = useState<IdeaType | null>(types.find((type) => type.slug === "feature-request")?.slug ?? types[0]?.slug ?? null);
@@ -137,7 +138,7 @@ export function IdeasBoard({
   };
 
   const patch = useCallback(
-    (id: string, change: Partial<FeedbackItem>) =>
+    (id: string, change: Partial<BoardItem>) =>
       setItems((list) => list.map((item) => (item.id === id ? { ...item, ...change } : item))),
     [],
   );
@@ -201,17 +202,12 @@ export function IdeasBoard({
     const category = categoryOf(item, categories);
     return (
       <li key={item.id} className={`idea card${inReview ? " idea--review" : ""}`}>
-        <button
-          type="button"
-          className={`vote${item.hasVoted ? " is-voted" : ""}`}
-          aria-pressed={item.hasVoted}
-          aria-label={fill(item.hasVoted ? r.unvote : r.vote, { title: item.title })}
+        <VoteControl
+          item={item}
+          layout="column"
+          onVote={(direction) => void vote(item, direction)}
           disabled={!authReady || inReview || viewer?.banned}
-          onClick={() => void vote(item)}
-        >
-          <Icon name="up" />
-          <b>{item.voteCount}</b>
-        </button>
+        />
         <div className="idea__body">
           <h3>
             <button type="button" className="card__open" onClick={() => setOpened({ id: item.id, mode: "view" })}>
@@ -477,7 +473,7 @@ export function IdeasBoard({
         next={next}
         admin={admin}
         onPatch={patch}
-        vote={(item) => void vote(item)}
+        vote={(item, direction) => void vote(item, direction)}
         votePending={current ? pending.includes(current.id) : false}
         removeLabel={current?.status === "under_review" ? r.reject : undefined}
       />

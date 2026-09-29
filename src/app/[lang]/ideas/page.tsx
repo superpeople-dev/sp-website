@@ -12,6 +12,7 @@ import { pendingCount } from "@/lib/authorship";
 import { getTags, listIdeas, listPending, safely, userToken } from "@/lib/reflet";
 import { pageMetadata } from "@/lib/seo";
 import { followItem, itemParam, sharedItem, sharedPreview } from "@/lib/share";
+import { withDownvotes } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
@@ -37,6 +38,7 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
   if (ideas) await followItem(lang, "/ideas", itemParam((await searchParams).item), (id) => [...ideas.items, ...(pending ?? [])].some((item) => item.id === id));
+  const board = ideas && (await withDownvotes([...ideas.items.filter((item) => item.status === "open"), ...(pending ?? [])], session?.id));
 
   return (
     <>
@@ -45,9 +47,9 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
         <PageHead title={t.ideas.title} lead={t.ideas.lead} notice={ideas ? null : t.board.unavailable}>
           {ideas && <AccountBar authReady={authReady} next={localeHref(lang, "/ideas")} viewer={viewer} />}
         </PageHead>
-        {ideas && (
+        {board && (
           <IdeasBoard
-            initial={[...ideas.items.filter((item) => item.status === "open"), ...(pending ?? [])]}
+            initial={board}
             categories={tags?.categories ?? []}
             types={tags?.types ?? []}
             viewer={viewer}

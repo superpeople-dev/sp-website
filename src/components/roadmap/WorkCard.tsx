@@ -4,11 +4,12 @@ import type { DraggableSyntheticListeners } from "@dnd-kit/core";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import { categoryOf, doneAt, type Category } from "@/lib/board";
+import { categoryOf, doneAt, type Category, type VoteDirection } from "@/lib/board";
 import { Icon } from "../Icon";
 import type { useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
 import { ItemMenu } from "./ItemMenu";
+import { VoteControl } from "./VoteControl";
 
 export type Drag = {
   ref: (element: HTMLElement | null) => void;
@@ -34,7 +35,7 @@ export function WorkCard({
   onOpen: (mode: "view" | "edit") => void;
   drag?: Drag;
   overlay?: boolean;
-  onVote?: () => void;
+  onVote?: (direction: VoteDirection) => void;
   voteDisabled?: boolean;
 }) {
   const { locale, t } = useI18n();
@@ -48,23 +49,8 @@ export function WorkCard({
     <li ref={drag?.ref} className={classes.filter(Boolean).join(" ")} {...drag?.listeners}>
       <div className="work__top">
         {item.status !== "completed" &&
-          (overlay ? (
-            <span className={`work__vote${item.hasVoted ? " is-voted" : ""}`}>
-              <Icon name="up" />
-              {item.voteCount}
-            </span>
-          ) : onVote ? (
-            <button
-              type="button"
-              className={`work__vote${item.hasVoted ? " is-voted" : ""}`}
-              aria-pressed={item.hasVoted}
-              aria-label={fill(item.hasVoted ? t.ideas.unvote : t.ideas.vote, { title: item.title })}
-              disabled={voteDisabled}
-              onClick={onVote}
-            >
-              <Icon name="up" />
-              {item.voteCount}
-            </button>
+          (overlay || onVote ? (
+            <VoteControl item={item} layout="row" className="votes--small" onVote={overlay ? undefined : onVote} disabled={voteDisabled} />
           ) : (
             <span className={`work__votes${item.hasVoted ? " is-voted" : ""}`}>
               <Icon name="up" />

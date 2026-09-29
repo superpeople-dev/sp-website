@@ -17,7 +17,7 @@ import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import { doneAt, type Category, type TypeTag, type Viewer } from "@/lib/board";
+import { doneAt, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
@@ -60,7 +60,7 @@ export function PlanBoard({
 }) {
   const { locale, t } = useI18n();
   const p = t.plan;
-  const [items, setItems] = useState(initial);
+  const [items, setItems] = useState<BoardItem[]>(initial);
   const admin = useAdmin(setItems);
   const [opened, setOpened] = useState<Opened | null>(null);
   useItemUrl(opened?.id ?? null, (id) => setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null));
@@ -71,7 +71,7 @@ export function PlanBoard({
   const close = useCallback(() => setOpened(null), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const patch = useCallback(
-    (id: string, change: Partial<FeedbackItem>) =>
+    (id: string, change: Partial<BoardItem>) =>
       setItems((list) => list.map((item) => (item.id === id ? { ...item, ...change } : item))),
     [],
   );
@@ -132,7 +132,7 @@ export function PlanBoard({
                     admin: canDrag ? admin : null,
                     showDate: column.key === "completed",
                     onOpen: (mode) => open(item.id, mode),
-                    onVote: authReady ? () => void vote(item) : undefined,
+                    onVote: authReady ? (direction) => void vote(item, direction) : undefined,
                     voteDisabled: pending.includes(item.id) || viewer?.banned,
                   };
                   return canDrag ? <DraggableCard key={item.id} {...props} /> : <WorkCard key={item.id} {...props} />;
@@ -194,7 +194,7 @@ export function PlanBoard({
         next={next}
         admin={admin}
         onPatch={patch}
-        vote={(item) => void vote(item)}
+        vote={(item, direction) => void vote(item, direction)}
         votePending={current ? pending.includes(current.id) : false}
       />
       {admin.dialog}
