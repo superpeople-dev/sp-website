@@ -19,7 +19,7 @@ export const localeInfo: Record<Locale, LocaleInfo> = {
 
 export const isLocale = (value: string): value is Locale => (locales as readonly string[]).includes(value);
 
-export const pagePaths = ["", "/ideas", "/roadmap", "/completed", "/terms", "/privacy"] as const;
+export const pagePaths = ["", "/servers", "/ideas", "/roadmap", "/completed", "/terms", "/privacy"] as const;
 export type PagePath = (typeof pagePaths)[number];
 
 export const localeHref = (locale: Locale, page: PagePath = "") =>

@@ -17,6 +17,7 @@ const subscribe = () => () => {};
 
 export const menuPages = [
   { path: "", label: "home", hint: "homeHint", icon: "home" },
+  { path: "/servers", label: "servers", hint: "serversHint", icon: "server" },
   { path: "/ideas", label: "ideas", hint: "ideasHint", icon: "bulb" },
   { path: "/roadmap", label: "roadmap", hint: "roadmapHint", icon: "board" },
   { path: "/completed", label: "completed", hint: "completedHint", icon: "done" },

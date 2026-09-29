@@ -5,6 +5,7 @@ import { languageAlternates, localeUrl, ogImagePath, siteUrl } from "@/lib/seo";
 import { galleryImages } from "@/lib/site";
 
 const subpages = [
+  { path: "/servers", changeFrequency: "always", priority: 0.8 },
   { path: "/roadmap", changeFrequency: "daily", priority: 0.8 },
   { path: "/ideas", changeFrequency: "daily", priority: 0.7 },
   { path: "/completed", changeFrequency: "weekly", priority: 0.7 },

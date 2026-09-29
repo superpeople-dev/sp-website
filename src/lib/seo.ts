@@ -26,6 +26,8 @@ export function languageAlternates(absolute = false, page: PagePath = ""): Recor
 function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   const d = dictionaries[locale];
   switch (page) {
+    case "/servers":
+      return { title: d.servers.seoTitle, description: d.servers.seoDescription };
     case "/ideas":
       return { title: d.ideas.seoTitle, description: d.ideas.seoDescription };
     case "/roadmap":
@@ -190,6 +192,7 @@ export function llmsTxt() {
 
 - [Website](${siteUrl})
 - [Download the latest launcher](${siteUrl}/download)
+- [Game servers and live status](${siteUrl}/servers)
 - [Roadmap](${siteUrl}/roadmap)
 - [Ideas and feature requests](${siteUrl}/ideas)
 - [Completed work and release notes](${siteUrl}/completed)

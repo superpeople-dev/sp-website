@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const pages = ["ideas", "roadmap", "completed", "terms", "privacy"];
+const pages = ["servers", "ideas", "roadmap", "completed", "terms", "privacy"];
 
 const nextConfig: NextConfig = {
   images: {

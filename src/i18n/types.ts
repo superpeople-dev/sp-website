@@ -12,10 +12,12 @@ export type Dictionary = {
     ideas: string;
     roadmap: string;
     completed: string;
+    servers: string;
     homeHint: string;
     ideasHint: string;
     roadmapHint: string;
     completedHint: string;
+    serversHint: string;
     tagline: string;
     download: string;
     githubLabel: string;
@@ -155,6 +157,26 @@ export type Dictionary = {
     related: string;
     seoTitle: string;
     seoDescription: string;
+  };
+  servers: {
+    title: string;
+    lead: string;
+    seoTitle: string;
+    seoDescription: string;
+    online: string;
+    offline: string;
+    summary: string;
+    players: string;
+    onePlayer: string;
+    modes: Record<"any" | "solo" | "duo" | "trio" | "squad", string>;
+    views: Record<"any" | "fpp" | "tpp", string>;
+    match: Record<"waiting" | "starting" | "running" | "over" | "between", string>;
+    continents: Record<"africa" | "asia" | "europe" | "northAmerica" | "southAmerica" | "oceania" | "antarctica", string>;
+    unknownLocation: string;
+    filterAll: string;
+    updated: string;
+    empty: string;
+    unavailable: string;
   };
   board: {
     status: Record<IdeaStatus, string>;
