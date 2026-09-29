@@ -7,6 +7,7 @@ import { repoUrl } from "@/lib/site";
 import { DiscordButton } from "./Buttons";
 import { Icon, type IconName } from "./Icon";
 import { Reveal, inView, rise, stagger } from "./motion";
+import { Toast } from "./Toast";
 
 // Hovering only restyles the border (CSS) and tilts the icon; the card itself stays put.
 const card: Variants = rise;
@@ -45,20 +46,23 @@ function ShareButton() {
   };
 
   return (
-    <button className="btn" type="button" onClick={share}>
-      <Icon name={copied ? "check" : "share"} />
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span
-          key={copied ? "copied" : "share"}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.18 }}
-        >
-          {copied ? t.help.copied : t.help.share}
-        </motion.span>
-      </AnimatePresence>
-    </button>
+    <>
+      <button className="btn" type="button" onClick={share}>
+        <Icon name={copied ? "check" : "share"} />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={copied ? "copied" : "share"}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            {copied ? t.help.copied : t.help.share}
+          </motion.span>
+        </AnimatePresence>
+      </button>
+      <Toast show={copied}>{t.board.linkCopied}</Toast>
+    </>
   );
 }
 

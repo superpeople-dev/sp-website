@@ -24,6 +24,7 @@ import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
+import { Toast } from "../Toast";
 import type { EditValues, useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
@@ -97,16 +98,19 @@ function ShareButton({ item }: { item: FeedbackItem }) {
     }
   };
   return (
-    <button
-      type="button"
-      className={`share-btn${copied ? " is-copied" : ""}`}
-      onClick={() => void share()}
-      aria-label={copied ? b.linkCopied : b.shareItem}
-      title={b.shareItem}
-    >
-      <Icon name={copied ? "check" : "share"} />
-      <span>{copied ? b.linkCopied : b.shareItem}</span>
-    </button>
+    <>
+      <button
+        type="button"
+        className={`share-btn${copied ? " is-copied" : ""}`}
+        onClick={() => void share()}
+        aria-label={b.shareItem}
+        title={b.shareItem}
+      >
+        <Icon name={copied ? "check" : "share"} />
+        <span>{b.shareItem}</span>
+      </button>
+      <Toast show={copied}>{b.linkCopied}</Toast>
+    </>
   );
 }
 

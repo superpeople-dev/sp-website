@@ -1616,6 +1616,24 @@ button.votes__down:disabled { cursor: default; }
   transition: border-color 0.2s, color 0.2s;
 }
 .share-btn svg { width: 15px; height: 15px; flex: none; }
+/* Toast: a short confirmation ("Link copied") at the bottom of the screen, above dialogs. */
+.toast-root { position: fixed; right: 0; bottom: calc(24px + env(safe-area-inset-bottom)); left: 0; z-index: 160; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 18px;
+  border: 1px solid rgba(61, 220, 132, 0.45);
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.85);
+  color: var(--paper);
+  font: 700 13px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.toast svg { width: 16px; height: 16px; flex: none; color: var(--green); }
 .share-btn:hover { border-color: rgba(255, 248, 244, 0.3); color: var(--paper); }
 .share-btn.is-copied { border-color: rgba(61, 220, 132, 0.45); color: var(--green); }
 @media (max-width: 700px) {
