@@ -312,7 +312,6 @@ export type Dictionary = {
     keywords: string[];
     ogAlt: string;
     ogHeadline: [string, string];
-    ogTagline: string;
     ogLabel: string;
     orgDescription: string;
     gameDescription: string;

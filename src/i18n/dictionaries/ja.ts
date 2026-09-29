@@ -471,7 +471,6 @@ export const ja: Dictionary = {
     ],
     ogAlt: "SUPER PEOPLE コミュニティ復活プロジェクト：「サーバーは消えた。だから作り直した。」とゲームのキービジュアル",
     ogHeadline: ["サーバーは消えた。", "だから作り直した。"],
-    ogTagline: "SUPER PEOPLE  -  オープンソース",
     ogLabel: "コミュニティ復活プロジェクト",
     orgDescription:
       "SUPER PEOPLE のマルチプレイヤー用バックエンドを作り直し、コミュニティサーバーでゲームを遊べるようにする、ボランティアによる非営利プロジェクトです。",

@@ -13,7 +13,10 @@ import { getServers } from "@/lib/servers";
 export async function generateMetadata({ params }: PageProps<"/[lang]/servers">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/servers");
+  // The preview image shows how many servers are up: its link changes with that count.
+  const servers = await getServers();
+  const online = servers?.servers.filter((server) => server.online).length ?? 0;
+  return pageMetadata(lang, "/servers", null, servers ? `${online}of${servers.servers.length}` : "");
 }
 
 export default async function ServersPage({ params }: PageProps<"/[lang]/servers">) {

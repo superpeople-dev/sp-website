@@ -472,7 +472,6 @@ export const es: Dictionary = {
     ],
     ogAlt: "SUPER PEOPLE, revival comunitario: «Lo cerraron. Así que lo reconstruimos.» sobre el arte del juego",
     ogHeadline: ["LO CERRARON.", "ASÍ QUE LO RECONSTRUIMOS."],
-    ogTagline: "SUPER PEOPLE  -  CÓDIGO ABIERTO",
     ogLabel: "REVIVAL COMUNITARIO",
     orgDescription:
       "Un proyecto voluntario y sin ánimo de lucro que reconstruye el backend multijugador de SUPER PEOPLE para que el juego se pueda jugar en servidores comunitarios.",

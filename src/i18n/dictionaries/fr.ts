@@ -472,7 +472,6 @@ export const fr: Dictionary = {
     ],
     ogAlt: "SUPER PEOPLE, relance communautaire : « Ils l'ont fermé. On l'a reconstruit. » sur l'illustration du jeu",
     ogHeadline: ["ILS L'ONT FERMÉ.", "ON L'A RECONSTRUIT."],
-    ogTagline: "SUPER PEOPLE  -  OPEN SOURCE",
     ogLabel: "RELANCE COMMUNAUTAIRE",
     orgDescription:
       "Un projet bénévole et non commercial qui reconstruit le backend multijoueur de SUPER PEOPLE pour que le jeu soit jouable sur des serveurs communautaires.",

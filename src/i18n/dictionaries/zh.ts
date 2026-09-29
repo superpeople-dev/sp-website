@@ -468,7 +468,6 @@ export const zh: Dictionary = {
     ],
     ogAlt: "SUPER PEOPLE 社区复活计划：“他们停服了。我们亲手重建。”配以游戏主视觉",
     ogHeadline: ["他们停服了。", "我们亲手重建。"],
-    ogTagline: "SUPER PEOPLE  -  开源",
     ogLabel: "社区复活计划",
     orgDescription: "一个由志愿者运营的非商业项目，正在重建 SUPER PEOPLE 的多人游戏后端，让游戏能在社区服务器上运行。",
     gameDescription:

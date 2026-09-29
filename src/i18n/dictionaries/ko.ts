@@ -471,7 +471,6 @@ export const ko: Dictionary = {
     ],
     ogAlt: "슈퍼피플 커뮤니티 부활 프로젝트: \"서버가 꺼졌다. 그래서 다시 만들었다.\" 게임 키 아트 위 문구",
     ogHeadline: ["서버가 꺼졌다.", "그래서 다시 만들었다."],
-    ogTagline: "SUPER PEOPLE  -  오픈 소스",
     ogLabel: "커뮤니티 부활 프로젝트",
     orgDescription:
       "슈퍼피플의 멀티플레이어 백엔드를 다시 만들어 커뮤니티 서버에서 게임을 플레이할 수 있게 하는 비상업 자원봉사 프로젝트입니다.",

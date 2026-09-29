@@ -13,8 +13,18 @@ export const siteName = "SUPER PEOPLE Revival";
 export const localeUrl = (locale: Locale, page: PagePath = "") =>
   locale === "en" && !page ? siteUrl : `${siteUrl}${localeHref(locale, page)}`;
 
+// Preview image links carry a version (?v=): the deploy's commit, plus what the image shows when it
+// changes on its own (the servers' status, an item's score). Browsers and apps like Discord keep an
+// image for hours under the same link; a new version is a new link, so they fetch the new image.
+const build = (process.env.VERCEL_GIT_COMMIT_SHA ?? "").slice(0, 7);
+const versioned = (path: string, live = "") => {
+  const version = [build, live].filter(Boolean).join("-");
+  return version ? `${path}?v=${version}` : path;
+};
+
 // Home keeps its hand-made image; every other page has one built by app/og/[lang]/[image]/route.tsx.
-export const ogImagePath = (locale: Locale, page: PagePath = "") => (page ? `/og/${locale}${page}.png` : `/og/${locale}.jpg`);
+export const ogImagePath = (locale: Locale, page: PagePath = "", live = "") =>
+  versioned(page ? `/og/${locale}${page}.png` : `/og/${locale}.jpg`, live);
 
 export function languageAlternates(absolute = false, page: PagePath = "", suffix = ""): Record<string, string> {
   const link = (l: Locale) => (absolute ? localeUrl(l, page) : localeHref(l, page)) + suffix;
@@ -42,12 +52,13 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   }
 }
 
-// An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description led
-// by its score (upvotes minus downvotes) and comment count like a Reddit post, and a preview image
-// drawn from them (app/og/[lang]/item/[id]/route.tsx).
+// An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description (with a
+// capital first letter) and a preview image that also shows its score (upvotes minus downvotes) and
+// comment count like a Reddit post (app/og/[lang]/item/[id]/route.tsx).
 export type SharedItem = { id: string; title: string; slug: string; preview: string; score: number; comments: number };
 
-export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null): Metadata {
+// live: what the page's image shows that changes between deploys (the servers' status), for its link.
+export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null, live = ""): Metadata {
   const d = dictionaries[locale];
   const t = d.seo;
   const info = localeInfo[locale];
@@ -56,13 +67,13 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const title = item ? `${item.title} - ${siteName}` : pageTitle;
   const suffix = item ? `/${item.id}${item.slug ? `/${item.slug}` : ""}` : "";
   const url = `${localeHref(locale, page)}${suffix}`;
-  const votes = item ? `▲ ${item.score} - 💬 ${item.comments}` : "";
-  const description = item ? [votes, item.preview].filter(Boolean).join(" - ") : sub ? sub.description : t.description;
+  const preview = item?.preview ? item.preview.charAt(0).toLocaleUpperCase(locale) + item.preview.slice(1) : "";
+  const description = preview || (sub ? sub.description : t.description);
   const share = item ? description : sub ? sub.description : t.shareDescription;
   const image = item
-    ? { url: `/og/${locale}/item/${item.id}.png`, width: 1200, height: 630, alt: item.title, type: "image/png" }
+    ? { url: versioned(`/og/${locale}/item/${item.id}.png`, `${item.score}.${item.comments}`), width: 1200, height: 630, alt: item.title, type: "image/png" }
     : sub
-      ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
+      ? { url: ogImagePath(locale, page, live), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
       : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
   return {
     metadataBase: new URL(siteUrl),

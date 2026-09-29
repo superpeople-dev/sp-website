@@ -473,7 +473,6 @@ export const en: Dictionary = {
     ],
     ogAlt: 'SUPER PEOPLE Community Revival: "They shut it down. So we rebuilt it." over the game\'s key art',
     ogHeadline: ["THEY SHUT IT DOWN.", "SO WE REBUILT IT."],
-    ogTagline: "SUPER PEOPLE  -  OPEN SOURCE",
     ogLabel: "COMMUNITY REVIVAL",
     orgDescription:
       "A non-commercial, volunteer-run project rebuilding the SUPER PEOPLE multiplayer backend so the game can be played on community servers.",

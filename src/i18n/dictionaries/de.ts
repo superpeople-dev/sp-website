@@ -472,7 +472,6 @@ export const de: Dictionary = {
     ],
     ogAlt: "SUPER PEOPLE Community-Revival: „Abgeschaltet. Also bauen wir es neu auf.“ über dem Artwork des Spiels",
     ogHeadline: ["ABGESCHALTET.", "ALSO BAUEN WIR ES NEU AUF."],
-    ogTagline: "SUPER PEOPLE  -  OPEN SOURCE",
     ogLabel: "COMMUNITY-REVIVAL",
     orgDescription:
       "Ein ehrenamtliches, nicht kommerzielles Projekt, das das Multiplayer-Backend von SUPER PEOPLE neu baut, damit das Spiel auf Community-Servern spielbar ist.",
