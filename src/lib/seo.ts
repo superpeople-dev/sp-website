@@ -52,12 +52,12 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const t = d.seo;
   const info = localeInfo[locale];
   const sub = page ? subpageSeo(locale, page) : null;
-  const pageTitle = sub ? `${sub.title} · ${siteName}` : t.title;
-  const title = item ? `${item.title} · ${siteName}` : pageTitle;
+  const pageTitle = sub ? `${sub.title} - ${siteName}` : t.title;
+  const title = item ? `${item.title} - ${siteName}` : pageTitle;
   const suffix = item ? `/${item.id}${item.slug ? `/${item.slug}` : ""}` : "";
   const url = `${localeHref(locale, page)}${suffix}`;
-  const votes = item ? `▲ ${item.score} · 💬 ${item.comments}` : "";
-  const description = item ? [votes, item.preview].filter(Boolean).join(" · ") : sub ? sub.description : t.description;
+  const votes = item ? `▲ ${item.score} - 💬 ${item.comments}` : "";
+  const description = item ? [votes, item.preview].filter(Boolean).join(" - ") : sub ? sub.description : t.description;
   const share = item ? description : sub ? sub.description : t.shareDescription;
   const image = item
     ? { url: `/og/${locale}/item/${item.id}.png`, width: 1200, height: 630, alt: item.title, type: "image/png" }
@@ -66,7 +66,7 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
       : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
   return {
     metadataBase: new URL(siteUrl),
-    title: item ? item.title : sub ? sub.title : { default: t.title, template: `%s · ${siteName}` },
+    title: item ? item.title : sub ? sub.title : { default: t.title, template: `%s - ${siteName}` },
     description,
     applicationName: siteName,
     keywords: t.keywords,

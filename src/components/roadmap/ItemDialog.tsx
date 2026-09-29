@@ -23,7 +23,7 @@ import {
 import { ideaLimits, ideaTypes } from "@/lib/site";
 import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
-import { Icon } from "../Icon";
+import { Icon, type IconName } from "../Icon";
 import { Modal } from "../Modal";
 import { Toast } from "../Toast";
 import type { EditValues, useAdmin } from "./admin";
@@ -41,6 +41,8 @@ type Thread = {
   comments: CommentView[];
   author: Author | null;
   media: MediaView[];
+  // Comments turned off by an admin: only admins who moderate comments can still post.
+  off: boolean;
 };
 
 type Props = {
@@ -73,10 +75,9 @@ export function ItemDialog(props: Props) {
   );
 }
 
-// The name and @username to show; the @username only when it adds something.
+// The name and @username to show, like "Gigeop @gigeop".
 function names(author: Pick<Author, "name" | "username">) {
-  const name = shownName(author.name, author.username);
-  return { name, user: author.username && author.username !== name ? author.username : null };
+  return { name: shownName(author.name, author.username), user: author.username || null };
 }
 
 // The item's link (the page with ?item=<id>): the phone's share sheet on touch screens, copied on desktop.
@@ -135,7 +136,8 @@ function ItemBody({
   const b = t.board;
   const r = t.ideas;
   const [ask, confirmDialog, askReason] = useConfirm();
-  const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [] });
+  const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [], off: false });
+  const [notice, setNotice] = useState({ show: false, text: "", icon: "check" as IconName });
   const [viewing, setViewing] = useState<MediaView | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [bannedIds, setBannedIds] = useState<string[]>([]);
@@ -157,8 +159,8 @@ function ItemBody({
     fetch(`/api/roadmap/comments?feedbackId=${encodeURIComponent(item.id)}`, { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error(String(response.status));
-        const data = (await response.json()) as { comments: CommentView[]; author: Author | null; media?: MediaView[] };
-        if (live) setThread({ status: "ready", comments: data.comments, author: data.author, media: data.media ?? [] });
+        const data = (await response.json()) as { comments: CommentView[]; author: Author | null; media?: MediaView[]; off?: boolean };
+        if (live) setThread({ status: "ready", comments: data.comments, author: data.author, media: data.media ?? [], off: data.off === true });
       })
       .catch(() => {
         if (live) setThread((current) => ({ ...current, status: "error" }));
@@ -167,6 +169,27 @@ function ItemBody({
       live = false;
     };
   }, [item.id, attempt]);
+
+  const flash = (text: string, icon: IconName = "check") => {
+    setNotice({ show: true, text, icon });
+    window.setTimeout(() => setNotice((current) => ({ ...current, show: false })), 2200);
+  };
+
+  const switchComments = async () => {
+    const off = !thread.off;
+    try {
+      const response = await fetch("/api/roadmap/comments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ feedbackId: item.id, off }),
+      });
+      if (!response.ok) throw new Error(String(response.status));
+      setThread((current) => ({ ...current, off }));
+      flash(off ? b.commentsOffDone : b.commentsOnDone, off ? "lock" : "comment");
+    } catch {
+      flash(b.actionFailed, "close");
+    }
+  };
 
   const retry = () => {
     setThread((current) => ({ ...current, status: "loading" }));
@@ -237,7 +260,11 @@ function ItemBody({
         body: JSON.stringify({ feedbackId: item.id, body }),
       });
       if (response.status === 401) return signIn(next);
-      if (response.status === 403) return setBlocked(true);
+      if (response.status === 403) {
+        const { error } = (await response.json().catch(() => ({}))) as { error?: string };
+        if (error === "off") return setThread((current) => ({ ...current, off: true }));
+        return setBlocked(true);
+      }
       if (!response.ok) throw new Error(String(response.status));
       const { comment } = (await response.json()) as { comment: CommentView };
       setThread((current) => ({ ...current, comments: [...current.comments, comment] }));
@@ -279,11 +306,12 @@ function ItemBody({
   // A banned person keeps their name, struck through and followed by "(banned)", with Discord's
   // default picture instead of theirs.
   const isBanned = (author: Author | null) => Boolean(author?.banned || (author?.id && bannedIds.includes(author.id)));
-  const banned = (name: string) => (
+  const banned = ({ name, user }: { name: string; user?: string | null }) => (
     <>
       <b className="is-banned">
         <s>{name}</s>
       </b>
+      {user && <span className="who__user">@{user}</span>}
       <span className="who__banned-tag">({t.admin.banned})</span>
     </>
   );
@@ -295,7 +323,7 @@ function ItemBody({
       return (
         <span className="who">
           <Avatar src={author.avatar} size={28} blank />
-          {banned(name)}
+          {banned({ name, user })}
         </span>
       );
     }
@@ -327,7 +355,7 @@ function ItemBody({
       <div className="comment__main">
         <div className="comment__head">
           {isBanned(comment.author) ? (
-            banned(commentAuthor(comment)?.name ?? "")
+            banned(commentAuthor(comment) ?? { name: "" })
           ) : (
             <>
               <b>{commentAuthor(comment)?.name ?? b.team}</b>
@@ -413,6 +441,13 @@ function ItemBody({
 
   const composer = () => {
     if (!authReady) return null;
+    const closed = thread.off && (
+      <p className="thread__closed" role="status">
+        <Icon name="lock" />
+        {canModerate ? b.commentsOffAdmin : b.commentsOffNotice}
+      </p>
+    );
+    if (closed && !canModerate) return closed;
     if (!viewer) {
       return (
         <div className="thread__signin">
@@ -433,38 +468,41 @@ function ItemBody({
       );
     }
     return (
-      <form className="composer" onSubmit={(e) => void post(e)}>
-        <Avatar src={viewer.avatar} size={36} />
-        <div className="composer__main">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) e.currentTarget.form?.requestSubmit();
-            }}
-            placeholder={b.commentPlaceholder}
-            aria-label={b.commentPlaceholder}
-            rows={3}
-            maxLength={ideaLimits.comment}
-            required
-          />
-          <div className="composer__foot">
-            {failed ? (
-              <span className="composer__error" role="status">
-                {b.commentFailed}
-              </span>
-            ) : (
-              <span className="composer__count">
-                {draft.length}/{ideaLimits.comment}
-              </span>
-            )}
-            <button type="submit" className="btn btn--primary btn--sm" disabled={sending || !draft.trim()}>
-              <Icon name="send" />
-              {sending ? b.commentPosting : b.commentPost}
-            </button>
+      <>
+        {closed}
+        <form className="composer" onSubmit={(e) => void post(e)}>
+          <Avatar src={viewer.avatar} size={36} />
+          <div className="composer__main">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) e.currentTarget.form?.requestSubmit();
+              }}
+              placeholder={b.commentPlaceholder}
+              aria-label={b.commentPlaceholder}
+              rows={3}
+              maxLength={ideaLimits.comment}
+              required
+            />
+            <div className="composer__foot">
+              {failed ? (
+                <span className="composer__error" role="status">
+                  {b.commentFailed}
+                </span>
+              ) : (
+                <span className="composer__count">
+                  {draft.length}/{ideaLimits.comment}
+                </span>
+              )}
+              <button type="submit" className="btn btn--primary btn--sm" disabled={sending || !draft.trim()}>
+                <Icon name="send" />
+                {sending ? b.commentPosting : b.commentPost}
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </>
     );
   };
 
@@ -486,8 +524,15 @@ function ItemBody({
         </div>
         <div className="sheet__actions">
           {mode === "view" && <ShareButton item={item} />}
-          {canManage && mode === "view" && (
-            <ItemMenu item={item} admin={admin} onEdit={() => onMode("edit")} removeLabel={removeLabel} />
+          {mode === "view" && (canManage || (canModerate && thread.status === "ready")) && (
+            <ItemMenu
+              item={item}
+              admin={admin}
+              onEdit={() => onMode("edit")}
+              removeLabel={removeLabel}
+              manage={canManage}
+              comments={thread.status === "ready" ? { off: thread.off, onToggle: () => void switchComments() } : undefined}
+            />
           )}
           <button type="button" className="icon-btn" onClick={onClose} aria-label={b.close} title={b.close}>
             <Icon name="close" />
@@ -584,6 +629,9 @@ function ItemBody({
         </div>
       )}
       {confirmDialog}
+      <Toast show={notice.show} icon={notice.icon}>
+        {notice.text}
+      </Toast>
     </>
   );
 }

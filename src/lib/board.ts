@@ -55,6 +55,8 @@ export type EventType =
   | "item.deleted"
   | "comment.posted"
   | "comment.deleted"
+  | "comments.off"
+  | "comments.on"
   | "media.deleted"
   | "user.banned"
   | "user.unbanned"
@@ -96,8 +98,12 @@ export const doneAt = (item: FeedbackItem) => item.completedAt ?? item.updatedAt
 // "letters" (Hangul fillers, blank braille, Khmer inherent vowels) people use for an invisible Discord name.
 const invisible = /[\s\p{Cc}\p{Cf}\p{Cn}\p{Co}\u115F\u1160\u17B4\u17B5\u2800\u3164\uFFA0]/gu;
 
-// The name to show: the display name, or the username when the display name is invisible.
-export const shownName = (name: string, username?: string) => (name.replace(invisible, "") ? name : username || name);
+// The name to show: the display name, or when it is invisible the username with a capital first letter
+// ("Gigeop", then "@gigeop" next to it).
+export const shownName = (name: string, username?: string) => {
+  if (name.replace(invisible, "") || !username) return name;
+  return username.charAt(0).toUpperCase() + username.slice(1);
+};
 
 // Items as the boards show them: voteCount is upvotes (Reflet) minus downvotes (lib/store.ts), and
 // hasDownvoted says whether the viewer downvoted (hasVoted stays "upvoted").

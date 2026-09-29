@@ -191,7 +191,7 @@ function AdminBody({
             </span>
             <div className="bans__who">
               <b>{item.title}</b>
-              <span>{[item.author, day.format(item.createdAt)].filter(Boolean).join(" · ")}</span>
+              <span>{[item.author, day.format(item.createdAt)].filter(Boolean).join(" - ")}</span>
             </div>
             <div className="admin-review__actions">
               <button type="button" className="btn btn--sm" disabled={busy === item.id} onClick={() => void approve(item)}>
@@ -223,7 +223,7 @@ function AdminBody({
             <div className="bans__who">
               <b>
                 {shownName(ban.name, ban.username)}
-                {ban.username && ban.username !== shownName(ban.name, ban.username) && <span className="who__user">@{ban.username}</span>}
+                {ban.username && <span className="who__user">@{ban.username}</span>}
               </b>
               <span>{fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}</span>
               {ban.reason && <q className="bans__reason">{ban.reason}</q>}
@@ -251,7 +251,10 @@ function AdminBody({
           <li key={member.id} className="staff__card">
             <Avatar src={member.avatar} size={40} />
             <div className="staff__who">
-              <b>{member.name}</b>
+              <span className="staff__name">
+                <b>{shownName(member.name, member.username)}</b>
+                {member.username && <span className="who__user">@{member.username}</span>}
+              </span>
               <span className="staff__perms">
                 {member.owner ? (
                   <span className="staff__owner">{a.owner}</span>
@@ -454,7 +457,7 @@ function StaffDialog({
           </fieldset>
           <div className="sheet-form__actions">
             {current && (
-              <button type="button" className="btn btn--sm btn--danger staff__remove" disabled={busy} onClick={() => void remove()}>
+              <button type="button" className="btn btn--sm staff__remove" disabled={busy} onClick={() => void remove()}>
                 <Icon name="trash" />
                 {a.remove}
               </button>

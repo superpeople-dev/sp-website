@@ -36,7 +36,7 @@ export async function adminCheck() {
   return (id: string, roleAdmin = false) => accessFrom(id, entries[id] ?? null, roleAdmin) !== null;
 }
 
-export type StaffMember = { id: string; name: string; avatar?: string; owner: boolean; permissions: Permission[] };
+export type StaffMember = { id: string; name: string; username?: string; avatar?: string; owner: boolean; permissions: Permission[] };
 
 // The admins tab: owners first, then everyone else by name, with their Discord picture when we have
 // one (from their last sign-in, or else from an idea or comment they posted).
@@ -53,7 +53,7 @@ export async function listStaff(): Promise<StaffMember[]> {
       const access = accessFrom(id, entries[id] ?? null, false);
       return access && { id, name, owner: access.owner, permissions: access.permissions };
     })
-    .filter((member): member is Omit<StaffMember, "avatar"> => member !== null);
+    .filter((member): member is Omit<StaffMember, "avatar" | "username"> => member !== null);
 
   const profiles = await profilesOf(members.map((member) => member.id));
   const missing = members.filter((member) => !profiles[member.id]);
@@ -61,6 +61,11 @@ export async function listStaff(): Promise<StaffMember[]> {
     for (const profile of await allAuthors()) if (!profiles[profile.id]) profiles[profile.id] = profile;
   }
   return members
-    .map((member) => ({ ...member, name: profiles[member.id]?.name || member.name, avatar: profiles[member.id]?.avatar }))
+    .map((member) => ({
+      ...member,
+      name: profiles[member.id]?.name || member.name,
+      username: profiles[member.id]?.username || undefined,
+      avatar: profiles[member.id]?.avatar,
+    }))
     .sort((a, b) => Number(b.owner) - Number(a.owner) || a.name.localeCompare(b.name));
 }

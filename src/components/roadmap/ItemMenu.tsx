@@ -11,11 +11,15 @@ import type { useAdmin } from "./admin";
 const stop = (e: SyntheticEvent) => e.stopPropagation();
 const items = (root: HTMLElement | null) => [...(root?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])];
 
+// manage: edit, move and delete (the "manage" permission). comments: turning the item's comments off
+// or back on, only where the comments are loaded (the item's dialog).
 export function ItemMenu({
   item,
   admin,
   onEdit,
   removeLabel,
+  manage = true,
+  comments,
   align = "right",
   className,
 }: {
@@ -23,6 +27,8 @@ export function ItemMenu({
   admin: ReturnType<typeof useAdmin>;
   onEdit: () => void;
   removeLabel?: string;
+  manage?: boolean;
+  comments?: { off: boolean; onToggle: () => void };
   align?: "left" | "right";
   className?: string;
 }) {
@@ -118,15 +124,19 @@ export function ItemMenu({
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.16, ease }}
           >
-            <button type="button" role="menuitem" onClick={() => run(onEdit)}>
-              <Icon name="edit" />
-              {t.board.edit}
-            </button>
-            <div className="item-menu__sep" role="separator" />
-            <p className="item-menu__label" aria-hidden="true">
-              {t.board.moveTo}
-            </p>
-            {destinations.map((destination) => {
+            {manage && (
+              <>
+                <button type="button" role="menuitem" onClick={() => run(onEdit)}>
+                  <Icon name="edit" />
+                  {t.board.edit}
+                </button>
+                <div className="item-menu__sep" role="separator" />
+                <p className="item-menu__label" aria-hidden="true">
+                  {t.board.moveTo}
+                </p>
+              </>
+            )}
+            {manage && destinations.map((destination) => {
               const current = item.status === destination.status;
               return (
                 <button
@@ -143,11 +153,24 @@ export function ItemMenu({
                 </button>
               );
             })}
-            <div className="item-menu__sep" role="separator" />
-            <button type="button" role="menuitem" className="is-danger" onClick={() => run(() => admin.remove(item, removeLabel))}>
-              <Icon name="trash" />
-              {removeLabel ?? t.board.remove}
-            </button>
+            {comments && (
+              <>
+                {manage && <div className="item-menu__sep" role="separator" />}
+                <button type="button" role="menuitem" onClick={() => run(comments.onToggle)}>
+                  <Icon name={comments.off ? "comment" : "lock"} />
+                  {comments.off ? t.board.commentsOn : t.board.commentsOff}
+                </button>
+              </>
+            )}
+            {manage && (
+              <>
+                <div className="item-menu__sep" role="separator" />
+                <button type="button" role="menuitem" className="is-danger" onClick={() => run(() => admin.remove(item, removeLabel))}>
+                  <Icon name="trash" />
+                  {removeLabel ?? t.board.remove}
+                </button>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

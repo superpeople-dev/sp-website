@@ -78,7 +78,7 @@ export function ServerList({ initial }: { initial: List }) {
 
   const place = (srv: GameServer) =>
     srv.country
-      ? [nameOf(srv.country), srv.continent && s.continents[srv.continent]].filter(Boolean).join(" · ")
+      ? [nameOf(srv.country), srv.continent && s.continents[srv.continent]].filter(Boolean).join(" - ")
       : srv.continent
         ? s.continents[srv.continent]
         : s.unknownLocation;
@@ -135,7 +135,7 @@ export function ServerList({ initial }: { initial: List }) {
                     <span className="server__tag">{s.modes[srv.mode]}</span>
                     <span className="server__tag">{s.views[srv.view]}</span>
                   </div>
-                  {details(srv).length > 0 && <p className="server__live">{details(srv).join(" · ")}</p>}
+                  {details(srv).length > 0 && <p className="server__live">{details(srv).join(" - ")}</p>}
                 </li>
               ))}
             </ul>

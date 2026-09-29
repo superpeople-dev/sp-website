@@ -71,6 +71,8 @@ export async function announce(event: ActivityEvent) {
       { label: "Comment deleted", color: colors.red, ...onItem, description: event.text, fields: [by, ...(who ? [{ ...who, name: "Written by" }] : [])] },
     ],
     "media.deleted": ["moderation", { label: "File removed", color: colors.red, ...onItem, fields: [by] }],
+    "comments.off": ["moderation", { label: "Comments turned off", color: colors.grey, ...onItem, fields: [by] }],
+    "comments.on": ["moderation", { label: "Comments turned back on", color: colors.green, ...onItem, fields: [by] }],
     "user.banned": [
       "moderation",
       { label: "User banned", color: colors.red, description: person(event.user), fields: [by, { name: "Reason", value: event.text || "?", inline: false }] },

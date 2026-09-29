@@ -273,6 +273,12 @@ export type Dictionary = {
     unban: string;
     bannedOn: string;
     bannedNotice: string;
+    commentsOff: string;
+    commentsOn: string;
+    commentsOffNotice: string;
+    commentsOffAdmin: string;
+    commentsOffDone: string;
+    commentsOnDone: string;
     more: string;
     moveTo: string;
     deleteMedia: string;

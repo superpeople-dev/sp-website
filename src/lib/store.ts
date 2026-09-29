@@ -143,3 +143,15 @@ export const saveEvent = (event: ActivityEvent) =>
 
 export const readEvents = () =>
   attempt("event list", [] as ActivityEvent[], (client) => client.lrange<ActivityEvent>(eventsKey, 0, keptEvents - 1));
+
+// Items whose comments an admin turned off: nobody but admins can add more.
+const lockedKey = "sp:comments-off";
+
+export const commentsOff = (itemId: string) =>
+  attempt("comments lock check", false, async (client) => (await client.sismember(lockedKey, itemId)) === 1);
+
+export async function setCommentsOff(itemId: string, off: boolean) {
+  if (!redis) throw new Error("Store is not configured");
+  if (off) await redis.sadd(lockedKey, itemId);
+  else await redis.srem(lockedKey, itemId);
+}

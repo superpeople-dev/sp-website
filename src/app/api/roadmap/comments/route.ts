@@ -7,7 +7,7 @@ import { addComment, deleteComment, failure, getIdea, listComments, listMedia, r
 import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits, mediaLimits } from "@/lib/site";
 import { adminCheck } from "@/lib/staff";
-import { authorsOf, isBanned, listBans, profileOf, rememberAuthor, type Profile } from "@/lib/store";
+import { authorsOf, commentsOff, isBanned, listBans, profileOf, rememberAuthor, setCommentsOff, storeReady, type Profile } from "@/lib/store";
 
 const noStore = { "Cache-Control": "no-store" };
 
@@ -40,7 +40,12 @@ export async function GET(request: NextRequest) {
   if (!feedbackId) return Response.json({ error: "invalid" }, { status: 400 });
   const viewer = await readSession(request);
   try {
-    const [comments, files, people] = await Promise.all([listComments(feedbackId), listMedia(feedbackId).catch(() => []), checks()]);
+    const [comments, files, people, off] = await Promise.all([
+      listComments(feedbackId),
+      listMedia(feedbackId).catch(() => []),
+      checks(),
+      commentsOff(feedbackId),
+    ]);
     const media: MediaView[] = files
       .filter((file) => file.url && mediaLimits.types.includes(file.mimeType))
       .sort((a, b) => a.createdAt - b.createdAt)
@@ -56,7 +61,7 @@ export async function GET(request: NextRequest) {
       replies: (comment.replies ?? []).map(view),
     });
     return Response.json(
-      { author: authorView(authors[feedbackId], null, showId, people), comments: comments.map(view), media },
+      { author: authorView(authors[feedbackId], null, showId, people), comments: comments.map(view), media, off },
       { headers: noStore },
     );
   } catch (error) {
@@ -73,6 +78,8 @@ export async function POST(request: NextRequest) {
   const feedbackId = typeof body.feedbackId === "string" ? body.feedbackId : "";
   const text = typeof body.body === "string" ? body.body.trim() : "";
   if (!feedbackId || !text || text.length > ideaLimits.comment) return Response.json({ error: "invalid" }, { status: 400 });
+  // Comments turned off: only admins who moderate comments can still answer.
+  if (!can(user, "comments") && (await commentsOff(feedbackId))) return Response.json({ error: "off" }, { status: 403 });
   try {
     const id = await addComment(feedbackId, text, await userToken(user));
     const profile = profileOf(user);
@@ -91,6 +98,28 @@ export async function POST(request: NextRequest) {
     return Response.json({ comment });
   } catch (error) {
     return failure("comment", error);
+  }
+}
+
+// Turning an item's comments off (or back on): admins who moderate comments or manage items.
+export async function PATCH(request: NextRequest) {
+  if (!sameOrigin(request)) return Response.json({ error: "forbidden" }, { status: 403 });
+  const user = await readSession(request);
+  if (!user || !(can(user, "comments") || can(user, "manage"))) return Response.json({ error: "forbidden" }, { status: user ? 403 : 401 });
+  if (!storeReady) return Response.json({ error: "store" }, { status: 503 });
+  const body = (await request.json().catch(() => ({}))) as { feedbackId?: unknown; off?: unknown };
+  const feedbackId = typeof body.feedbackId === "string" ? body.feedbackId : "";
+  if (!feedbackId || typeof body.off !== "boolean") return Response.json({ error: "invalid" }, { status: 400 });
+  try {
+    await setCommentsOff(feedbackId, body.off);
+    const item = await getIdea(feedbackId, 60).catch(() => null);
+    await logEvent(user, {
+      type: body.off ? "comments.off" : "comments.on",
+      item: item ? { id: feedbackId, title: item.title, status: item.status } : undefined,
+    });
+    return Response.json({ off: body.off });
+  } catch (error) {
+    return failure("comments switch", error);
   }
 }
 

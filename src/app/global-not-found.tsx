@@ -7,7 +7,7 @@ const body = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variabl
 const display = Barlow_Condensed({ subsets: ["latin"], weight: ["700", "900"], variable: "--font-display" });
 
 export const metadata: Metadata = {
-  title: "Page not found · SUPER PEOPLE Revival",
+  title: "Page not found - SUPER PEOPLE Revival",
   robots: { index: false, follow: true },
 };
 

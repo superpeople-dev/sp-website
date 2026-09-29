@@ -14,7 +14,7 @@ export const ogColors = { ink: "#0a0a0c", paper: "#f4f1ee", dim: "#d9d4cf", mute
 export async function googleFont(family: string, weight: number, text: string) {
   // Digits and a few signs are always asked for too: a text with no glyph of this font at all (a
   // Japanese title from a Latin font) gets no font back.
-  const glyphs = `${text} 0123456789·…`;
+  const glyphs = `${text} 0123456789-…`;
   const url = `https://fonts.googleapis.com/css2?family=${family.replaceAll(" ", "+")}:wght@${weight}&text=${encodeURIComponent(glyphs)}`;
   let problem = "";
   for (let attempt = 0; attempt < 3; attempt++) {

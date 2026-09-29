@@ -119,6 +119,7 @@ const paths = {
   board: <path {...stroke} strokeWidth={2} d="M4 4.5h4v15H4zM10 4.5h4v10h-4zM16 4.5h4v6h-4z" />,
   done: <path {...stroke} strokeWidth={2} d="M20 12a8 8 0 1 1-8-8M8.5 11.5l3 3L20 6" />,
   comment: <path {...stroke} strokeWidth={2} d="M20 11.5a7.5 7.5 0 0 1-10.8 6.7L4.5 19.5l1.3-4.2A7.5 7.5 0 1 1 20 11.5Z" />,
+  lock: <path {...stroke} strokeWidth={2} d="M5.5 10.5h13v10h-13zM8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3M12 14.5v2" />,
   logout: <path {...stroke} strokeWidth={2} d="M15 16.5 19.5 12 15 7.5M19.5 12H9M12 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6" />,
   discord: (
     <path

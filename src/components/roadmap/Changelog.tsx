@@ -27,7 +27,7 @@ export function Changelog({ entries, t, locale }: { entries: ChangelogEntry[]; t
                   {entry.description && <p>{entry.description}</p>}
                   {entry.feedback.length > 0 && (
                     <p className="change__related">
-                      {t.related}: {entry.feedback.map((f) => f.title).join(" · ")}
+                      {t.related}: {entry.feedback.map((f) => f.title).join(" - ")}
                     </p>
                   )}
                 </div>
