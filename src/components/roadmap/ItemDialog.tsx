@@ -134,7 +134,7 @@ function ItemBody({
   const { locale, t } = useI18n();
   const b = t.board;
   const r = t.ideas;
-  const [ask, confirmDialog] = useConfirm();
+  const [ask, confirmDialog, askReason] = useConfirm();
   const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [] });
   const [viewing, setViewing] = useState<MediaView | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -184,19 +184,21 @@ function ItemBody({
     Boolean(viewer?.canBan && author?.id && author.id !== viewer.id && !author.admin);
 
   const banAuthor = async (author: Author & { id: string }) => {
-    const ok = await ask({
-      title: fill(b.banTitle, { name: author.name }),
+    const name = names(author).name;
+    const reason = await askReason({
+      title: fill(b.banTitle, { name }),
       body: b.banBody,
       confirm: b.banYes,
       cancel: b.cancel,
       icon: "ban",
       danger: true,
+      reason: { label: b.banReason, placeholder: b.banReasonHint },
     });
-    if (!ok) return;
+    if (!reason) return;
     const response = await fetch("/api/admin/bans", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "ban", user: author }),
+      body: JSON.stringify({ action: "ban", user: { ...author, name }, reason }),
     }).catch(() => null);
     if (!response?.ok) return window.alert(b.actionFailed);
     setBannedIds((ids) => [...ids, author.id]);

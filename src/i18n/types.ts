@@ -263,6 +263,8 @@ export type Dictionary = {
     linkCopied: string;
     banTitle: string;
     banBody: string;
+    banReason: string;
+    banReasonHint: string;
     banYes: string;
     banned: string;
     bansOpen: string;

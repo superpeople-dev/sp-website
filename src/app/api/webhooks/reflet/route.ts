@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
+import { itemPath } from "@/lib/board";
 import { getIdea, refletTag } from "@/lib/reflet";
 import { reporterIds } from "@/lib/reporters";
 import { siteUrl } from "@/lib/seo";
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
         {
           author: { name: announcement.label },
           title: clip(feedback.title, 256),
-          url: `${siteUrl}${announcement.path}`,
+          url: `${siteUrl}${feedback.id ? itemPath(announcement.path, { id: feedback.id, title: feedback.title }) : announcement.path}`,
           description: description ? clip(description, 400) : undefined,
           color: announcement.color,
           fields: fields.length ? fields : undefined,

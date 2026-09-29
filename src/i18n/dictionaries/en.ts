@@ -377,6 +377,8 @@ export const en: Dictionary = {
     linkCopied: "Link copied",
     banTitle: "Ban {name}?",
     banBody: "They won't be able to post ideas, vote or comment. You can undo this from the banned players list.",
+    banReason: "Reason",
+    banReasonHint: "Why? Other admins will see this.",
     banYes: "Yes, ban",
     banned: "Banned",
     bansOpen: "Bans",

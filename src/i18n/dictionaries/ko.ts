@@ -377,6 +377,8 @@ export const ko: Dictionary = {
     linkCopied: "링크를 복사했어요",
     banTitle: "{name} 님을 차단할까요?",
     banBody: "아이디어 게시, 투표, 댓글 작성을 할 수 없게 됩니다. 차단된 플레이어 목록에서 되돌릴 수 있습니다.",
+    banReason: "사유",
+    banReasonHint: "이유를 적어 주세요. 다른 관리자도 볼 수 있어요.",
     banYes: "차단",
     banned: "차단됨",
     bansOpen: "차단 목록",

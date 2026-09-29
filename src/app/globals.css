@@ -1735,6 +1735,11 @@ button.votes__down:disabled { cursor: default; }
 .is-banned { color: var(--muted); }
 .is-banned s { text-decoration-thickness: 2px; text-decoration-color: var(--signal); }
 .who__banned-tag { color: var(--signal-hi); font-size: 14px; }
+.bans__reason { color: var(--paper-dim); font-size: 14px; font-style: italic; overflow-wrap: anywhere; }
+/* A question that needs a written answer (a ban's reason). */
+.confirm__reason { display: grid; gap: 6px; margin-top: 16px; color: var(--muted); font: 700 12px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.confirm__reason textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ink); color: var(--paper); font: 15px/1.45 var(--body); letter-spacing: normal; text-transform: none; resize: vertical; }
+.confirm__reason textarea:focus { outline: none; border-color: var(--signal); }
 
 .thread { margin-top: 32px; padding: 0; }
 .thread__title { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 20px; letter-spacing: 0.08em; }

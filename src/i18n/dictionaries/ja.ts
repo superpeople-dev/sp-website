@@ -377,6 +377,8 @@ export const ja: Dictionary = {
     linkCopied: "リンクをコピーしました",
     banTitle: "{name} を BAN しますか？",
     banBody: "このプレイヤーはアイデアの投稿、投票、コメントができなくなります。BAN したプレイヤーの一覧から取り消せます。",
+    banReason: "理由",
+    banReasonHint: "理由を書いてください。他の管理者にも表示されます。",
     banYes: "BAN する",
     banned: "BAN 済み",
     bansOpen: "BAN 一覧",

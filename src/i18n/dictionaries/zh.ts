@@ -375,6 +375,8 @@ export const zh: Dictionary = {
     linkCopied: "链接已复制",
     banTitle: "封禁 {name}？",
     banBody: "对方将无法发布想法、投票或评论。你可以在封禁玩家列表中撤销。",
+    banReason: "原因",
+    banReasonHint: "为什么封禁？其他管理员会看到。",
     banYes: "确认封禁",
     banned: "已封禁",
     bansOpen: "封禁列表",

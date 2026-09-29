@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { eventRanges, type ActivityEvent, type EventRange } from "./board";
+import { announce } from "./discord";
 import type { SessionUser } from "./session";
 import { readEvents, saveEvent } from "./store";
 
@@ -8,14 +10,17 @@ import { readEvents, saveEvent } from "./store";
 
 type NewEvent = Omit<ActivityEvent, "id" | "at" | "actor">;
 
-// Adds a line to the log. Never fails the action it records.
+// Adds a line to the log, and posts it on Discord (lib/discord.ts) once the response is sent. Never
+// fails the action it records.
 export async function logEvent(actor: Pick<SessionUser, "id" | "name" | "avatar">, event: NewEvent) {
-  await saveEvent({
+  const entry: ActivityEvent = {
     id: crypto.randomUUID(),
     at: Date.now(),
     actor: { id: actor.id, name: actor.name, avatar: actor.avatar },
     ...event,
-  });
+  };
+  await saveEvent(entry);
+  after(() => announce(entry));
 }
 
 export { eventRanges, type EventRange };

@@ -377,6 +377,8 @@ export const hi: Dictionary = {
     linkCopied: "लिंक कॉपी हो गया",
     banTitle: "{name} को बैन करें?",
     banBody: "वे आइडिया पोस्ट नहीं कर पाएँगे, वोट या कमेंट भी नहीं। आप बैन किए गए खिलाड़ियों की सूची से इसे वापस ले सकते हैं।",
+    banReason: "कारण",
+    banReasonHint: "क्यों? दूसरे एडमिन यह देखेंगे।",
     banYes: "हाँ, बैन करें",
     banned: "बैन",
     bansOpen: "बैन",

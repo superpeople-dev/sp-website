@@ -226,6 +226,7 @@ function AdminBody({
                 {ban.username && ban.username !== shownName(ban.name, ban.username) && <span className="who__user">@{ban.username}</span>}
               </b>
               <span>{fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}</span>
+              {ban.reason && <q className="bans__reason">{ban.reason}</q>}
             </div>
             <button type="button" className="btn btn--sm" disabled={busy === ban.id} onClick={() => void unban(ban)}>
               {b.unban}

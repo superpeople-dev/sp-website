@@ -14,15 +14,28 @@ type Request = {
   icon?: IconName;
   danger?: boolean;
   discord?: boolean;
-  resolve: (value: boolean) => void;
+  // A text the person must give (a ban's reason): confirming stays off until they write one.
+  reason?: { label: string; placeholder?: string };
+  resolve: (value: boolean, text?: string) => void;
 };
 
 export type ConfirmOptions = Omit<Request, "resolve">;
+export type ReasonOptions = ConfirmOptions & { reason: NonNullable<Request["reason"]> };
+
+const minReason = 3;
 
 const subscribe = () => () => {};
 
-function Dialog({ request, onClose }: { request: Request | null; onClose: (value: boolean) => void }) {
+function Dialog({ request, onClose }: { request: Request | null; onClose: (value: boolean, text?: string) => void }) {
   const client = useSyncExternalStore(subscribe, () => true, () => false);
+  const [text, setText] = useState("");
+  const [shown, setShown] = useState(request);
+  // Each question starts with an empty reason.
+  if (request !== shown) {
+    setShown(request);
+    setText("");
+  }
+  const missing = Boolean(request?.reason) && text.trim().length < minReason;
 
   useEffect(() => {
     if (!request) return;
@@ -63,6 +76,20 @@ function Dialog({ request, onClose }: { request: Request | null; onClose: (value
             )}
             <h2 id="confirm-title">{request.title}</h2>
             {request.body && <p id="confirm-body">{request.body}</p>}
+            {request.reason && (
+              <label className="confirm__reason">
+                <span>{request.reason.label}</span>
+                <textarea
+                  value={text}
+                  onChange={(event) => setText(event.target.value)}
+                  placeholder={request.reason.placeholder}
+                  maxLength={300}
+                  rows={3}
+                  required
+                  autoFocus
+                />
+              </label>
+            )}
             <div className="confirm__actions">
               <button type="button" className="btn" onClick={() => onClose(false)}>
                 {request.cancel}
@@ -70,8 +97,9 @@ function Dialog({ request, onClose }: { request: Request | null; onClose: (value
               <button
                 type="button"
                 className={`btn ${request.danger ? "btn--danger" : request.discord ? "btn--discord" : "btn--primary"}`}
-                onClick={() => onClose(true)}
-                autoFocus
+                onClick={() => onClose(true, text.trim())}
+                disabled={missing}
+                autoFocus={!request.reason}
               >
                 {request.discord && <Icon name="discord" />}
                 {request.confirm}
@@ -85,17 +113,27 @@ function Dialog({ request, onClose }: { request: Request | null; onClose: (value
   );
 }
 
-export function useConfirm(): [(options: ConfirmOptions) => Promise<boolean>, ReactNode] {
+// ask: yes or no. askReason: the text they gave, or null when they cancelled.
+export function useConfirm(): [
+  (options: ConfirmOptions) => Promise<boolean>,
+  ReactNode,
+  (options: ReasonOptions) => Promise<string | null>,
+] {
   const id = useId();
   const [request, setRequest] = useState<Request | null>(null);
   const ask = useCallback((options: ConfirmOptions) => new Promise<boolean>((resolve) => setRequest({ ...options, resolve })), []);
+  const askReason = useCallback(
+    (options: ReasonOptions) =>
+      new Promise<string | null>((resolve) => setRequest({ ...options, resolve: (ok, text) => resolve(ok && text ? text : null) })),
+    [],
+  );
   const close = useCallback(
-    (value: boolean) =>
+    (value: boolean, text?: string) =>
       setRequest((current) => {
-        current?.resolve(value);
+        current?.resolve(value, text);
         return null;
       }),
     [],
   );
-  return [ask, <Dialog key={id} request={request} onClose={close} />];
+  return [ask, <Dialog key={id} request={request} onClose={close} />, askReason];
 }

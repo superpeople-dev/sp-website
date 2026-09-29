@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   const user = await readSession(request);
   if (!user || !can(user, "bans")) return Response.json({ error: "forbidden" }, { status: user ? 403 : 401 });
   if (!storeReady) return Response.json({ error: "store" }, { status: 503 });
-  const body = (await request.json().catch(() => ({}))) as { action?: unknown; user?: Record<string, unknown> };
+  const body = (await request.json().catch(() => ({}))) as { action?: unknown; user?: Record<string, unknown>; reason?: unknown };
   const id = text(body.user?.id, 32);
   if (!/^\d{5,32}$/.test(id)) return Response.json({ error: "invalid" }, { status: 400 });
   const name = text(body.user?.name, 100) || id;
@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
       await unban(id);
       await logEvent(user, { type: "user.unbanned", user: { id, name } });
     } else if (body.action === "ban") {
+      // A ban needs a reason, which other admins see.
+      const reason = text(body.reason, 300).trim();
+      if (reason.length < 3) return Response.json({ error: "reason" }, { status: 400 });
       // Admins can't be banned (an owner removes them from the admins first).
       if (id === user.id || (await accessOf(id))) return Response.json({ error: "protected" }, { status: 400 });
       await ban({
@@ -37,8 +40,9 @@ export async function POST(request: NextRequest) {
         avatar: text(body.user?.avatar, 300),
         by: user.name,
         at: Date.now(),
+        reason,
       });
-      await logEvent(user, { type: "user.banned", user: { id, name } });
+      await logEvent(user, { type: "user.banned", user: { id, name }, text: reason });
     } else {
       return Response.json({ error: "invalid" }, { status: 400 });
     }

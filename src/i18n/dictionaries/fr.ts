@@ -377,6 +377,8 @@ export const fr: Dictionary = {
     linkCopied: "Lien copié",
     banTitle: "Bannir {name} ?",
     banBody: "Ce joueur ne pourra plus publier d'idées, voter ni commenter. Vous pourrez annuler depuis la liste des joueurs bannis.",
+    banReason: "Raison",
+    banReasonHint: "Pourquoi ? Les autres admins la verront.",
     banYes: "Oui, bannir",
     banned: "Banni",
     bansOpen: "Bannis",

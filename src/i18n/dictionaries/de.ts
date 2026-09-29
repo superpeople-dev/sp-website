@@ -377,6 +377,8 @@ export const de: Dictionary = {
     linkCopied: "Link kopiert",
     banTitle: "{name} sperren?",
     banBody: "Die Person kann dann keine Ideen mehr posten, abstimmen oder kommentieren. Du kannst das in der Liste der gesperrten Spieler rückgängig machen.",
+    banReason: "Grund",
+    banReasonHint: "Warum? Die anderen Admins sehen das.",
     banYes: "Ja, sperren",
     banned: "Gesperrt",
     bansOpen: "Sperren",

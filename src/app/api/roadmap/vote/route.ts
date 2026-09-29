@@ -1,5 +1,6 @@
 import { revalidateTag } from "next/cache";
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
+import { announceVote } from "@/lib/discord";
 import { failure, getIdeaFor, refletTag, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { downvoteCounts, hasDownvoted, isBanned, setDownvote, storeReady } from "@/lib/store";
@@ -42,7 +43,12 @@ export async function POST(request: NextRequest) {
     }
     downvotes ??= (await downvoteCounts([feedbackId]))[feedbackId] ?? 0;
     revalidateTag(refletTag, "max");
-    return Response.json({ voteCount: upvotes - downvotes, voted: up, downvoted: down });
+    const score = upvotes - downvotes;
+    // Discord hears about votes given, not taken back.
+    if ((direction === "up" && up) || (direction === "down" && down)) {
+      after(() => announceVote(user, { id: feedbackId, title: item.title, status: item.status }, direction, score));
+    }
+    return Response.json({ voteCount: score, voted: up, downvoted: down });
   } catch (error) {
     return failure("vote", error);
   }

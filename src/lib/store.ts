@@ -9,7 +9,7 @@ const redis = url && token ? new Redis({ url, token }) : null;
 export const storeReady = redis !== null;
 
 export type Profile = { id: string; name: string; username: string; avatar: string; admin: boolean };
-export type Ban = Omit<Profile, "admin"> & { by: string; at: number };
+export type Ban = Omit<Profile, "admin"> & { by: string; at: number; reason?: string };
 
 const bansKey = "sp:bans";
 const authorsKey = "sp:authors";

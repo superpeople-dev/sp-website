@@ -377,6 +377,8 @@ export const es: Dictionary = {
     linkCopied: "Enlace copiado",
     banTitle: "¿Bloquear a {name}?",
     banBody: "No podrá publicar ideas, votar ni comentar. Puedes deshacerlo desde la lista de jugadores bloqueados.",
+    banReason: "Motivo",
+    banReasonHint: "¿Por qué? Los demás admins lo verán.",
     banYes: "Sí, bloquear",
     banned: "Bloqueado",
     bansOpen: "Bloqueos",
