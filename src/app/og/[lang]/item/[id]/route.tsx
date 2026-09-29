@@ -10,7 +10,9 @@ import { downvoteCounts } from "@/lib/store";
 // comments. Drawn on request (votes change), kept by the CDN for five minutes: /og/<lang>/item/<id>.png.
 
 const art: Record<BoardPage, string> = { "/ideas": "powers", "/roadmap": "vehicle", "/completed": "tower" };
-const statusColor: Record<string, string> = { open: c.dim, planned: "#f0b719", in_progress: "#ff6d5e", completed: "#3ddc84" };
+// The status is a filled badge: red for open ideas, light text on red and dark text on the lighter colours.
+const statusColor: Record<string, string> = { open: c.red, planned: "#f0b719", in_progress: "#ff6d5e", completed: "#3ddc84" };
+const statusText: Record<string, string> = { open: c.paper, planned: c.ink, in_progress: c.ink, completed: c.ink };
 
 const titleSize = (title: string) => (title.length <= 28 ? 92 : title.length <= 50 ? 76 : title.length <= 80 ? 62 : 54);
 const cut = (text: string, length: number) => (text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text);
@@ -82,10 +84,10 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[lang
             <div
               style={{
                 marginLeft: "auto",
-                padding: "6px 14px",
-                border: `2px solid ${statusColor[item.status] ?? c.dim}`,
+                padding: "8px 16px",
                 borderRadius: 4,
-                color: statusColor[item.status] ?? c.dim,
+                background: statusColor[item.status] ?? c.red,
+                color: statusText[item.status] ?? c.paper,
                 fontSize: 24,
                 fontWeight: 700,
                 letterSpacing: 2,
