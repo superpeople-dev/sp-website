@@ -5,7 +5,7 @@ import { logEvent } from "@/lib/events";
 import { createIdea, failure, getIdeaFor, getTags, refletTag, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { isOffensive, offensiveName } from "@/lib/moderation";
-import { ideaLimits } from "@/lib/site";
+import { ideaLimits, ideaTypes } from "@/lib/site";
 import { isBanned, profileOf, rememberAuthor } from "@/lib/store";
 
 export async function POST(request: NextRequest) {
@@ -23,12 +23,17 @@ export async function POST(request: NextRequest) {
   if (title.length < 3 || title.length > ideaLimits.title || description.length > ideaLimits.description) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
+  // A type and a platform are both required: one of lib/site.ts ideaTypes, and a category id or "other".
+  const typed = ideaTypes.some((type) => type.slug === body.type);
+  if (!typed || typeof body.platform !== "string" || !body.platform) return Response.json({ error: "invalid" }, { status: 400 });
   if (isOffensive(title) || isOffensive(description)) return Response.json({ error: "offensive" }, { status: 422 });
   try {
     const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
     const tagId = types.find((type) => type.slug === body.type)?.id;
-    // The platform (Launcher, Game, …) is one of Reflet's categories; "Other" sends none.
+    // The platform (Launcher, Game, …) is one of Reflet's categories; "other" is none of them. Without
+    // the categories (Reflet didn't answer), any platform goes through untagged.
     const platformId = categories.find((category) => category.id === body.platform)?.id;
+    if (!platformId && body.platform !== "other" && categories.length) return Response.json({ error: "invalid" }, { status: 400 });
     const token = await userToken(user);
     const { feedbackId } = await createIdea(title, description, token, tagId);
     await Promise.all([

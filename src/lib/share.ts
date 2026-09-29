@@ -7,7 +7,7 @@ import { getIdea, safely } from "./reflet";
 import type { SharedItem } from "./seo";
 import { authorsOf, downvoteCounts } from "./store";
 
-// Item pages: /ideas/<id>/<slug>, /roadmap/<id>/<slug>, /completed/<id>/<slug> show that board with
+// Item pages: /bugs-and-ideas/<id>/<slug>, /roadmap/<id>/<slug>, /completed/<id>/<slug> show that board with
 // the item's dialog open, and have the item's own title, description and preview image.
 
 export type BoardPage = BoardPath;

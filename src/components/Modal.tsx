@@ -73,7 +73,7 @@ export function Modal({
       const roots = document.querySelectorAll(".sheet-root");
       const top = roots[roots.length - 1];
       if (top && panel.current && !top.contains(panel.current)) return;
-      if (e.key === "Escape" && !document.querySelector(".confirm-root, .item-menu.is-open, .lightbox")) onClose();
+      if (e.key === "Escape" && !document.querySelector(".confirm-root, .item-menu.is-open, .dropdown.is-open, .lightbox")) onClose();
     };
     document.addEventListener("keydown", onKey);
     return () => {

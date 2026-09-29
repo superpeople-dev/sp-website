@@ -11,7 +11,7 @@ type Payload = { event?: string; data?: { feedback?: Partial<FeedbackItem> } };
 type Announcement = { label: string; color: number; path: string };
 
 const statusAnnouncements: Partial<Record<FeedbackStatus, Announcement>> = {
-  open: { label: "New idea", color: 0x8fb0ff, path: "/ideas" },
+  open: { label: "New idea", color: 0x8fb0ff, path: "/bugs-and-ideas" },
   planned: { label: "Added to the roadmap", color: 0xf0b719, path: "/roadmap" },
   in_progress: { label: "Moved to In progress", color: 0xef4438, path: "/roadmap" },
   completed: { label: "Completed", color: 0x3ddc84, path: "/completed" },

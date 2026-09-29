@@ -15,7 +15,7 @@ export const revalidate = 600;
 const subpages = [
   { path: "/servers", changeFrequency: "always", priority: 0.8 },
   { path: "/roadmap", changeFrequency: "daily", priority: 0.8 },
-  { path: "/ideas", changeFrequency: "daily", priority: 0.7 },
+  { path: "/bugs-and-ideas", changeFrequency: "daily", priority: 0.7 },
   { path: "/completed", changeFrequency: "weekly", priority: 0.7 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
@@ -30,7 +30,7 @@ function lastChange(path: PagePath, items: FeedbackItem[]) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Every public idea and roadmap item has its own page (/ideas/<id>/<slug> and so on).
+  // Every public idea and roadmap item has its own page (/bugs-and-ideas/<id>/<slug> and so on).
   const lists = await safely(() =>
     Promise.all((["open", "planned", "in_progress", "completed"] as const).map((status) => listByStatus(status))),
   );

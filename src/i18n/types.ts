@@ -119,10 +119,13 @@ export type Dictionary = {
     error: string;
     typeLabel: string;
     platformLabel: string;
+    typePlaceholder: string;
     platformPlaceholder: string;
     platforms: Record<"launcher" | "game" | "website" | "servers" | "other", string>;
     types: Record<IdeaType, string>;
     filterAll: string;
+    search: string;
+    noMatch: string;
     confirmTitle: string;
     confirmBody: string;
     confirmYes: string;

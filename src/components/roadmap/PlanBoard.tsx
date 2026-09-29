@@ -27,7 +27,7 @@ import { useVote } from "./useVote";
 import { WorkCard } from "./WorkCard";
 import { useItemUrl } from "./useItemUrl";
 
-const recentDone = 6;
+const recentDone = 3;
 
 type CardProps = Omit<Parameters<typeof WorkCard>[0], "drag" | "overlay">;
 

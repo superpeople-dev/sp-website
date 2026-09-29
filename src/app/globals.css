@@ -820,20 +820,59 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 }
 .ideas__sort button:hover { color: var(--paper); }
 .ideas__sort button.is-active { background: var(--surface-3); color: var(--paper); }
-/* Ideas toolbar. Desktop: filter, then sort and Suggest on the right, all on one row.
-   Phone: Suggest on its own full-width row, filter and sort under it. */
-.ideas__bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.ideas__end { display: flex; flex: none; align-items: center; gap: 10px; margin-left: auto; }
+/* Ideas toolbar, with Suggest on its own row above it. Desktop: the type and platform filters, the
+   sort next to them, the search on the right, one row; the filters give way first (their text is cut
+   with "…"). Phone: the two filters side by side, then the sort and the search. Nothing wraps. */
+.ideas__top { display: flex; margin-bottom: 14px; }
 .ideas__suggest { flex: none; }
-@media (max-width: 700px) {
-  .ideas__bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 8px; }
-  .ideas__end { display: contents; }
-  .ideas__suggest { grid-row: 1; grid-column: 1 / -1; width: 100%; }
-  .ideas__sort { grid-column: 2; }
-  .ideas__sort button { padding: 0 10px; font-size: 12px; letter-spacing: 0.08em; }
-  .ideas__bar .filter__btn { padding: 0 10px; }
-  .ideas__bar:not(:has(.filter)) .ideas__sort { grid-column: 1; justify-self: start; }
+.ideas__bar { position: relative; z-index: 5; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.ideas__filters { display: flex; flex: 0 1 auto; gap: 10px; min-width: 0; }
+.ideas__filter { flex: 0 1 auto; max-width: 240px; }
+.ideas__filter-btn { width: 100%; }
+.ideas__filter-btn span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ideas__filter-btn .ideas__chevron { width: 13px; height: 13px; margin-left: auto; color: var(--muted); }
+.ideas__search {
+  display: flex;
+  flex: 1 0 160px;
+  align-items: center;
+  gap: 10px;
+  max-width: 340px;
+  height: 38px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--muted);
+  transition: border-color 0.2s;
 }
+.ideas__search svg { width: 16px; height: 16px; flex: none; }
+.ideas__search input { width: 100%; min-width: 0; padding: 0; border: 0; outline: none; background: none; color: var(--paper); font: 15px/1.4 var(--body); }
+.ideas__search input::placeholder { color: var(--muted); }
+.ideas__search:hover { border-color: rgba(255, 248, 244, 0.3); }
+.ideas__search:has(input:focus) { border-color: var(--signal); }
+@media (max-width: 700px) {
+  .ideas__suggest { width: 100%; }
+  .ideas__bar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 8px; }
+  .ideas__filters { display: grid; grid-column: 1 / -1; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 8px; }
+  .ideas__filter { max-width: none; }
+  .ideas__bar .ideas__filter-btn { padding: 0 10px; }
+  .ideas__filter + .ideas__filter .dropdown__list { right: 0; left: auto; transform-origin: top right; }
+  .ideas__sort button { padding: 0 10px; font-size: 12px; letter-spacing: 0.08em; }
+  .ideas__search { max-width: none; margin-left: 0; }
+  /* 16px, so phones don't zoom in on it. */
+  .ideas__search input { font-size: 16px; }
+}
+/* The smallest phones: the sort gets its own row, so the search keeps room to type in. */
+@media (max-width: 360px) {
+  .ideas__bar { grid-template-columns: minmax(0, 1fr); }
+  .ideas__sort { display: flex; }
+  .ideas__sort button { flex: 1; }
+  .ideas__filter-btn svg:first-child { display: none; }
+}
+html[lang="ja"] .ideas__filter-btn,
+html[lang="ko"] .ideas__filter-btn,
+html[lang="zh-Hans"] .ideas__filter-btn { letter-spacing: 0.02em; }
 .ideas__sent {
   display: flex;
   align-items: flex-start;
@@ -854,7 +893,8 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
 .filter { display: flex; min-width: 0; }
 .filter__chips { display: flex; gap: 6px; }
 .filter__chips button,
-.filter__btn {
+.filter__btn,
+.ideas__filter-btn {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -873,11 +913,15 @@ html[lang="zh-Hans"] .page-head h1 { line-height: 1.15; }
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 .filter__chips button:hover,
-.filter__btn:hover { border-color: rgba(255, 248, 244, 0.3); color: var(--paper); }
+.filter__btn:hover,
+.ideas__filter-btn:hover,
+.ideas__filter.is-open .ideas__filter-btn { border-color: rgba(255, 248, 244, 0.3); color: var(--paper); }
 .filter__chips button.is-active,
-.filter__btn.is-active { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); color: var(--paper); }
+.filter__btn.is-active,
+.ideas__filter-btn.is-active { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); color: var(--paper); }
 .filter__chips svg,
-.filter__btn svg { width: 15px; height: 15px; flex: none; }
+.filter__btn svg,
+.ideas__filter-btn svg { width: 15px; height: 15px; flex: none; }
 .filter__btn { display: none; max-width: 100%; }
 .filter__btn span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .filter__btn svg:last-child { width: 13px; height: 13px; color: var(--muted); }
@@ -1148,7 +1192,12 @@ button.votes__down:disabled { cursor: default; }
 .picker__btn.is-empty { color: var(--muted); font: 400 16px var(--body); letter-spacing: 0; text-transform: none; }
 .picker__btn > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .picker__btn svg { width: 17px; height: 17px; flex: none; }
-.picker__btn .picker__chevron { margin-left: auto; color: var(--muted); }
+.picker__btn .picker__chevron { margin-left: auto; color: var(--muted); transition: transform 0.2s; }
+.picker__menu.is-open .picker__btn { border-color: var(--signal); }
+.picker__menu.is-open .picker__chevron { transform: rotate(180deg); }
+/* The form's lists are as wide as their field, with taller rows. */
+.picker__menu .dropdown__list { width: 100%; max-width: none; }
+.picker__menu .dropdown__list button { padding: 11px 12px; }
 .idea-form__note { margin: 0; color: var(--green); font-size: 15px; }
 .field-label { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .field-count { color: var(--muted); font: 600 12px var(--body); letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
@@ -1546,6 +1595,52 @@ button.votes__down:disabled { cursor: default; }
 .card .idea__tools { position: absolute; top: 14px; right: 14px; }
 .idea:has(.idea__tools) .idea__body h3 { padding-right: 40px; }
 .work__menu { margin-left: auto; }
+
+/* Dropdown: a button with its options listed right under it, like a select. Each one stacks on its
+   own (z-index 0), the open one above the rest; a list still fading out after closing lets clicks
+   through to what is under it (another dropdown's list, say). */
+.dropdown { position: relative; z-index: 0; min-width: 0; }
+.dropdown.is-open { z-index: 30; }
+.dropdown:not(.is-open) .dropdown__list { pointer-events: none; }
+.dropdown__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 40;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  min-width: 100%;
+  max-width: min(320px, calc(100vw - 32px));
+  max-height: min(360px, 60vh);
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+.dropdown__list--left { left: 0; transform-origin: top left; }
+.dropdown__list--right { right: 0; transform-origin: top right; }
+.dropdown__list button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--paper-dim);
+  font: 600 14.5px var(--body);
+  text-align: left;
+  cursor: pointer;
+}
+.dropdown__list button span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown__list button svg { width: 16px; height: 16px; flex: none; }
+.dropdown__list button:hover,
+.dropdown__list button:focus-visible { outline: none; background: var(--surface-3); color: var(--paper); }
+.dropdown__list button.is-active { color: var(--paper); }
+.dropdown__check { margin-left: auto; color: var(--signal-hi); }
 
 .item-menu { position: relative; flex: none; }
 .item-menu__pop {

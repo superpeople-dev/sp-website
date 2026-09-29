@@ -18,16 +18,16 @@ import { forBoard } from "@/lib/votes";
 import { authReady, currentSession, viewerOf } from "@/lib/session";
 import { isBanned, storeReady } from "@/lib/store";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/ideas/[[...item]]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/[lang]/bugs-and-ideas/[[...item]]">): Promise<Metadata> {
   const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
-  return pageMetadata(lang, "/ideas", await sharedPage(itemSegments(item)?.id));
+  return pageMetadata(lang, "/bugs-and-ideas", await sharedPage(itemSegments(item)?.id));
 }
 
-export default async function IdeasPage({ params, searchParams }: PageProps<"/[lang]/ideas/[[...item]]">) {
+export default async function IdeasPage({ params, searchParams }: PageProps<"/[lang]/bugs-and-ideas/[[...item]]">) {
   const { lang, item } = await params;
   if (!isLocale(lang)) notFound();
-  // An item page (/ideas/<id>/<slug>), or an old ?item=<id> link that is sent to one.
+  // An item page (/bugs-and-ideas/<id>/<slug>), or an old ?item=<id> link that is sent to one.
   const legacy = (await searchParams).item;
   const wanted = itemSegments(item) ?? (typeof legacy === "string" ? { id: legacy, slug: "?" } : null);
   const t = getDictionary(lang);
@@ -42,17 +42,17 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
   const board = ideas && (await forBoard([...ideas.items.filter((entry) => entry.status === "open"), ...(pending ?? [])], session?.id));
-  if (board) await settleItem(lang, "/ideas", wanted, (id) => board.find((entry) => entry.id === id));
+  if (board) await settleItem(lang, "/bugs-and-ideas", wanted, (id) => board.find((entry) => entry.id === id));
   // The item's page describes the item itself to search engines.
   const shared = wanted ? await sharedPage(wanted.id) : null;
 
   return (
     <>
-      <JsonLd data={pageStructuredData(lang, "/ideas", shared)} />
-      <Nav downloadUrl={release.downloadUrl} page="/ideas" />
+      <JsonLd data={pageStructuredData(lang, "/bugs-and-ideas", shared)} />
+      <Nav downloadUrl={release.downloadUrl} page="/bugs-and-ideas" />
       <main>
         <PageHead title={t.ideas.title} lead={t.ideas.lead} notice={ideas ? null : t.board.unavailable}>
-          {ideas && <AccountBar authReady={authReady} next={localeHref(lang, "/ideas")} viewer={viewer} />}
+          {ideas && <AccountBar authReady={authReady} next={localeHref(lang, "/bugs-and-ideas")} viewer={viewer} />}
         </PageHead>
         {board && (
           <IdeasBoard

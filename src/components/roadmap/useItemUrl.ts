@@ -7,7 +7,7 @@ import { itemPath } from "@/lib/board";
 export const pageUrl = () => window.location.origin + window.location.pathname;
 
 // The item whose dialog is open has its own address, <base>/<id>/<slug> (base is the board's path,
-// like /fr/ideas), so it can be shared and opens the same way for whoever follows it. Opening pushes
+// like /fr/bugs-and-ideas), so it can be shared and opens the same way for whoever follows it. Opening pushes
 // that address, so the back button (or back gesture on phones) closes the dialog; closing goes back
 // to the board's address. onUrl gets the item id after back/forward, or null.
 export function useItemUrl(base: string, opened: { id: string; title: string } | null, onUrl: (id: string | null) => void) {

@@ -338,7 +338,7 @@ function AdminBody({
           staff()
         )}
         {tab === "review" && (
-          <Link className="plan__more" href={localeHref(locale, "/ideas")} onClick={onLeave}>
+          <Link className="plan__more" href={localeHref(locale, "/bugs-and-ideas")} onClick={onLeave}>
             {b.openIdeas}
             <Icon name="right" />
           </Link>

@@ -26,7 +26,7 @@ bun dev
 ```
 
 Open http://localhost:3000. The home and legal pages work without any environment variables. The
-Ideas, Roadmap and Completed pages need the Reflet and Discord variables listed below; without them
+Bugs & Ideas, Roadmap and Completed pages need the Reflet and Discord variables listed below; without them
 they show a "not available" message.
 
 Before opening a pull request, check that these pass:
@@ -41,7 +41,7 @@ bun run build
 
 ```
 src/
-  app/[lang]/     pages for each language: home, ideas, roadmap, completed, terms, privacy
+  app/[lang]/     pages for each language: home, bugs-and-ideas, roadmap, completed, terms, privacy
   app/api/        Discord sign-in, votes, new ideas, admin actions and the Reflet webhook
   components/     UI components; roadmap/ holds the community pages
   i18n/           language config, shared types and one dictionary per language
@@ -79,8 +79,8 @@ its own. `/download` always redirects to the newest installer.
 
 | Page | Shows | Reflet status |
 | --- | --- | --- |
-| `/ideas` | Approved ideas and bug reports. Signed-in players post and vote. | Open |
-| `/ideas`, admins only | New posts waiting for review | Under review |
+| `/bugs-and-ideas` | Approved ideas and bug reports. Signed-in players post and vote. | Open |
+| `/bugs-and-ideas`, admins only | New posts waiting for review | Under review |
 | `/roadmap` | To do, working on and recently completed | Planned, In progress, Completed |
 | `/completed` | Everything completed, grouped by area, and the release notes | Completed |
 

@@ -5,11 +5,11 @@ import { assetDataUrl, googleFont, imageLocale, ogColors as c, ogSize } from "@/
 import { itemPreview, pageOf, sharedItem, type BoardPage } from "@/lib/share";
 import { downvoteCounts } from "@/lib/store";
 
-// The link preview of an item page (/ideas/<id>/<slug>…), like a Reddit post's: the status, the
+// The link preview of an item page (/bugs-and-ideas/<id>/<slug>…), like a Reddit post's: the status, the
 // title, the start of the description, then the score (upvotes minus downvotes) and the number of
 // comments. Drawn on request (votes change), kept by the CDN for five minutes: /og/<lang>/item/<id>.png.
 
-const art: Record<BoardPage, string> = { "/ideas": "powers", "/roadmap": "vehicle", "/completed": "tower" };
+const art: Record<BoardPage, string> = { "/bugs-and-ideas": "powers", "/roadmap": "vehicle", "/completed": "tower" };
 // The status is a filled badge: red for open ideas, light text on red and dark text on the lighter colours.
 const statusColor: Record<string, string> = { open: c.red, planned: "#f0b719", in_progress: "#ff6d5e", completed: "#3ddc84" };
 const statusText: Record<string, string> = { open: c.paper, planned: c.ink, in_progress: c.ink, completed: c.ink };

@@ -40,7 +40,7 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   switch (page) {
     case "/servers":
       return { title: d.servers.seoTitle, description: d.servers.seoDescription };
-    case "/ideas":
+    case "/bugs-and-ideas":
       return { title: d.ideas.seoTitle, description: d.ideas.seoDescription };
     case "/roadmap":
       return { title: d.plan.seoTitle, description: d.plan.seoDescription };
@@ -59,7 +59,7 @@ function pageName(locale: Locale, page: Exclude<PagePath, "">) {
   switch (page) {
     case "/servers":
       return d.nav.servers;
-    case "/ideas":
+    case "/bugs-and-ideas":
       return d.nav.ideas;
     case "/roadmap":
       return d.nav.roadmap;
@@ -72,7 +72,7 @@ function pageName(locale: Locale, page: Exclude<PagePath, "">) {
   }
 }
 
-// An item page (/ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description (lib/share.ts
+// An item page (/bugs-and-ideas/<id>/<slug>, lib/share.ts) is about the item: its title, its description (lib/share.ts
 // itemPreview) and a preview image that also shows its score (upvotes minus downvotes) and
 // comment count like a Reddit post (app/og/[lang]/item/[id]/route.tsx). Its structured data is a forum
 // post with the whole text, the author and the dates.
@@ -153,7 +153,7 @@ export function pageStructuredData(locale: Locale, page: Exclude<PagePath, "">, 
   const pageUrl = localeUrl(locale, page);
   const url = item ? `${pageUrl}${itemSuffix(item)}` : pageUrl;
   const image = `${siteUrl}${item ? itemImage(locale, item) : ogImagePath(locale, page)}`;
-  const board = page === "/ideas" || page === "/roadmap" || page === "/completed";
+  const board = page === "/bugs-and-ideas" || page === "/roadmap" || page === "/completed";
   const crumbs = [
     { name: dictionaries[locale].nav.home, url: localeUrl(locale) },
     { name: pageName(locale, page), url: pageUrl },
@@ -314,7 +314,7 @@ export function llmsTxt() {
 - [Download the latest launcher](${siteUrl}/download)
 - [Game servers and live status](${siteUrl}/servers)
 - [Roadmap](${siteUrl}/roadmap)
-- [Ideas and feature requests](${siteUrl}/ideas)
+- [Bug reports and feature requests](${siteUrl}/bugs-and-ideas)
 - [Completed work and release notes](${siteUrl}/completed)
 - [Launcher source code on GitHub](${repoUrl})
 - [Discord community](${site.discord})

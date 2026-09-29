@@ -8,7 +8,7 @@ import type { IdeaType } from "@/i18n/types";
 import { can, categoryOf, typeOf, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
-import { FilterPicker, type FilterOption } from "../FilterPicker";
+import { Dropdown, type DropdownOption } from "../Dropdown";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
 import { SelectPicker, type PickOption } from "../SelectPicker";
@@ -25,7 +25,9 @@ import { signIn } from "./viewer";
 import { useItemUrl } from "./useItemUrl";
 
 type Sort = "top" | "new";
-type Filter = IdeaType | "all";
+type TypeFilter = IdeaType | "all";
+// A category id, "other" (none) or "all".
+type PlatformFilter = string;
 type FormState = "idle" | "sending" | "pending" | "partial" | "limit" | "error" | "offensive" | "name";
 
 const byVotes = (a: FeedbackItem, b: FeedbackItem) =>
@@ -38,7 +40,8 @@ const platformRank = (category: Category) => {
   const rank = platformOrder.indexOf(category.name.toLowerCase());
   return rank < 0 ? platformOrder.length : rank;
 };
-
+// Lower case and without accents, so "equipe" finds "Équipe".
+const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 export function IdeasBoard({
   initial,
@@ -61,8 +64,11 @@ export function IdeasBoard({
   const r = t.ideas;
   const [items, setItems] = useState<BoardItem[]>(initial);
   const [sort, setSort] = useState<Sort>("top");
-  const [filter, setFilter] = useState<Filter>("all");
-  const [kind, setKind] = useState<IdeaType | null>(types.find((type) => type.slug === "feature-request")?.slug ?? types[0]?.slug ?? null);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
+  const [query, setQuery] = useState("");
+  // Neither has a default: the poster picks both (the form opens their list when one is left empty).
+  const [kind, setKind] = useState<IdeaType | null>(null);
   // A category id, or "other" (none).
   const [platform, setPlatform] = useState<string | null>(null);
   const [picking, setPicking] = useState<"type" | "platform" | null>(null);
@@ -78,10 +84,10 @@ export function IdeasBoard({
   const previews = useMemo(() => files.map((file) => ({ file, url: URL.createObjectURL(file) })), [files]);
   const [ask, dialog] = useConfirm();
   const admin = useAdmin(setItems);
-  // Opened on arrival when this is an item's page (/ideas/<id>/<slug>).
+  // Opened on arrival when this is an item's page (/bugs-and-ideas/<id>/<slug>).
   const [opened, setOpened] = useState<Opened | null>(openId ? { id: openId, mode: "view" } : null);
   const current = opened ? (items.find((item) => item.id === opened.id) ?? null) : null;
-  useItemUrl(localeHref(locale, "/ideas"), current, (id) =>
+  useItemUrl(localeHref(locale, "/bugs-and-ideas"), current, (id) =>
     setOpened(id && items.some((item) => item.id === id) ? { id, mode: "view" } : null),
   );
   const close = useCallback(() => setOpened(null), []);
@@ -98,7 +104,7 @@ export function IdeasBoard({
     );
   }, [ask, r, t]);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
-  const next = localeHref(locale, "/ideas");
+  const next = localeHref(locale, "/bugs-and-ideas");
   const available = ideaTypes.filter((type) => type.slug === "other" || types.some((tag) => tag.slug === type.slug));
   const platformName = (name: string) => {
     const key = name.toLowerCase();
@@ -110,18 +116,26 @@ export function IdeasBoard({
       .map((category) => ({ key: category.id, label: platformName(category.name), icon: categoryIcon(category.name) })),
     { key: "other", label: r.platforms.other, icon: "other" },
   ];
-  const filters: FilterOption<Filter>[] = [
-    { key: "all", label: r.filterAll, icon: "layers" },
+  const typeFilters: DropdownOption<TypeFilter>[] = [
+    { key: "all", label: r.filterAll, icon: "tag" },
     ...available.map((type) => ({ key: type.slug, label: r.types[type.slug], icon: type.icon })),
   ];
+  const platformFilters: DropdownOption<PlatformFilter>[] = [{ key: "all", label: r.filterAll, icon: "layers" }, ...platforms];
+  const typeShown = typeFilters.find((option) => option.key === typeFilter) ?? typeFilters[0];
+  const platformShown = platformFilters.find((option) => option.key === platformFilter) ?? platformFilters[0];
 
-  const visible = useMemo(
-    () =>
-      items
-        .filter((item) => item.status === "open" && (filter === "all" || typeOf(item, types) === filter))
-        .sort(sort === "top" ? byVotes : byDate),
-    [items, sort, filter, types],
-  );
+  const open = useMemo(() => items.filter((item) => item.status === "open"), [items]);
+  const visible = useMemo(() => {
+    const words = plain(query).split(/\s+/).filter(Boolean);
+    return open
+      .filter(
+        (item) =>
+          (typeFilter === "all" || typeOf(item, types) === typeFilter) &&
+          (platformFilter === "all" || (categoryOf(item, categories)?.id ?? "other") === platformFilter) &&
+          words.every((word) => plain(`${item.title} ${item.description}`).includes(word)),
+      )
+      .sort(sort === "top" ? byVotes : byDate);
+  }, [open, sort, typeFilter, platformFilter, query, types, categories]);
   const review = useMemo(() => items.filter((item) => item.status === "under_review").sort(byDate), [items]);
 
   useEffect(() => () => previews.forEach((preview) => URL.revokeObjectURL(preview.url)), [previews]);
@@ -143,7 +157,8 @@ export function IdeasBoard({
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (form === "sending" || atLimit) return;
-    // The platform has no default: left empty, its picker opens.
+    // The type and the platform are required: the first one left empty opens its list.
+    if (available.length > 1 && !kind) return setPicking("type");
     if (platforms.length > 1 && !platform) return setPicking("platform");
     const ok = await ask({
       title: r.confirmTitle,
@@ -158,7 +173,7 @@ export function IdeasBoard({
       const response = await fetch("/api/roadmap/ideas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description: details, type: kind, platform: platform === "other" ? null : platform }),
+        body: JSON.stringify({ title, description: details, type: kind ?? available[0]?.slug, platform: platform ?? "other" }),
       });
       if (response.status === 401) return signIn(next);
       if (response.status === 403 || response.status === 422) {
@@ -182,6 +197,7 @@ export function IdeasBoard({
       setComposing(false);
       setTitle("");
       setDetails("");
+      setKind(null);
       setPlatform(null);
       setFiles([]);
       setFileError(null);
@@ -298,31 +314,69 @@ export function IdeasBoard({
           </Reveal>
         )}
 
+        {canPost && (
+          <Reveal className="ideas__top" y={16}>
+            <button type="button" className="btn btn--primary btn--sm ideas__suggest" onClick={openForm}>
+              <Icon name="plus" />
+              {r.formTitle}
+            </button>
+          </Reveal>
+        )}
+
+        {/* Desktop: the type and platform filters, the sort, then the search on the right, on one row.
+            Phone: the two filters on one row, the sort and the search under them. */}
         <Reveal className="ideas__bar" y={16}>
-          {available.length > 1 && (
-            <FilterPicker label={r.typeLabel} options={filters} value={filter} onChange={setFilter} chipIcons />
-          )}
-          <div className="ideas__end">
-            <div className="ideas__sort" role="group">
-              {(["top", "new"] as const).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={sort === key ? "is-active" : undefined}
-                  aria-pressed={sort === key}
-                  onClick={() => setSort(key)}
+          {(available.length > 1 || platforms.length > 1) && (
+            <div className="ideas__filters">
+              {available.length > 1 && (
+                <Dropdown
+                  label={r.typeLabel}
+                  buttonLabel={`${r.typeLabel}: ${typeShown.label}`}
+                  options={typeFilters}
+                  value={typeFilter}
+                  onChange={setTypeFilter}
+                  className="ideas__filter"
+                  buttonClass={`ideas__filter-btn${typeFilter === "all" ? "" : " is-active"}`}
                 >
-                  {key === "top" ? r.sortTop : r.sortNew}
-                </button>
-              ))}
+                  <Icon name={typeShown.icon} />
+                  <span>{typeFilter === "all" ? r.typeLabel : typeShown.label}</span>
+                  <Icon name="chevron" className="ideas__chevron" />
+                </Dropdown>
+              )}
+              {platforms.length > 1 && (
+                <Dropdown
+                  label={r.platformLabel}
+                  buttonLabel={`${r.platformLabel}: ${platformShown.label}`}
+                  options={platformFilters}
+                  value={platformFilter}
+                  onChange={setPlatformFilter}
+                  className="ideas__filter"
+                  buttonClass={`ideas__filter-btn${platformFilter === "all" ? "" : " is-active"}`}
+                >
+                  <Icon name={platformShown.icon} />
+                  <span>{platformFilter === "all" ? r.platformLabel : platformShown.label}</span>
+                  <Icon name="chevron" className="ideas__chevron" />
+                </Dropdown>
+              )}
             </div>
-            {canPost && (
-              <button type="button" className="btn btn--primary btn--sm ideas__suggest" onClick={openForm}>
-                <Icon name="plus" />
-                {r.formTitle}
+          )}
+          <div className="ideas__sort" role="group">
+            {(["top", "new"] as const).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={sort === key ? "is-active" : undefined}
+                aria-pressed={sort === key}
+                onClick={() => setSort(key)}
+              >
+                {key === "top" ? r.sortTop : r.sortNew}
               </button>
-            )}
+            ))}
           </div>
+          <label className="ideas__search">
+            <Icon name="search" />
+            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={r.search} aria-label={r.search} />
+          </label>
         </Reveal>
 
         {sent && (
@@ -336,7 +390,7 @@ export function IdeasBoard({
           {visible.length ? (
             <ul className="idea-list">{visible.map((item) => card(item, false))}</ul>
           ) : (
-            <p className="ideas__empty">{r.empty}</p>
+            <p className="ideas__empty">{open.length ? r.noMatch : r.empty}</p>
           )}
         </Reveal>
       </div>
@@ -380,6 +434,7 @@ export function IdeasBoard({
                   options={available.map((type) => ({ key: type.slug, label: r.types[type.slug], icon: type.icon }))}
                   value={kind}
                   onChange={setKind}
+                  placeholder={r.typePlaceholder}
                   open={picking === "type"}
                   onOpen={(open) => setPicking(open ? "type" : null)}
                 />

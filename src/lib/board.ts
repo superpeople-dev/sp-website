@@ -41,9 +41,9 @@ export type CommentView = {
 };
 
 // The board an item is on, by status.
-export type BoardPath = "/ideas" | "/roadmap" | "/completed";
+export type BoardPath = "/bugs-and-ideas" | "/roadmap" | "/completed";
 export const boardOf = (status: FeedbackStatus): BoardPath =>
-  status === "completed" ? "/completed" : status === "planned" || status === "in_progress" ? "/roadmap" : "/ideas";
+  status === "completed" ? "/completed" : status === "planned" || status === "in_progress" ? "/roadmap" : "/bugs-and-ideas";
 
 // One line of the admins' activity log (lib/events.ts): what happened in the community, who did it
 // and to what.
@@ -113,7 +113,7 @@ export type BoardItem = FeedbackItem & { hasDownvoted?: boolean; authorBanned?: 
 export type VoteDirection = "up" | "down";
 export const downvoted = (item: FeedbackItem) => (item as BoardItem).hasDownvoted === true;
 
-// Item pages are /ideas/<id>/<slug> (or /roadmap/…, /completed/…), like Reddit: the id finds the
+// Item pages are /bugs-and-ideas/<id>/<slug> (or /roadmap/…, /completed/…), like Reddit: the id finds the
 // item, the slug is the title for people and search engines (plain a-z and digits, may be empty).
 export const slugOf = (title: string) =>
   title

@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
-const pages = ["servers", "ideas", "roadmap", "completed", "terms", "privacy"];
-// Boards whose items have their own pages: /ideas/<id>/<slug> and so on.
-const boards = ["ideas", "roadmap", "completed"];
+const pages = ["servers", "bugs-and-ideas", "roadmap", "completed", "terms", "privacy"];
+// Boards whose items have their own pages: /bugs-and-ideas/<id>/<slug> and so on.
+const boards = ["bugs-and-ideas", "roadmap", "completed"];
+// Pages that moved: the old links (shared, posted on Discord, found by search engines) keep working.
+const moved = [
+  { from: "ideas", to: "bugs-and-ideas" },
+  { from: "idea", to: "bugs-and-ideas" },
+];
 
 const nextConfig: NextConfig = {
   images: {
@@ -24,6 +29,15 @@ const nextConfig: NextConfig = {
       { source: "/en", destination: "/", permanent: true },
       ...pages.map((page) => ({ source: `/en/${page}`, destination: `/${page}`, permanent: true })),
       ...boards.map((board) => ({ source: `/en/${board}/:path+`, destination: `/${board}/:path+`, permanent: true })),
+      // English has no /en prefix, so /en/<old> goes straight to /<new>; the other languages keep theirs.
+      ...moved.flatMap(({ from, to }) => [
+        { source: `/${from}`, destination: `/${to}`, permanent: true },
+        { source: `/${from}/:path+`, destination: `/${to}/:path+`, permanent: true },
+        { source: `/en/${from}`, destination: `/${to}`, permanent: true },
+        { source: `/en/${from}/:path+`, destination: `/${to}/:path+`, permanent: true },
+        { source: `/:lang([a-z]{2})/${from}`, destination: `/:lang/${to}`, permanent: true },
+        { source: `/:lang([a-z]{2})/${from}/:path+`, destination: `/:lang/${to}/:path+`, permanent: true },
+      ]),
     ];
   },
 };
