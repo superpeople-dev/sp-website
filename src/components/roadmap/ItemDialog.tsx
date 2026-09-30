@@ -119,7 +119,7 @@ export function ItemDialog(props: Props) {
   );
 }
 
-// The name and @username to show, like "Gigeop @gigeop".
+// The name to show, and the Discord username (only admins see it: UserTag).
 function names(author: Pick<Author, "name" | "username">) {
   return { name: shownName(author.name, author.username), user: author.username || null };
 }
@@ -458,12 +458,21 @@ function ItemBody({
   // A banned person keeps their name, struck through and followed by "(banned)", with Discord's
   // default picture instead of theirs.
   const isBanned = (author: Author | null) => Boolean(author?.banned || (author?.id && bannedIds.includes(author.id)));
+  // Nobody sees someone's Discord username next to their name; an admin gets an "i" at its top right
+  // with the username in a tooltip, to know who it is on Discord.
+  const userTag = (user?: string | null) =>
+    viewer?.admin && user ? (
+      <span className="usertag" tabIndex={0} role="note" aria-label={`Discord: @${user}`} data-tip={`@${user}`}>
+        i
+      </span>
+    ) : null;
+
   const banned = ({ name, user }: { name: string; user?: string | null }) => (
     <>
       <b className="is-banned">
         <s>{name}</s>
       </b>
-      {user && <span className="who__user">@{user}</span>}
+      {userTag(user)}
       <span className="who__banned-tag">({t.admin.banned})</span>
     </>
   );
@@ -483,7 +492,7 @@ function ItemBody({
       <span className="who">
         <Avatar src={author.avatar} size={28} />
         <b>{name}</b>
-        {user && <span className="who__user">@{user}</span>}
+        {userTag(user)}
         {author.admin && <span className="who__badge">{b.admin}</span>}
       </span>
     );
@@ -511,7 +520,7 @@ function ItemBody({
           ) : (
             <>
               <b>{commentAuthor(comment)?.name ?? b.team}</b>
-              {commentAuthor(comment)?.user && <span className="comment__user">@{commentAuthor(comment)?.user}</span>}
+              {userTag(commentAuthor(comment)?.user)}
               {comment.author?.admin && <span className="who__badge">{b.admin}</span>}
             </>
           )}
