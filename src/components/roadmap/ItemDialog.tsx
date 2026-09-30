@@ -21,8 +21,10 @@ import {
   type VoteDirection,
 } from "@/lib/board";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
+import logo from "@/assets/sp-logo.png";
 import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
+import { Dropdown } from "../Dropdown";
 import { Icon, type IconName } from "../Icon";
 import { Modal } from "../Modal";
 import { Toast } from "../Toast";
@@ -44,7 +46,23 @@ type Thread = {
   media: MediaView[];
   // Comments turned off by an admin: only admins who moderate comments can still post.
   off: boolean;
+  // Who the item is assigned to (null: the whole team), and the admins it can be assigned to (only
+  // for an admin who manages items).
+  assignee: Author | null;
+  staff: Author[] | null;
 };
+
+// The items on the roadmap have someone who works on them.
+const roadmapStatuses: FeedbackItem["status"][] = ["planned", "in_progress", "completed"];
+
+// The whole team, where an item isn't assigned to one admin: the logo in place of an avatar.
+function TeamMark({ size = 28 }: { size?: number }) {
+  return (
+    <span className="team-mark" style={{ width: size, height: size }}>
+      <Image src={logo} alt="" style={{ width: Math.round(size * 0.64), height: "auto" }} />
+    </span>
+  );
+}
 
 type Props = {
   item: FeedbackItem | null;
@@ -135,7 +153,7 @@ function ItemBody({
   const b = t.board;
   const r = t.ideas;
   const [ask, confirmDialog, askReason] = useConfirm();
-  const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [], off: false });
+  const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [], off: false, assignee: null, staff: null });
   const [notice, setNotice] = useState({ show: false, text: "", icon: "check" as IconName });
   const [viewing, setViewing] = useState<MediaView | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -159,8 +177,24 @@ function ItemBody({
     fetch(`/api/roadmap/comments?feedbackId=${encodeURIComponent(item.id)}`, { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error(String(response.status));
-        const data = (await response.json()) as { comments: CommentView[]; author: Author | null; media?: MediaView[]; off?: boolean };
-        if (live) setThread({ status: "ready", comments: data.comments, author: data.author, media: data.media ?? [], off: data.off === true });
+        const data = (await response.json()) as {
+          comments: CommentView[];
+          author: Author | null;
+          media?: MediaView[];
+          off?: boolean;
+          assignee?: Author | null;
+          staff?: Author[];
+        };
+        if (!live) return;
+        setThread({
+          status: "ready",
+          comments: data.comments,
+          author: data.author,
+          media: data.media ?? [],
+          off: data.off === true,
+          assignee: data.assignee ?? null,
+          staff: data.staff ?? null,
+        });
       })
       .catch(() => {
         if (live) setThread((current) => ({ ...current, status: "error" }));
@@ -187,6 +221,24 @@ function ItemBody({
       setThread((current) => ({ ...current, off }));
       flash(off ? b.commentsOffDone : b.commentsOnDone, off ? "lock" : "comment");
     } catch {
+      flash(b.actionFailed, "close");
+    }
+  };
+
+  const assign = async (id: string | null) => {
+    const before = thread.assignee;
+    const next = id ? (thread.staff?.find((member) => member.id === id) ?? null) : null;
+    setThread((current) => ({ ...current, assignee: next }));
+    try {
+      const response = await fetch("/api/admin/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "assign", feedbackId: item.id, assignee: id }),
+      });
+      if (!response.ok) throw new Error(String(response.status));
+      flash(fill(b.toastAssigned, { name: next?.name ?? b.assignTeam }));
+    } catch {
+      setThread((current) => ({ ...current, assignee: before }));
       flash(b.actionFailed, "close");
     }
   };
@@ -392,9 +444,43 @@ function ItemBody({
     </li>
   );
 
+  const onRoadmap = roadmapStatuses.includes(item.status);
+  // Who is assigned: an admin (without the admin badge: they all are), or the whole team.
+  const assigneeView = (assignee: Author | null) =>
+    assignee ? (
+      who({ ...assignee, admin: false })
+    ) : (
+      <span className="who">
+        <TeamMark />
+        <b>{b.assignTeam}</b>
+      </span>
+    );
+  const assigned =
+    thread.status === "loading" ? (
+      <span className="skel skel--who" aria-hidden="true" />
+    ) : canManage && thread.staff ? (
+      <Dropdown
+        label={b.assignedTo}
+        buttonLabel={`${b.assignedTo}: ${thread.assignee?.name ?? b.assignTeam}`}
+        options={[
+          { key: "team", label: b.assignTeam, media: <TeamMark size={22} /> },
+          ...thread.staff.map((member) => ({ key: member.id ?? member.name, label: member.name, media: <Avatar src={member.avatar} size={22} /> })),
+        ]}
+        value={thread.assignee?.id ?? "team"}
+        onChange={(key) => void assign(key === "team" ? null : key)}
+        className="assignee"
+        buttonClass="assignee__btn"
+      >
+        {assigneeView(thread.assignee)}
+        <Icon name="chevron" className="assignee__chevron" />
+      </Dropdown>
+    ) : (
+      assigneeView(thread.assignee)
+    );
+
   const facts = (
     <dl className="sheet__facts">
-      <div className="sheet__fact sheet__fact--wide">
+      <div className={`sheet__fact ${onRoadmap ? "sheet__fact--half" : "sheet__fact--wide"}`}>
         <dt>{b.postedBy}</dt>
         <dd>
           {thread.status === "loading" ? (
@@ -407,6 +493,12 @@ function ItemBody({
           )}
         </dd>
       </div>
+      {onRoadmap && (
+        <div className="sheet__fact sheet__fact--half">
+          <dt>{b.assignedTo}</dt>
+          <dd>{assigned}</dd>
+        </div>
+      )}
       <div className="sheet__fact">
         <dt>{b.posted}</dt>
         <dd>

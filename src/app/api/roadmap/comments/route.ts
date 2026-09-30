@@ -7,8 +7,19 @@ import { isOffensive, offensiveName } from "@/lib/moderation";
 import { addComment, deleteComment, failure, getIdea, listComments, listMedia, refletTag, userToken } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits, mediaLimits } from "@/lib/site";
-import { adminCheck } from "@/lib/staff";
-import { authorsOf, commentsOff, isBanned, listBans, profileOf, rememberAuthor, setCommentsOff, storeReady, type Profile } from "@/lib/store";
+import { adminCheck, listStaff, type StaffMember } from "@/lib/staff";
+import {
+  assigneeOf,
+  authorsOf,
+  commentsOff,
+  isBanned,
+  listBans,
+  profileOf,
+  rememberAuthor,
+  setCommentsOff,
+  storeReady,
+  type Profile,
+} from "@/lib/store";
 
 const noStore = { "Cache-Control": "no-store" };
 
@@ -41,12 +52,19 @@ export async function GET(request: NextRequest) {
   if (!feedbackId) return Response.json({ error: "invalid" }, { status: 400 });
   const viewer = await readSession(request);
   try {
-    const [comments, files, people, off] = await Promise.all([
+    const [comments, files, people, off, assignedId] = await Promise.all([
       listComments(feedbackId),
       listMedia(feedbackId).catch(() => []),
       checks(),
       commentsOff(feedbackId),
+      assigneeOf(feedbackId),
     ]);
+    // Who the item is assigned to (none: the whole team), and for the admins who manage items, the
+    // admins they can assign it to. An admin removed since then leaves it to the team again.
+    const manager = viewer !== null && can(viewer, "manage");
+    const staff = assignedId || manager ? await listStaff() : [];
+    const member = (m: StaffMember): Author => ({ ...(manager && { id: m.id }), name: m.name, username: m.username, avatar: m.avatar, admin: true });
+    const assigned = staff.find((m) => m.id === assignedId);
     const media: MediaView[] = files
       .filter((file) => file.url && mediaLimits.types.includes(file.mimeType))
       .sort((a, b) => a.createdAt - b.createdAt)
@@ -62,7 +80,14 @@ export async function GET(request: NextRequest) {
       replies: (comment.replies ?? []).map(view),
     });
     return Response.json(
-      { author: authorView(authors[feedbackId], null, showId, people), comments: comments.map(view), media, off },
+      {
+        author: authorView(authors[feedbackId], null, showId, people),
+        comments: comments.map(view),
+        media,
+        off,
+        assignee: assigned ? member(assigned) : null,
+        ...(manager && { staff: staff.map(member) }),
+      },
       { headers: noStore },
     );
   } catch (error) {

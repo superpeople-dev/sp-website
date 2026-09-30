@@ -55,6 +55,8 @@ export type EventType =
   | "item.moved"
   | "item.edited"
   | "item.deleted"
+  | "item.assigned"
+  | "item.unassigned"
   | "comment.posted"
   | "comment.deleted"
   | "comments.off"
@@ -76,7 +78,8 @@ export type ActivityEvent = {
   type: EventType;
   actor: { id: string; name: string; avatar?: string };
   item?: { id: string; title: string; status?: FeedbackStatus };
-  // The other person: the banned user, the admin who was changed, a deleted comment's author.
+  // The other person: the banned user, the admin who was changed, a deleted comment's author, the
+  // admin an item was assigned to.
   user?: { id: string; name: string };
   // A comment's text (also kept once it is deleted).
   text?: string;

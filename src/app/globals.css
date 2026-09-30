@@ -1826,6 +1826,32 @@ button.votes__down:disabled { cursor: default; }
 }
 .sheet__fact { display: grid; flex: 1 1 140px; align-content: start; gap: 6px; padding: 12px 14px; background: var(--surface); }
 .sheet__fact--wide { flex-basis: 100%; }
+/* Posted by and Assigned to, side by side on a roadmap item (one under the other when narrow). */
+.sheet__fact--half { flex-basis: calc(50% - 1px); min-width: 200px; }
+/* The Assigned to list opens below the facts box. */
+.sheet__facts:has(.dropdown) { overflow: visible; }
+.team-mark { display: grid; flex: none; place-items: center; border-radius: 50%; background: var(--surface-3); }
+.assignee { max-width: 100%; }
+.assignee__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin: -5px -8px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.assignee__btn:hover,
+.assignee.is-open .assignee__btn { border-color: var(--line); background: var(--surface-2); }
+.assignee__btn:focus-visible { outline: none; border-color: var(--signal); }
+.assignee__chevron { width: 13px; height: 13px; flex: none; color: var(--muted); }
 .sheet__fact dt { color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 .sheet__fact dd { display: flex; align-items: center; min-height: 28px; margin: 0; color: var(--paper); font-size: 15px; }
 .sheet__author { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }

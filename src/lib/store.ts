@@ -156,6 +156,20 @@ export async function setCommentsOff(itemId: string, off: boolean) {
   else await redis.srem(lockedKey, itemId);
 }
 
+// Who works on an item: an admin (their Discord id). Not set, it is the whole team's. Kept as an
+// object: Upstash reads a bare numeric string back as a number, and a Discord id is too long for one.
+const assigneesKey = "sp:assignees";
+type Assignment = { id: string; by: string; at: number };
+
+export const assigneeOf = (itemId: string) =>
+  attempt("assignee lookup", null as string | null, async (client) => (await client.hget<Assignment>(assigneesKey, itemId))?.id ?? null);
+
+export async function setAssignee(itemId: string, staffId: string | null, by: string) {
+  if (!redis) throw new Error("Store is not configured");
+  if (staffId) await redis.hset(assigneesKey, { [itemId]: { id: staffId, by, at: Date.now() } satisfies Assignment });
+  else await redis.hdel(assigneesKey, itemId);
+}
+
 // Tasks an admin just created on the site (app/api/admin/feedback): Reflet reports the status the task
 // was created in as a status change, and the Discord post should say "New task", not "Moved to".
 const createdKey = (itemId: string) => `sp:created:${itemId}`;

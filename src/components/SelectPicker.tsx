@@ -46,7 +46,7 @@ export function SelectPicker<K extends string>({
         open={open}
         onOpen={onOpen}
       >
-        {current && <Icon name={current.icon} />}
+        {current && (current.media ?? <Icon name={current.icon ?? "tag"} />)}
         <span id={valueId}>{current?.label ?? placeholder}</span>
         <Icon name="chevron" className="picker__chevron" />
       </Dropdown>

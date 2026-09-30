@@ -5,7 +5,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode,
 import { Icon, type IconName } from "./Icon";
 import { ease } from "./motion";
 
-export type DropdownOption<K extends string> = { key: K; label: string; icon: IconName };
+// media: a picture (an avatar) shown instead of the icon.
+export type DropdownOption<K extends string> = { key: K; label: string; icon?: IconName; media?: ReactNode };
 
 const stop = (e: SyntheticEvent) => e.stopPropagation();
 const choices = (root: HTMLElement | null) => [...(root?.querySelectorAll<HTMLElement>('[role="option"]') ?? [])];
@@ -150,7 +151,7 @@ export function Dropdown<K extends string>({
                   close();
                 }}
               >
-                <Icon name={option.icon} />
+                {option.media ?? <Icon name={option.icon ?? "tag"} />}
                 <span>{option.label}</span>
                 {option.key === value && <Icon name="check" className="dropdown__check" />}
               </button>

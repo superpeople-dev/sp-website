@@ -246,6 +246,9 @@ export type Dictionary = {
     toastMoved: string;
     toastSaved: string;
     toastAdded: string;
+    assignedTo: string;
+    assignTeam: string;
+    toastAssigned: string;
     mediaUploadFailed: string;
     close: string;
     edit: string;

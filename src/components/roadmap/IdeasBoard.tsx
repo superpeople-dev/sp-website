@@ -251,7 +251,7 @@ export function IdeasBoard({
                   className="ideas__filter"
                   buttonClass={`ideas__filter-btn${typeFilter === "all" ? "" : " is-active"}`}
                 >
-                  <Icon name={typeShown.icon} />
+                  <Icon name={typeShown.icon ?? "tag"} />
                   <span>{typeFilter === "all" ? r.typeLabel : typeShown.label}</span>
                   <Icon name="chevron" className="ideas__chevron" />
                 </Dropdown>
@@ -266,7 +266,7 @@ export function IdeasBoard({
                   className="ideas__filter"
                   buttonClass={`ideas__filter-btn${platformFilter === "all" ? "" : " is-active"}`}
                 >
-                  <Icon name={platformShown.icon} />
+                  <Icon name={platformShown.icon ?? "layers"} />
                   <span>{platformFilter === "all" ? r.platformLabel : platformShown.label}</span>
                   <Icon name="chevron" className="ideas__chevron" />
                 </Dropdown>

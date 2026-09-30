@@ -66,6 +66,11 @@ export async function announce(event: ActivityEvent) {
     "idea.posted": ["moderation", { label: "New idea to review", color: colors.gold, ...onItem, fields: [by] }],
     "idea.rejected": ["moderation", { label: "Idea rejected", color: colors.red, title: event.item?.title, fields: [by] }],
     "item.edited": ["moderation", { label: "Item edited", color: colors.grey, ...onItem, fields: [by] }],
+    "item.assigned": [
+      "moderation",
+      { label: "Task assigned", color: colors.gold, ...onItem, fields: [by, { name: "Assigned to", value: person(event.user), inline: true }] },
+    ],
+    "item.unassigned": ["moderation", { label: "Task given back to the whole team", color: colors.grey, ...onItem, fields: [by] }],
     "item.deleted": ["moderation", { label: "Item deleted", color: colors.red, title: event.item?.title, fields: [by] }],
     "comment.deleted": [
       "moderation",

@@ -18,7 +18,8 @@ import { can } from "@/lib/board";
 import { logEvent } from "@/lib/events";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
-import { markCreated, profileOf, rememberAuthor } from "@/lib/store";
+import { listStaff } from "@/lib/staff";
+import { markCreated, profileOf, rememberAuthor, setAssignee } from "@/lib/store";
 
 const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
 const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
@@ -34,6 +35,8 @@ type Body = {
   // create: the type's slug and the platform (a category id, or "other"), as the idea form sends them.
   type?: unknown;
   platform?: unknown;
+  // assign: an admin's Discord id, or null for the whole team.
+  assignee?: unknown;
 };
 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
@@ -125,6 +128,16 @@ export async function POST(request: NextRequest) {
       await logEvent(user, { type: rejecting ? "idea.rejected" : "item.deleted", item: target });
     } else if (body.action === "edit" && (await edit(feedbackId, body))) {
       await logEvent(user, { type: "item.edited", item: { ...target, title: text(body.title) } });
+    } else if (body.action === "assign" && (body.assignee === null || typeof body.assignee === "string")) {
+      // Only to someone who is an admin now.
+      const assignee = body.assignee === null ? null : ((await listStaff()).find((member) => member.id === body.assignee) ?? null);
+      if (body.assignee !== null && !assignee) return Response.json({ error: "invalid" }, { status: 400 });
+      await setAssignee(feedbackId, assignee?.id ?? null, user.id);
+      await logEvent(
+        user,
+        assignee ? { type: "item.assigned", item: target, user: { id: assignee.id, name: assignee.name } } : { type: "item.unassigned", item: target },
+      );
+      return Response.json({ ok: true });
     } else {
       return Response.json({ error: "invalid" }, { status: 400 });
     }
