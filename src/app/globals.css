@@ -1065,7 +1065,6 @@ button.votes__up:disabled,
 button.votes__down:disabled { cursor: default; }
 .votes svg { width: 18px; height: 18px; }
 .votes svg path { transition: fill 0.2s; }
-.votes__down svg { transform: rotate(180deg); }
 .votes__count { min-width: 2ch; padding: 0 6px; color: var(--paper); font: 800 16px/1 var(--display); font-variant-numeric: tabular-nums; text-align: center; }
 /* Hover only where a pointer really hovers (a phone keeps :hover on the last tapped button), and
    only the arrow takes the colour: a red or blue background under the mouse right after taking a
@@ -1499,21 +1498,6 @@ button.votes__down:disabled { cursor: default; }
 }
 .add-task svg { width: 15px; height: 15px; }
 .add-task:hover { border-color: var(--signal); background: rgba(239, 68, 56, 0.06); color: var(--paper); }
-.add-task__form { display: grid; gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
-.add-task__form input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  background: var(--ink);
-  color: var(--paper);
-  font: 15px/1.4 var(--body);
-}
-.add-task__form input:focus { outline: none; border-color: var(--signal); }
-.add-task__form input::placeholder { color: var(--muted); }
-.add-task__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
-.add-task__actions .field-count { margin-right: auto; }
-.add-task__error { margin: 0; color: var(--signal-hi); font-size: 14px; }
 .work__desc {
   display: -webkit-box;
   margin: 6px 0 0;
@@ -1724,7 +1708,25 @@ button.votes__down:disabled { cursor: default; }
   border-bottom: 1px solid var(--line-soft);
 }
 .sheet__chips { display: flex; align-items: center; gap: 14px; min-width: 0; font: 700 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
-.sheet__tags { display: flex; align-items: center; gap: 14px; min-width: 0; overflow: hidden; white-space: nowrap; }
+.sheet__tags { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; white-space: nowrap; }
+/* The status, type and platform next to the votes: boxes as tall as the vote bar, with its border and corners. */
+.sheet__tags > * {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  font: 700 13px var(--display);
+  letter-spacing: 0.1em;
+}
+.sheet__tags svg { width: 16px; height: 16px; flex: none; }
+@media (max-width: 700px), (pointer: coarse) {
+  .sheet__tags > * { height: 40px; }
+}
 @media (max-width: 700px) {
   .sheet__bar--item:has(.sheet__chips > .votes, .sheet__chips > .sheet__votes) {
     display: grid;
@@ -1738,7 +1740,7 @@ button.votes__down:disabled { cursor: default; }
   .sheet__bar--item .sheet__tags { grid-area: tags; }
   .sheet__bar--item .sheet__actions { grid-area: actions; }
 }
-.sheet__status { padding: 3px 8px; border: 1px solid currentColor; border-radius: 2px; color: var(--paper-dim); }
+.sheet__status { border-color: currentColor; color: var(--paper-dim); }
 .sheet__status--under_review { color: #8fb0ff; }
 .sheet__status--planned { color: var(--gold); }
 .sheet__status--in_progress { color: var(--signal-hi); }

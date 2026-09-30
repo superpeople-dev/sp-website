@@ -301,8 +301,8 @@ export type Dictionary = {
     deleteMediaBody: string;
     openMedia: string;
     addTask: string;
-    taskPlaceholder: string;
-    add: string;
+    taskCloseTitle: string;
+    taskCloseBody: string;
     adminPanel: string;
     tabReview: string;
     tabAdmins: string;

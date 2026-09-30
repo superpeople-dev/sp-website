@@ -31,26 +31,34 @@ type Body = {
   description?: unknown;
   typeId?: unknown;
   categoryId?: unknown;
+  // create: the type's slug and the platform (a category id, or "other"), as the idea form sends them.
+  type?: unknown;
+  platform?: unknown;
 };
 
 const text = (value: unknown) => (typeof value === "string" ? value.trim() : "");
 
 async function create(user: SessionUser, body: Body) {
   const title = text(body.title);
+  const description = text(body.description);
   const status = body.status as FeedbackStatus;
-  if (title.length < 3 || title.length > ideaLimits.title || !boardStatuses.includes(status)) {
+  if (title.length < 3 || title.length > ideaLimits.title || description.length > ideaLimits.description || !boardStatuses.includes(status)) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
   try {
-    // Reflet no longer creates an item without a description, and a roadmap task has only a title:
-    // it is created with the title as its description, which is then cleared (kept if Reflet refuses).
-    const { feedbackId } = await createIdea(title, title, await userToken(user));
+    const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
+    const typeId = types.find((type) => type.slug === body.type)?.id;
+    const platformId = categories.find((category) => category.id === body.platform)?.id;
+    // Reflet no longer creates an item without a description: a task without details is created with
+    // its title as the description, which is then cleared (kept if Reflet refuses).
+    const { feedbackId } = await createIdea(title, description || title, await userToken(user), typeId);
     // Before the status is set: Reflet reports it as a status change (api/webhooks/reflet).
     await markCreated(feedbackId);
     await Promise.all([
       setStatus(feedbackId, status),
       rememberAuthor(feedbackId, profileOf(user)),
-      updateIdea(feedbackId, title, "").catch(() => null),
+      platformId ? updateTags(feedbackId, [platformId], []).catch(() => null) : null,
+      description ? null : updateIdea(feedbackId, title, "").catch(() => null),
     ]);
     revalidateTag(refletTag, { expire: 0 });
     await logEvent(user, { type: "item.created", item: { id: feedbackId, title, status }, to: status });

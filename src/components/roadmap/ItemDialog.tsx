@@ -27,7 +27,7 @@ import { Icon, type IconName } from "../Icon";
 import { Modal } from "../Modal";
 import { Toast } from "../Toast";
 import type { EditValues, useAdmin } from "./admin";
-import { CategoryTag } from "./CategoryTag";
+import { CategoryTag, platformName } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
 import { MediaThumb, pickFiles, uploadMedia } from "./media";
@@ -59,7 +59,6 @@ type Props = {
   admin: ReturnType<typeof useAdmin>;
   onPatch: (id: string, change: Partial<FeedbackItem>) => void;
   vote?: (item: FeedbackItem, direction: VoteDirection) => void;
-  votePending?: boolean;
   removeLabel?: string;
 };
 
@@ -130,7 +129,6 @@ function ItemBody({
   admin,
   onPatch,
   vote,
-  votePending,
   removeLabel,
 }: Props & { item: FeedbackItem }) {
   const { locale, t } = useI18n();
@@ -437,7 +435,7 @@ function ItemBody({
       <VoteControl
         item={item}
         onVote={(direction) => vote(item, direction)}
-        disabled={!authReady || votePending || viewer?.banned}
+        disabled={!authReady || viewer?.banned}
       />
     ) : (
       <span className="sheet__votes" title={b.votes}>
@@ -831,7 +829,7 @@ function EditForm({
               <option value="">{b.noCategory}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.name}
+                  {platformName(category.name, t.ideas)}
                 </option>
               ))}
             </select>

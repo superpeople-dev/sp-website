@@ -33,7 +33,7 @@ export function VoteControl({
         </span>
         <b className="votes__count">{item.voteCount}</b>
         <span className="votes__down">
-          <Icon name="vote" />
+          <Icon name="voteDown" />
         </span>
       </span>
     );
@@ -60,7 +60,7 @@ export function VoteControl({
         disabled={disabled}
         onClick={() => onVote("down")}
       >
-        <Icon name="vote" />
+        <Icon name="voteDown" />
       </button>
     </div>
   );

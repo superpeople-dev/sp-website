@@ -9,7 +9,7 @@ import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { useAdmin } from "./admin";
-import { categoryIcon } from "./CategoryTag";
+import { categoryIcon, platformName } from "./CategoryTag";
 import { WorkCard } from "./WorkCard";
 import { useItemUrl } from "./useItemUrl";
 
@@ -80,7 +80,7 @@ export function CompletedList({
               <span className="done-group__icon" style={{ "--cat": group.category?.color ?? "var(--muted)" } as CSSProperties}>
                 <Icon name={group.category ? categoryIcon(group.category.name) : "other"} />
               </span>
-              {group.category?.name ?? t.completed.other}
+              {group.category ? platformName(group.category.name, t.ideas) : t.completed.other}
               <span className="panel__count">{group.items.length}</span>
             </h2>
             <ul className="work-list work-list--grid">

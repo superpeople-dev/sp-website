@@ -86,7 +86,7 @@ export function PlanBoard({
   );
   const canDrag = can(viewer, "manage");
   const next = localeHref(locale, "/roadmap");
-  const { vote, pending, prompt: signInPrompt } = useVote({ patch, viewer, authReady, next });
+  const { vote, prompt: signInPrompt } = useVote({ patch, viewer, authReady, next });
   const add = (item: FeedbackItem) => setItems((list) => [...list.filter((entry) => entry.id !== item.id), item]);
 
   const columns = useMemo(() => {
@@ -138,7 +138,9 @@ export function PlanBoard({
                     showDate: column.key === "completed",
                     onOpen: (mode) => open(item.id, mode),
                     onVote: authReady ? (direction) => void vote(item, direction) : undefined,
-                    voteDisabled: pending.includes(item.id) || viewer?.banned,
+                    // Not while a vote is sending (useVote ignores those clicks): the arrows would lose their hover
+                    // colour and get it back, a blink.
+                    voteDisabled: viewer?.banned,
                   };
                   return canDrag ? <DraggableCard key={item.id} {...props} /> : <WorkCard key={item.id} {...props} />;
                 })}
@@ -146,7 +148,7 @@ export function PlanBoard({
             ) : (
               <p className="plan__empty">{p.empty}</p>
             )}
-            {canDrag && <AddTask status={column.key} onAdded={add} />}
+            {canDrag && <AddTask status={column.key} categories={categories} types={types} onAdded={add} />}
             {column.key === "completed" && (column.total ?? 0) > 0 && (
               <Link className="plan__more" href={localeHref(locale, "/completed")}>
                 {p.seeAll}
@@ -200,7 +202,6 @@ export function PlanBoard({
         admin={admin}
         onPatch={patch}
         vote={(item, direction) => void vote(item, direction)}
-        votePending={current ? pending.includes(current.id) : false}
       />
       {admin.dialog}
       {signInPrompt}
