@@ -1,28 +1,17 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import type { FeedbackStatus } from "reflet-sdk";
-import {
-  createIdea,
-  deleteIdea,
-  failure,
-  getIdea,
-  getTags,
-  refletTag,
-  RefletRequestError,
-  setStatus,
-  updateIdea,
-  updateTags,
-  userToken,
-} from "@/lib/reflet";
+import { deleteIdea, failure, getIdea, refletTag, RefletRequestError } from "@/lib/reflet";
 import { can } from "@/lib/board";
 import { logEvent } from "@/lib/events";
 import { typeAndPlatforms } from "@/lib/kinds";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { listStaff } from "@/lib/staff";
-import { addNotice, markChangedBy, markCreated, profileOf, rememberAuthor, setAssignee } from "@/lib/store";
+import { addNotice, setAssignee } from "@/lib/store";
+import { createTask, editTask, moveTask, statuses } from "@/lib/tasks";
 
-const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
+// The admin panel and the item dialog create tasks on the roadmap (the developer API may also create ideas).
 const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
 
 type Body = {
@@ -50,45 +39,11 @@ async function create(user: SessionUser, body: Body) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
   try {
-    const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
-    const typeId = types.find((type) => type.slug === body.type)?.id;
-    const platformId = categories.find((category) => category.id === body.platform)?.id;
-    // Reflet no longer creates an item without a description: a task without details is created with
-    // its title as the description, which is then cleared (kept if Reflet refuses).
-    const { feedbackId } = await createIdea(title, description || title, await userToken(user), typeId);
-    // Before the status is set: Reflet reports it as a status change (api/webhooks/reflet).
-    await markCreated(feedbackId);
-    await Promise.all([
-      setStatus(feedbackId, status),
-      rememberAuthor(feedbackId, profileOf(user)),
-      platformId ? updateTags(feedbackId, [platformId], []).catch(() => null) : null,
-      description ? null : updateIdea(feedbackId, title, "").catch(() => null),
-    ]);
-    revalidateTag(refletTag, { expire: 0 });
-    await logEvent(user, { type: "item.created", item: { id: feedbackId, title, status }, to: status });
-    const item = await getIdea(feedbackId);
-    return Response.json({ item: { ...item, status } });
+    const item = await createTask(user, { title, description, status, type: String(body.type ?? ""), platform: String(body.platform ?? "") });
+    return Response.json({ item });
   } catch (error) {
     return failure("create task", error);
   }
-}
-
-async function edit(feedbackId: string, body: Body) {
-  const title = text(body.title);
-  const description = text(body.description);
-  if (title.length < 3 || title.length > ideaLimits.titleMax || description.length > ideaLimits.description) return false;
-  const [{ categories, types }, item] = await Promise.all([getTags(), getIdea(feedbackId)]);
-  const managed = new Set([...categories, ...types].map((tag) => tag.id));
-  const wanted = [
-    types.find((type) => type.id === body.typeId)?.id,
-    categories.find((category) => category.id === body.categoryId)?.id,
-  ].filter((id): id is string => Boolean(id));
-  const current = item.tags.map((tag) => tag.id).filter((id) => managed.has(id));
-  const add = wanted.filter((id) => !current.includes(id));
-  const remove = current.filter((id) => !wanted.includes(id));
-  await updateIdea(feedbackId, title, description);
-  if (add.length || remove.length) await updateTags(feedbackId, add, remove);
-  return true;
 }
 
 // Approving or rejecting a new idea (still under review) needs "review"; anything else "manage".
@@ -122,16 +77,13 @@ export async function POST(request: NextRequest) {
     const target = { id: feedbackId, title: item.title, status: item.status };
 
     if (body.action === "status" && statuses.includes(to)) {
-      // Before the status is set: Reflet's webhook posts the change on Discord and names who did it.
-      await markChangedBy(feedbackId, { id: user.id, name: user.name, to });
-      await setStatus(feedbackId, to);
-      await logEvent(user, approving ? { type: "idea.approved", item: target } : { type: "item.moved", item: target, to });
+      await moveTask(user, item, to);
     } else if (body.action === "delete") {
       await deleteIdea(feedbackId);
       // Its Discord post says what it was ("Bug report rejected") and for which platform.
       const { type: kind, platforms } = typeAndPlatforms(item.tags);
       await logEvent(user, { type: rejecting ? "idea.rejected" : "item.deleted", item: target, kind, platform: platforms.join(", ") || "Other" });
-    } else if (body.action === "edit" && (await edit(feedbackId, body))) {
+    } else if (body.action === "edit" && (await editTask(feedbackId, { ...body, title: text(body.title), description: text(body.description) }))) {
       await logEvent(user, { type: "item.edited", item: { ...target, title: text(body.title) } });
     } else if (body.action === "assign" && (body.assignee === null || typeof body.assignee === "string")) {
       // Only to someone who is an admin now.

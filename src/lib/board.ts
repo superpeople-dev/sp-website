@@ -104,6 +104,8 @@ export type ActivityEvent = {
   to?: FeedbackStatus;
   // The people a comment mentions (lib/mentions.ts): its Discord post pings them.
   mentions?: { id: string; name: string }[];
+  // Done through the developer API (app/api/dev): the name of the admin's API key.
+  via?: string;
   permissions?: Permission[];
 };
 

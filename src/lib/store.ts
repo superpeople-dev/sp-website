@@ -203,6 +203,37 @@ export const markChangedBy = (itemId: string, change: StatusChange) =>
 export const changedBy = (itemId: string) =>
   attempt("status change check", null as StatusChange | null, (client) => client.get<StatusChange>(changedByKey(itemId)));
 
+// Admins' API keys (lib/apikeys.ts), by the SHA-256 of the key: the key itself is never stored.
+export type ApiKeyRecord = {
+  id: string;
+  hash: string;
+  name: string;
+  owner: { id: string; name: string; username: string; avatar: string };
+  createdAt: number;
+  lastUsedAt?: number;
+};
+const apiKeysKey = "sp:api-keys";
+// When each key was last used, apart: a use that races a revoke must not write the key back.
+const apiKeysUsedKey = "sp:api-keys-used";
+export const saveApiKey = (record: ApiKeyRecord) =>
+  attempt("api key save", null, (client) => client.hset(apiKeysKey, { [record.hash]: record }));
+export const readApiKey = (hash: string) =>
+  attempt("api key lookup", null as ApiKeyRecord | null, (client) => client.hget<ApiKeyRecord>(apiKeysKey, hash));
+export const listApiKeys = () =>
+  attempt("api key list", [] as ApiKeyRecord[], async (client) => {
+    const [records, used] = await Promise.all([
+      client.hgetall<Record<string, ApiKeyRecord>>(apiKeysKey),
+      client.hgetall<Record<string, number>>(apiKeysUsedKey),
+    ]);
+    return Object.values(records ?? {}).map((record) => ({ ...record, lastUsedAt: Number(used?.[record.hash]) || undefined }));
+  });
+export const deleteApiKey = (hash: string) =>
+  attempt("api key delete", null, async (client) => {
+    await client.hdel(apiKeysKey, hash);
+    await client.hdel(apiKeysUsedKey, hash);
+  });
+export const touchApiKey = (hash: string) => attempt("api key use", null, (client) => client.hset(apiKeysUsedKey, { [hash]: Date.now() }));
+
 // Tasks an admin just created on the site (app/api/admin/feedback): Reflet reports the status the task
 // was created in as a status change, and the Discord post should say "New task", not "Moved to".
 const createdKey = (itemId: string) => `sp:created:${itemId}`;

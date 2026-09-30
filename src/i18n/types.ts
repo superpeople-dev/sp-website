@@ -212,6 +212,25 @@ export type Dictionary = {
   };
   admin: {
     tabActivity: string;
+    tabApi: string;
+    apiLead: string;
+    apiDocs: string;
+    apiName: string;
+    apiNamePlaceholder: string;
+    apiCreate: string;
+    apiNew: string;
+    apiCopy: string;
+    apiCopied: string;
+    apiEmpty: string;
+    apiCreated: string;
+    apiUsed: string;
+    apiNeverUsed: string;
+    apiRevoke: string;
+    apiRevokeTitle: string;
+    apiRevokeBody: string;
+    apiRole: string;
+    apiLimit: string;
+    apiVia: string;
     owner: string;
     permissions: Record<Permission, { label: string; hint: string }>;
     noPermissions: string;

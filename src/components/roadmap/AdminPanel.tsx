@@ -26,7 +26,7 @@ import { Modal } from "../Modal";
 
 type Pending = { id: string; title: string; createdAt: number; author: string | null };
 type Overview = { pending: Pending[] | null; bans: Ban[] | null; staff: StaffMember[] };
-type Tab = "review" | "bans" | "admins" | "activity";
+type Tab = "review" | "bans" | "admins" | "activity" | "api";
 
 const post = (url: string, body: object) =>
   fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
@@ -163,6 +163,7 @@ function AdminBody({
     ...(can(viewer, "bans") && data?.bans !== null ? [{ key: "bans" as const, label: b.bansOpen, count: data?.bans?.length }] : []),
     { key: "admins", label: b.tabAdmins, count: data?.staff.length },
     { key: "activity", label: a.tabActivity },
+    { key: "api", label: a.tabApi },
   ];
 
   const skeleton = (
@@ -326,6 +327,8 @@ function AdminBody({
       <div className="sheet__body" role="tabpanel" id="admin-panel" aria-labelledby={`admin-tab-${tab}`}>
         {tab === "activity" ? (
           <ActivityLog />
+        ) : tab === "api" ? (
+          <ApiKeys />
         ) : failed ? (
           <p className="thread__note">{b.actionFailed}</p>
         ) : !data ? (
@@ -579,6 +582,12 @@ function ActivityLog() {
                 </span>
                 <div className="activity__main">
                   <p>{sentence(event)}</p>
+                  {event.via && (
+                    <span className="activity__via">
+                      <Icon name="code" />
+                      {fill(a.apiVia, { name: event.via })}
+                    </span>
+                  )}
                   {event.text && <blockquote>{event.text}</blockquote>}
                   {event.permissions && (
                     <span className="staff__perms">
@@ -599,6 +608,149 @@ function ActivityLog() {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+type ApiKey = { id: string; name: string; createdAt: number; lastUsedAt: number | null };
+
+// The admin's own API keys for the developer API (lib/apikeys.ts): agents use one to create, move and
+// comment on tasks as this admin. A new key is shown once, to copy; a key can be revoked at any time.
+function ApiKeys() {
+  const { locale, t } = useI18n();
+  const a = t.admin;
+  const b = t.board;
+  const [ask, confirmDialog] = useConfirm();
+  const [data, setData] = useState<{ keys: ApiKey[]; allowed: boolean; max: number } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [created, setCreated] = useState<{ key: string; name: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const day = useMemo(() => new Intl.DateTimeFormat(localeInfo[locale].intl, { day: "numeric", month: "short", year: "numeric" }), [locale]);
+
+  useEffect(() => {
+    let live = true;
+    fetch("/api/admin/keys", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        const found = (await response.json()) as { keys: ApiKey[]; allowed: boolean; max: number };
+        if (live) setData(found);
+      })
+      .catch(() => {
+        if (live) setFailed(true);
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const create = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!name.trim() || busy) return;
+    setBusy(true);
+    setProblem(null);
+    const response = await post("/api/admin/keys", { action: "create", name });
+    setBusy(false);
+    const answer = response ? ((await response.json().catch(() => ({}))) as { key?: string; view?: ApiKey; error?: string }) : {};
+    if (!response?.ok || !answer.key || !answer.view) {
+      return setProblem(answer.error === "role" ? a.apiRole : answer.error === "limit" ? fill(a.apiLimit, { max: String(data?.max ?? 10) }) : b.actionFailed);
+    }
+    const view = answer.view;
+    setCreated({ key: answer.key, name: view.name });
+    setCopied(false);
+    setName("");
+    setData((current) => current && { ...current, keys: [view, ...current.keys] });
+  };
+
+  const copy = async () => {
+    if (!created) return;
+    await navigator.clipboard.writeText(created.key).catch(() => null);
+    setCopied(true);
+  };
+
+  const revoke = async (key: ApiKey) => {
+    const ok = await ask({
+      title: fill(a.apiRevokeTitle, { name: key.name }),
+      body: a.apiRevokeBody,
+      confirm: a.apiRevoke,
+      cancel: b.cancel,
+      icon: "trash",
+      danger: true,
+    });
+    if (!ok) return;
+    const response = await post("/api/admin/keys", { action: "revoke", id: key.id });
+    if (!response?.ok) return window.alert(b.actionFailed);
+    setData((current) => current && { ...current, keys: current.keys.filter((entry) => entry.id !== key.id) });
+    if (created?.name === key.name) setCreated(null);
+  };
+
+  if (failed) return <p className="thread__note">{b.actionFailed}</p>;
+  if (!data) return <p className="thread__empty" aria-busy="true">…</p>;
+
+  return (
+    <div className="apikeys">
+      <p className="apikeys__lead">
+        {a.apiLead}{" "}
+        <a href="https://github.com/superpeople-dev/sp-docs/blob/main/docs/ROADMAP-API.md" target="_blank" rel="noopener noreferrer">
+          {a.apiDocs}
+        </a>
+      </p>
+      {data.allowed ? (
+        <form className="apikeys__form" onSubmit={(event) => void create(event)}>
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            maxLength={40}
+            placeholder={a.apiNamePlaceholder}
+            aria-label={a.apiName}
+            required
+          />
+          <button type="submit" className="btn btn--sm btn--primary" disabled={busy || !name.trim()}>
+            <Icon name="plus" />
+            {a.apiCreate}
+          </button>
+        </form>
+      ) : (
+        <p className="thread__note">{a.apiRole}</p>
+      )}
+      {problem && <p className="thread__note">{problem}</p>}
+      {created && (
+        <div className="apikeys__new" role="status">
+          <p>{a.apiNew}</p>
+          <div className="apikeys__secret">
+            <code>{created.key}</code>
+            <button type="button" className="btn btn--sm" onClick={() => void copy()}>
+              <Icon name={copied ? "check" : "code"} />
+              {copied ? a.apiCopied : a.apiCopy}
+            </button>
+          </div>
+        </div>
+      )}
+      {data.keys.length ? (
+        <ul className="bans apikeys__list">
+          {data.keys.map((key) => (
+            <li key={key.id} className="bans__row">
+              <span className="activity__icon" aria-hidden="true">
+                <Icon name="lock" />
+              </span>
+              <div className="bans__who">
+                <b>{key.name}</b>
+                <span>
+                  {fill(a.apiCreated, { date: day.format(key.createdAt) })} - {key.lastUsedAt ? fill(a.apiUsed, { date: day.format(key.lastUsedAt) }) : a.apiNeverUsed}
+                </span>
+              </div>
+              <button type="button" className="btn btn--sm admin-review__reject" onClick={() => void revoke(key)}>
+                {a.apiRevoke}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="thread__empty">{a.apiEmpty}</p>
+      )}
+      {confirmDialog}
     </div>
   );
 }

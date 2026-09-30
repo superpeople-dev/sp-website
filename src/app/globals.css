@@ -1526,7 +1526,10 @@ button.votes__down:disabled { cursor: default; }
   .account-bar__suggest { order: 4; grid-column: 1 / -1; width: 100%; }
 }
 .sheet--admin { width: min(640px, 100%); }
-.admin-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 16px 0 20px; border-bottom: 1px solid var(--line-soft); }
+/* One row: where the tabs don't fit (phones, long languages) it scrolls sideways. */
+.admin-tabs { display: flex; gap: 4px; padding: 6px 16px 0 20px; overflow-x: auto; border-bottom: 1px solid var(--line-soft); scrollbar-width: none; }
+.admin-tabs::-webkit-scrollbar { display: none; }
+.admin-tabs button { flex: none; }
 .admin-tabs button {
   display: inline-flex;
   align-items: center;
@@ -1599,6 +1602,40 @@ button.votes__down:disabled { cursor: default; }
 .activity__main b { color: var(--paper); font-weight: 600; }
 .activity__main a { color: var(--paper); font-weight: 600; }
 .activity__main blockquote { margin: 0; padding: 6px 10px; border-left: 2px solid var(--line); color: var(--muted); font-size: 15px; white-space: pre-line; overflow-wrap: anywhere; }
+/* Done by an agent with an admin's API key. */
+.activity__via { display: inline-flex; align-items: center; gap: 6px; justify-self: start; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.activity__via svg { width: 13px; height: 13px; flex: none; }
+
+/* The admin panel's API tab (ApiKeys): the new key's name and its button on one row, the key once
+   right after it is made, then the admin's keys. */
+.apikeys { display: grid; gap: 14px; }
+.apikeys__lead { margin: 0; color: var(--paper-dim); font-size: 15px; line-height: 1.5; }
+.apikeys__lead a { color: var(--paper); font-weight: 600; }
+.apikeys__form { display: flex; gap: 8px; }
+.apikeys__form input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--ink);
+  color: var(--paper);
+  font: 15px var(--body);
+}
+.apikeys__form input:focus { outline: none; border-color: var(--signal); }
+.apikeys__form .btn { flex: none; }
+.apikeys__new { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid rgba(240, 183, 25, 0.45); border-radius: var(--r); background: rgba(240, 183, 25, 0.08); }
+.apikeys__new p { margin: 0; color: var(--gold); font-weight: 600; }
+.apikeys__secret { display: flex; align-items: center; gap: 8px; }
+.apikeys__secret code { flex: 1; min-width: 0; padding: 8px 10px; border-radius: var(--r); background: var(--ink); color: var(--paper); font: 13px/1.4 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; user-select: all; }
+.apikeys__secret .btn { flex: none; }
+@media (max-width: 420px) {
+  .apikeys__form,
+  .apikeys__secret { flex-direction: column; align-items: stretch; }
+  .apikeys__form .btn,
+  .apikeys__secret .btn { justify-content: center; }
+}
 .activity__row--comment-deleted blockquote { border-left-color: var(--signal); }
 .activity__row time { padding-top: 5px; color: var(--muted); font-size: 13px; white-space: nowrap; }
 .activity__more { margin: 0; color: var(--muted); font-size: 14px; text-align: center; }
