@@ -138,6 +138,8 @@ h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacin
 .btn--lg { font-size: 18px; padding: 19px 30px; }
 .btn--sm { font-size: 13px; padding: 0 16px; height: 38px; }
 .btn--sm svg { width: 16px; height: 16px; }
+/* "Sign in with Discord" (the account bar, under comments): a bit taller than the other small buttons. */
+.btn--discord.btn--sm { height: 44px; }
 @keyframes nudge { 50% { transform: translateY(2px); } }
 
 .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
