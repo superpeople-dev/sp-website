@@ -1821,7 +1821,8 @@ button.votes__down:disabled { cursor: default; }
   .sheet__bar--item .sheet__tags { grid-area: tags; }
   .sheet__bar--item .sheet__actions { grid-area: actions; }
 }
-.sheet__status { border-color: currentColor; color: var(--paper-dim); }
+/* The status: its colour for the text and the border, a tint of it for the background. */
+.sheet__status { border-color: currentColor; background: color-mix(in srgb, currentColor 16%, transparent); color: var(--paper-dim); }
 .sheet__status--under_review { color: #8fb0ff; }
 .sheet__status--planned { color: var(--gold); }
 .sheet__status--in_progress { color: var(--signal-hi); }
