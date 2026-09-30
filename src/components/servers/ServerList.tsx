@@ -119,7 +119,7 @@ export function ServerList({ initial }: { initial: List }) {
           {shown.length ? (
             <ul className="server-list">
               {shown.map((srv, i) => (
-                <li key={`${srv.name}-${i}`} className={`server${srv.online ? " is-online" : ""}`}>
+                <li key={`${srv.name}-${i}`} className={`server${srv.online ? " is-online" : ""}${srv.match === "over" ? " is-over" : ""}`}>
                   <div className="server__top">
                     <h3 className="server__name">
                       <span className="server__dot" aria-hidden="true" />
