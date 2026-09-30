@@ -62,8 +62,8 @@ export const ko: Dictionary = {
         body: "설치 파일을 내려받아 실행하세요. 새로 나온 앱이라 Windows SmartScreen 경고가 뜰 수 있습니다. \"추가 정보\"를 누른 뒤 \"실행\"을 클릭하세요.",
       },
       {
-        title: "키 받기",
-        body: "Discord에 참여해 봇에게 `/authkey`를 입력하세요. 받은 키를 런처에 한 번만 붙여 넣으면 됩니다. 키는 PC에 암호화되어 저장됩니다.",
+        title: "Discord 연결",
+        body: "런처를 열고 **Connect with Discord**를 누르세요. 한 번만 로그인하면 런처가 로그인 상태를 유지합니다.",
       },
       {
         title: "다운로드 후 플레이",
@@ -156,7 +156,7 @@ export const ko: Dictionary = {
       },
       {
         q: "어떻게 시작하나요?",
-        a: "먼저 런처를 받으세요. 런처가 archive.org에서 호환되는 게임 파일을 내려받아 설치까지 해 줍니다. 게임이 미리 설치되어 있을 필요는 없습니다. 오히려 이전 Steam 버전을 설치해 최신 상태로 업데이트했다면 이 프로젝트에서는 작동하지 않습니다.\n\n런처는 GitHub에서 내려받을 수 있습니다:\nhttps://github.com/superpeople-dev/sp-launcher\n\n런처를 받았다면 인증 키도 필요합니다. Discord의 🤖・bot 채널에서 `/authkey`를 입력하면 키를 발급받을 수 있습니다.\n\n필요한 경우 런처는 게임이 원래의 슈퍼피플 서비스 대신 커뮤니티 서버에 연결되도록 Windows hosts 파일에 항목을 임시로 추가합니다. 이 변경 사항은 게임을 종료하면 원래대로 되돌아갑니다.",
+        a: "먼저 런처를 받으세요. 런처가 archive.org에서 호환되는 게임 파일을 내려받아 설치까지 해 줍니다. 게임이 미리 설치되어 있을 필요는 없습니다. 오히려 이전 Steam 버전을 설치해 최신 상태로 업데이트했다면 이 프로젝트에서는 작동하지 않습니다.\n\n런처는 GitHub에서 내려받을 수 있습니다:\nhttps://github.com/superpeople-dev/sp-launcher\n\n런처를 받았다면 ‘Connect with Discord’를 눌러 Discord 계정으로 로그인하세요. 런처 키를 사용했다면 계정과 진행 상황이 그대로 이어집니다.\n\n필요한 경우 런처는 게임이 원래의 슈퍼피플 서비스 대신 커뮤니티 서버에 연결되도록 Windows hosts 파일에 항목을 임시로 추가합니다. 이 변경 사항은 게임을 종료하면 원래대로 되돌아갑니다.",
       },
       {
         q: "게임을 소유하거나 Steam이 있어야 하나요?",

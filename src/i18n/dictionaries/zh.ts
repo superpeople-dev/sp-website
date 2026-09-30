@@ -62,8 +62,8 @@ export const zh: Dictionary = {
         body: "下载安装包并运行。由于应用刚发布，Windows 可能会弹出 SmartScreen 警告。点击“更多信息”，再点击“仍要运行”。",
       },
       {
-        title: "获取密钥",
-        body: "加入我们的 Discord，向机器人发送 `/authkey`。把密钥粘贴到启动器里一次即可，它会加密保存在你的电脑上。",
+        title: "连接 Discord",
+        body: "打开启动器，点击 **Connect with Discord**。只需登录一次，启动器会保持登录状态。",
       },
       {
         title: "下载并开玩",
@@ -154,7 +154,7 @@ export const zh: Dictionary = {
       },
       {
         q: "该怎么开始？",
-        a: "先获取启动器，它可以从 archive.org 下载兼容的游戏文件，并帮你完成安装。你不需要事先装有游戏。事实上，如果你装的是之前的 Steam 版本并且已经更新过，它是无法用于本项目的。\n\n你可以在 GitHub 上下载启动器：\nhttps://github.com/superpeople-dev/sp-launcher\n\n有了启动器之后，你还需要一个认证密钥。在 Discord 的 🤖・bot 频道中使用 `/authkey` 即可生成。\n\n必要时，启动器会临时在 Windows 的 hosts 文件中添加记录，让游戏连接到社区服务器，而不是 SUPER PEOPLE 原来的官方服务。游戏退出后，这些更改会被还原。",
+        a: "先获取启动器，它可以从 archive.org 下载兼容的游戏文件，并帮你完成安装。你不需要事先装有游戏。事实上，如果你装的是之前的 Steam 版本并且已经更新过，它是无法用于本项目的。\n\n你可以在 GitHub 上下载启动器：\nhttps://github.com/superpeople-dev/sp-launcher\n\n有了启动器之后，点击“Connect with Discord”，用你的 Discord 账号登录即可。如果你之前有启动器密钥，你的账号和进度都会保留。\n\n必要时，启动器会临时在 Windows 的 hosts 文件中添加记录，让游戏连接到社区服务器，而不是 SUPER PEOPLE 原来的官方服务。游戏退出后，这些更改会被还原。",
       },
       {
         q: "需要拥有游戏或 Steam 吗？",
