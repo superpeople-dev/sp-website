@@ -21,7 +21,16 @@ export const isChallenge = (value: string | null): value is string => typeof val
 
 export const challengeOf = (verifier: string) => createHash("sha256").update(verifier).digest("base64url");
 
-export const profileOfSession = (user: SessionUser) => ({ id: user.id, name: user.name, username: user.username, avatar: user.avatar });
+// With what the player may do as an admin (lib/staff.ts), for the launcher's admin tools. The site
+// checks the same permissions again on every admin call.
+export const profileOfSession = (user: SessionUser) => ({
+  id: user.id,
+  name: user.name,
+  username: user.username,
+  avatar: user.avatar,
+  admin: user.admin,
+  permissions: user.permissions,
+});
 
 // ------------------------------------------------------------- game pass ---
 // Pressing Play, the launcher asks for a pass and hands it to the game backend (sp-backend,
@@ -59,6 +68,9 @@ export type LauncherItem = {
   completedAt: number | null;
   tags: { name: string; color: string }[];
   author: { name: string; avatar: string | null } | null;
+  // Its type and platform tags, which an admin's edit keeps (app/api/admin/feedback, action "edit").
+  typeId: string | null;
+  platformId: string | null;
 };
 
 const typeLabel: Record<string, string> = {
@@ -73,6 +85,8 @@ const hex = (color: number) => `#${color.toString(16).padStart(6, "0")}`;
 
 export function launcherItem(item: FeedbackItem & BoardItem, authors: Record<string, Profile>): LauncherItem {
   const { type, platforms } = typeAndPlatforms(item.tags);
+  const typeTag = item.tags.find((tag) => !platforms.includes(tag.name)) ?? null;
+  const platformTag = item.tags.find((tag) => platforms.includes(tag.name)) ?? null;
   const profile = authors[item.id];
   const reported = item.description.match(reporter)?.[1];
   const author = profile
@@ -98,5 +112,10 @@ export function launcherItem(item: FeedbackItem & BoardItem, authors: Record<str
     completedAt: item.status === "completed" ? (item.completedAt ?? item.updatedAt) : null,
     tags,
     author,
+    typeId: typeTag?.id ?? null,
+    platformId: platformTag?.id ?? null,
   };
 }
+
+// The types an admin can give an item, as the launcher names them.
+export const typeName = (slug: string) => typeLabel[slug] ?? "Other";
