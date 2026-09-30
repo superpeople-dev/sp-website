@@ -20,8 +20,11 @@ export const menuPages = [
   { path: "/servers", label: "servers", hint: "serversHint", icon: "server" },
   { path: "/bugs-and-ideas", label: "ideas", hint: "ideasHint", icon: "bulb" },
   { path: "/roadmap", label: "roadmap", hint: "roadmapHint", icon: "board" },
-  { path: "/completed", label: "completed", hint: "completedHint", icon: "done" },
 ] as const satisfies readonly { path: PagePath; label: string; hint: string; icon: IconName }[];
+
+// The menu entry that shows as current: Completed is not in the menu (the roadmap links to it), so
+// on its page the Roadmap is.
+export const menuPageOf = (page: PagePath): PagePath => (page === "/completed" ? "/roadmap" : page);
 
 export function MobileMenu({
   open,
@@ -107,7 +110,7 @@ export function MobileMenu({
             <p className="drawer__label">{t.nav.sections}</p>
             <nav className="drawer__links" aria-label={t.nav.sections}>
               {menuPages.map(({ path, label, hint, icon }, i) => {
-                const active = page === path;
+                const active = menuPageOf(page) === path;
                 return (
                   <motion.div
                     key={label}
@@ -118,7 +121,7 @@ export function MobileMenu({
                     <Link
                       href={localeHref(locale, path)}
                       className={`drawer__link${active ? " is-active" : ""}`}
-                      aria-current={active ? "page" : undefined}
+                      aria-current={page === path ? "page" : undefined}
                       onClick={(e) => onNavigate(e, path)}
                     >
                       <span className="drawer__icon">

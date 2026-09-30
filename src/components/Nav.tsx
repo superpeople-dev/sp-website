@@ -11,7 +11,7 @@ import { scrollToTop } from "@/lib/scroll";
 import { repoUrl } from "@/lib/site";
 import { Icon } from "./Icon";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { MobileMenu, menuPages as pages } from "./MobileMenu";
+import { MobileMenu, menuPageOf, menuPages as pages } from "./MobileMenu";
 import { ease } from "./motion";
 
 export function Nav({ downloadUrl, page = "" }: { downloadUrl: string; page?: PagePath }) {
@@ -61,13 +61,13 @@ export function Nav({ downloadUrl, page = "" }: { downloadUrl: string; page?: Pa
             <Link
               key={label}
               href={localeHref(locale, path)}
-              className={page === path ? "is-active" : undefined}
+              className={menuPageOf(page) === path ? "is-active" : undefined}
               aria-current={page === path ? "page" : undefined}
               onClick={(e) => go(e, path)}
             >
               <Icon name={icon} />
               {t.nav[label]}
-              {page === path && underline}
+              {menuPageOf(page) === path && underline}
             </Link>
           ))}
         </nav>
