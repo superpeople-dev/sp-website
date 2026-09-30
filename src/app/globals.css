@@ -2249,6 +2249,9 @@ button.votes__down:disabled { cursor: default; }
   cursor: zoom-out;
 }
 .lightbox img { width: auto; max-width: 100%; height: auto; max-height: 100%; border-radius: var(--r); object-fit: contain; }
+/* An item's picture (ItemDialog): all of it on the screen, whatever its size, the screen less the
+   margin around it (a percentage of the grid would not hold its height). */
+.lightbox--media img { max-width: calc(100vw - 48px); max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px); }
 .lightbox__close { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; }
 
 .sheet-form { display: grid; gap: 16px; }

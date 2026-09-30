@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -893,14 +894,18 @@ function ItemBody({
           </>
         )}
       </div>
-      {viewing && (
-        <div className="lightbox" role="presentation" onClick={() => setViewing(null)}>
-          <Image src={viewing.url} alt={viewing.name} width={1600} height={1000} unoptimized />
-          <button type="button" className="icon-btn lightbox__close" aria-label={b.close} title={b.close} autoFocus>
-            <Icon name="close" />
-          </button>
-        </div>
-      )}
+      {/* On the page itself, not in the dialog: the dialog's panel moves (a transform), which would
+          make "fixed" mean the panel instead of the screen. */}
+      {viewing &&
+        createPortal(
+          <div className="lightbox lightbox--media" role="presentation" onClick={() => setViewing(null)}>
+            <Image src={viewing.url} alt={viewing.name} width={1600} height={1000} unoptimized />
+            <button type="button" className="icon-btn lightbox__close" aria-label={b.close} title={b.close} autoFocus>
+              <Icon name="close" />
+            </button>
+          </div>,
+          document.body,
+        )}
       {confirmDialog}
       <Toast show={notice.show} icon={notice.icon}>
         {notice.text}
