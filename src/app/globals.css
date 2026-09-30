@@ -1329,6 +1329,10 @@ button.votes__down:disabled { cursor: default; }
 /* The bell (NotificationBell): assigned a task, mentioned in a comment. Its list opens under it,
    on phones as wide as the account bar. */
 .account-bar__bell { position: relative; flex: none; }
+/* Close to the button after it (the bar puts 14px between its items; phones already 8px). */
+@media (min-width: 701px) {
+  .account-bar__bell + * { margin-left: -6px; }
+}
 .bell__btn { position: relative; justify-content: center; width: 38px; padding: 0; }
 .bell__count {
   position: absolute;
