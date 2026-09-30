@@ -155,7 +155,7 @@ export function IdeasBoard({
               {item.title}
             </button>
           </h3>
-          {item.description && <p>{item.description}</p>}
+          <p>{item.description}</p>
           <div className="idea__meta">
             {typeBadge(item)}
             {category && <CategoryTag category={category} />}

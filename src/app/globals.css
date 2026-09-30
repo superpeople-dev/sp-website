@@ -1093,22 +1093,30 @@ button.votes__down:disabled { cursor: default; }
   .votes--small svg { width: 17px; height: 17px; }
   .votes--small .votes__count { font-size: 15px; }
 }
-.idea__body h3 { margin: 2px 0 6px; font-size: 19px; line-height: 1.15; letter-spacing: 0.04em; overflow-wrap: anywhere; }
+/* Every idea card is as tall as the others: a one-line title, two lines of description (kept empty
+   when there is none; line breaks become spaces) and one line of tags, each cut with "…". The whole
+   post is in its dialog. */
+.idea__body h3 { margin: 2px 0 6px; font-size: 19px; line-height: 1.15; letter-spacing: 0.04em; }
+.idea__body h3 .card__open { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .idea__body p {
   display: -webkit-box;
+  height: 3.2em;
   margin: 0 0 10px;
   overflow: hidden;
   color: var(--paper-dim);
   font-size: 15.5px;
-  white-space: pre-line;
+  line-height: 1.6;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 .idea__meta {
   display: flex;
-  flex-wrap: wrap;
+  /* Fixed: a name in another script (a fallback font) would make the line taller. */
+  height: 16px;
+  overflow: hidden;
   align-items: center;
+  white-space: nowrap;
   gap: 8px 14px;
   color: var(--muted);
   font: 700 12px var(--display);
@@ -1121,6 +1129,8 @@ button.votes__down:disabled { cursor: default; }
 .idea__status--completed { color: var(--green); }
 .idea__comments { display: inline-flex; align-items: center; gap: 5px; }
 .idea__comments svg { width: 14px; height: 14px; }
+.idea__meta > * { flex: none; }
+.idea__meta > .idea__author { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .idea__author { letter-spacing: 0.04em; text-transform: none; font-weight: 600; }
 
 .account { display: grid; gap: 14px; }
