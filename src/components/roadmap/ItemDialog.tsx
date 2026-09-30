@@ -458,8 +458,6 @@ function ItemBody({
   // A banned person keeps their name, struck through and followed by "(banned)", with Discord's
   // default picture instead of theirs.
   const isBanned = (author: Author | null) => Boolean(author?.banned || (author?.id && bannedIds.includes(author.id)));
-  // Nobody sees someone's Discord username next to their name; an admin gets an "i" at its top right
-  // with the username in a tooltip, to know who it is on Discord.
   const adminBadge = (
     <span className="who__badge">
       <Icon name="shield" />
@@ -467,19 +465,22 @@ function ItemBody({
     </span>
   );
 
-  const userTag = (user?: string | null) =>
-    viewer?.admin && user ? (
-      <span className="usertag" tabIndex={0} role="note" aria-label={`Discord: @${user}`} data-tip={`@${user}`}>
-        <Icon name="info" />
-      </span>
-    ) : null;
+  // Nobody sees someone's Discord username next to their name. Hidden for now: an admin got an "i" at
+  // its top right with the username in a tooltip (CSS .usertag). To bring it back, uncomment this and
+  // the three {userTag(…)} below.
+  // const userTag = (user?: string | null) =>
+  //   viewer?.admin && user ? (
+  //     <span className="usertag" tabIndex={0} role="note" aria-label={`Discord: @${user}`} data-tip={`@${user}`}>
+  //       <Icon name="info" />
+  //     </span>
+  //   ) : null;
 
-  const banned = ({ name, user }: { name: string; user?: string | null }) => (
+  const banned = ({ name }: { name: string; user?: string | null }) => (
     <>
       <b className="is-banned">
         <s>{name}</s>
       </b>
-      {userTag(user)}
+      {/* {userTag(user)} */}
       <span className="who__banned-tag">({t.admin.banned})</span>
     </>
   );
@@ -499,7 +500,7 @@ function ItemBody({
       <span className="who">
         <Avatar src={author.avatar} size={28} />
         <b>{name}</b>
-        {userTag(user)}
+        {/* {userTag(user)} */}
         {author.admin && adminBadge}
       </span>
     );
@@ -528,7 +529,7 @@ function ItemBody({
           ) : (
             <>
               <b>{commentAuthor(comment)?.name ?? b.team}</b>
-              {userTag(commentAuthor(comment)?.user)}
+              {/* {userTag(commentAuthor(comment)?.user)} */}
               {comment.author?.admin && adminBadge}
             </>
           )}

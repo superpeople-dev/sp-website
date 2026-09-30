@@ -1293,10 +1293,10 @@ button.votes__down:disabled { cursor: default; }
   flex: none;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
+  padding: 5px 9px;
   border-radius: 2px;
-  background: var(--gold);
-  color: #1c1405;
+  background: var(--signal);
+  color: #fff;
   font: 700 11px var(--display);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1967,16 +1967,16 @@ button.votes__down:disabled { cursor: default; }
 .usertag:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 /* The facts box would cut the tooltip of the "Posted by" name. */
 .sheet__facts:has(.usertag) { overflow: visible; }
-/* ADMIN: a gold chip with a shield. */
+/* ADMIN: a red chip with a shield. */
 .who__badge {
   display: inline-flex;
   flex: none;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 4px 7px;
   border-radius: 2px;
-  background: var(--gold);
-  color: #1c1405;
+  background: var(--signal);
+  color: #fff;
   font: 700 10px var(--display);
   letter-spacing: 0.12em;
   text-transform: uppercase;
