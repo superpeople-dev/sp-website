@@ -16,6 +16,7 @@ import {
 } from "@/lib/reflet";
 import { can } from "@/lib/board";
 import { logEvent } from "@/lib/events";
+import { typeAndPlatforms } from "@/lib/kinds";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { listStaff } from "@/lib/staff";
@@ -127,7 +128,9 @@ export async function POST(request: NextRequest) {
       await logEvent(user, approving ? { type: "idea.approved", item: target } : { type: "item.moved", item: target, to });
     } else if (body.action === "delete") {
       await deleteIdea(feedbackId);
-      await logEvent(user, { type: rejecting ? "idea.rejected" : "item.deleted", item: target });
+      // Its Discord post says what it was ("Bug report rejected") and for which platform.
+      const { type: kind, platforms } = typeAndPlatforms(item.tags);
+      await logEvent(user, { type: rejecting ? "idea.rejected" : "item.deleted", item: target, kind, platform: platforms.join(", ") || "Other" });
     } else if (body.action === "edit" && (await edit(feedbackId, body))) {
       await logEvent(user, { type: "item.edited", item: { ...target, title: text(body.title) } });
     } else if (body.action === "assign" && (body.assignee === null || typeof body.assignee === "string")) {

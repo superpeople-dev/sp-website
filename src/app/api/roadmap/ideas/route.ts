@@ -24,15 +24,16 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
   // A type and a platform are both required: one of lib/site.ts ideaTypes, and a category id or "other".
-  const typed = ideaTypes.some((type) => type.slug === body.type);
-  if (!typed || typeof body.platform !== "string" || !body.platform) return Response.json({ error: "invalid" }, { status: 400 });
+  const kind = ideaTypes.find((type) => type.slug === body.type)?.slug;
+  if (!kind || typeof body.platform !== "string" || !body.platform) return Response.json({ error: "invalid" }, { status: 400 });
   if (isOffensive(title) || isOffensive(description)) return Response.json({ error: "offensive" }, { status: 422 });
   try {
     const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
-    const tagId = types.find((type) => type.slug === body.type)?.id;
+    const tagId = types.find((type) => type.slug === kind)?.id;
     // The platform (Launcher, Game, …) is one of Reflet's categories; "other" is none of them. Without
     // the categories (Reflet didn't answer), any platform goes through untagged.
-    const platformId = categories.find((category) => category.id === body.platform)?.id;
+    const platform = categories.find((category) => category.id === body.platform);
+    const platformId = platform?.id;
     if (!platformId && body.platform !== "other" && categories.length) return Response.json({ error: "invalid" }, { status: 400 });
     const token = await userToken(user);
     const { feedbackId } = await createIdea(title, description, token, tagId);
@@ -46,7 +47,13 @@ export async function POST(request: NextRequest) {
     await getIdeaFor(feedbackId, token)
       .then((item) => (item.hasVoted ? null : voteIdea(feedbackId, token)))
       .catch(() => null);
-    await logEvent(user, { type: "idea.posted", item: { id: feedbackId, title, status: "under_review" } });
+    await logEvent(user, {
+      type: "idea.posted",
+      item: { id: feedbackId, title, status: "under_review" },
+      kind,
+      platform: platform?.name ?? "Other",
+      text: description || undefined,
+    });
     revalidateTag(refletTag, { expire: 0 });
     return Response.json({ pending: true, feedbackId });
   } catch (error) {

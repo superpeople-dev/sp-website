@@ -1,4 +1,5 @@
 import { boardOf, itemPath, type ActivityEvent } from "./board";
+import { capital, kinds } from "./kinds";
 import { siteUrl } from "./seo";
 
 // Discord posts for what happens on the site, in the style of the Reflet webhook's "New idea".
@@ -64,6 +65,16 @@ export async function announce(event: ActivityEvent) {
   const by = { name: "By", value: person(event.actor), inline: true };
   const onItem = event.item ? { title: event.item.title, url: itemUrl(event.item) } : {};
   const who = event.user ? { name: "User", value: person(event.user), inline: true } : null;
+  // What the idea is ("New bug report to review") and its Type and Platform fields, when the event
+  // says (older lines of the log don't: they stay an "idea").
+  const kind = kinds[event.kind ?? "other"];
+  const about = event.kind
+    ? [
+        { name: "Type", value: kind.type, inline: true },
+        { name: "Platform", value: event.platform || "Other", inline: true },
+      ]
+    : [];
+  const gone = `${event.item?.status === "planned" || event.item?.status === "in_progress" || event.item?.status === "completed" ? "Task" : capital(kind.name)} deleted`;
   const embeds: Partial<Record<ActivityEvent["type"], [Channel, Embed]>> = {
     "comment.posted": [
       "community",
@@ -76,15 +87,24 @@ export async function announce(event: ActivityEvent) {
         ping: event.mentions?.map((mention) => mention.id).filter((id) => /^\d+$/.test(id)),
       },
     ],
-    "idea.posted": ["moderation", { label: "New idea to review", color: colors.gold, ...onItem, fields: [by] }],
-    "idea.rejected": ["moderation", { label: "Idea rejected", color: colors.red, title: event.item?.title, fields: [by] }],
+    "idea.posted": [
+      "moderation",
+      {
+        label: `New ${kind.name} to review`,
+        color: kind.color,
+        ...onItem,
+        description: event.text ? clip(event.text, 700) : undefined,
+        fields: [...about, { ...by, name: kind.by }],
+      },
+    ],
+    "idea.rejected": ["moderation", { label: `${capital(kind.name)} rejected`, color: colors.red, title: event.item?.title, fields: [...about, by] }],
     "item.edited": ["moderation", { label: "Item edited", color: colors.grey, ...onItem, fields: [by] }],
     "item.assigned": [
       "moderation",
       { label: "Task assigned", color: colors.gold, ...onItem, fields: [by, { name: "Assigned to", value: person(event.user), inline: true }] },
     ],
     "item.unassigned": ["moderation", { label: "Task given back to the whole team", color: colors.grey, ...onItem, fields: [by] }],
-    "item.deleted": ["moderation", { label: "Item deleted", color: colors.red, title: event.item?.title, fields: [by] }],
+    "item.deleted": ["moderation", { label: gone, color: colors.red, title: event.item?.title, fields: [...about, by] }],
     "comment.deleted": [
       "moderation",
       { label: "Comment deleted", color: colors.red, ...onItem, description: event.text, fields: [by, ...(who ? [{ ...who, name: "Written by" }] : [])] },
@@ -104,12 +124,7 @@ export async function announce(event: ActivityEvent) {
   const found = embeds[event.type];
   if (found) await post(...found);
   if (event.type === "item.deleted" && event.item) {
-    await post("community", {
-      label: event.item.status === "open" ? "Idea deleted" : "Task deleted",
-      color: colors.red,
-      title: event.item.title,
-      fields: [by],
-    });
+    await post("community", { label: gone, color: colors.red, title: event.item.title, fields: [...about, by] });
   }
 }
 

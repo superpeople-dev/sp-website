@@ -95,8 +95,11 @@ export type ActivityEvent = {
   // The other person: the banned user, the admin who was changed, a deleted comment's author, the
   // admin an item was assigned to.
   user?: { id: string; name: string };
-  // A comment's text (also kept once it is deleted).
+  // A comment's text (also kept once it is deleted), a new idea's description.
   text?: string;
+  // What an idea is (its type tag) and the platform it is about, named in its Discord posts.
+  kind?: IdeaType;
+  platform?: string;
   // Where an item was moved.
   to?: FeedbackStatus;
   // The people a comment mentions (lib/mentions.ts): its Discord post pings them.
