@@ -16,6 +16,14 @@ const envAdmins = (process.env.ADMIN_DISCORD_IDS ?? "")
 
 export const isOwner = (id: string) => owners.includes(id);
 
+// Whether these Discord roles include one that makes someone an admin (DISCORD_ADMIN_ROLE_IDS),
+// for the Discord bot's commands (app/api/bot): the bot sends the roles it saw on the member.
+const adminRoleIds = (process.env.DISCORD_ADMIN_ROLE_IDS ?? "")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
+export const hasAdminRole = (roles: string[]) => roles.some((role) => adminRoleIds.includes(role));
+
 // Admins saved before the activity and api permissions existed had both (the activity log was every
 // admin's); they keep them until an owner saves their permissions again.
 const since2: Permission[] = ["activity", "api"];
