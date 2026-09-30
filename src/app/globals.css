@@ -1090,6 +1090,7 @@ button.votes__down:disabled { cursor: default; }
   .votes svg { width: 20px; height: 20px; }
   .votes__count { font-size: 17px; }
   .votes--small { height: 36px; }
+  .work .work__top { height: 36px; }
   .votes--small svg { width: 17px; height: 17px; }
   .votes--small .votes__count { font-size: 15px; }
 }
@@ -1481,8 +1482,13 @@ button.votes__down:disabled { cursor: default; }
 .work-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .work-list--grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .work { padding: 14px 16px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); }
-.work h3 { margin: 8px 0 0; font-size: 17px; line-height: 1.2; letter-spacing: 0.03em; overflow-wrap: anywhere; }
-.work__top { display: flex; align-items: center; gap: 12px; min-height: 28px; }
+/* Roadmap cards are all the same height: a top row as tall as the votes (with or without them), a
+   title of two lines, two lines of description (kept empty when there is none; line breaks become
+   spaces) and one line for the date and the comments, each cut with "…". */
+.work h3 { height: 2.4em; margin: 8px 0 0; font-size: 17px; line-height: 1.2; letter-spacing: 0.03em; overflow-wrap: anywhere; }
+.work h3 .card__open { display: block; max-width: 100%; }
+.work__title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.work__top { display: flex; align-items: center; gap: 12px; height: 28px; }
 .work__category {
   display: inline-flex;
   align-items: center;
@@ -1518,17 +1524,18 @@ button.votes__down:disabled { cursor: default; }
 .add-task:hover { border-color: var(--signal); background: rgba(239, 68, 56, 0.06); color: var(--paper); }
 .work__desc {
   display: -webkit-box;
+  height: 2.9em;
   margin: 6px 0 0;
   overflow: hidden;
   color: var(--paper-dim);
   font-size: 14.5px;
   line-height: 1.45;
-  white-space: pre-line;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
-.work__date { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.work__foot { display: flex; align-items: center; gap: 14px; height: 20px; margin: 6px 0 0; overflow: hidden; white-space: nowrap; }
+.work__date { overflow: hidden; color: var(--muted); font-size: 14px; text-overflow: ellipsis; }
 
 .admin-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .admin-actions[aria-busy="true"] { opacity: 0.55; }
@@ -1574,7 +1581,7 @@ button.votes__down:disabled { cursor: default; }
 .card .admin-actions,
 .card .item-menu { position: relative; z-index: 1; }
 .card .item-menu.is-open { z-index: 30; }
-.work__comments { display: inline-flex; align-items: center; gap: 5px; margin: 6px 0 0; color: var(--muted); font: 700 12px var(--display); }
+.work__comments { display: inline-flex; flex: none; align-items: center; gap: 5px; color: var(--muted); font: 700 12px var(--display); }
 .work__comments svg { width: 13px; height: 13px; }
 
 .icon-btn {
@@ -1836,7 +1843,8 @@ button.votes__down:disabled { cursor: default; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  max-width: 100%;
+  /* Its negative side margins line the picture up with the one above: its box is 16px wider. */
+  max-width: calc(100% + 16px);
   margin: -5px -8px;
   padding: 4px 8px;
   border: 1px solid transparent;
@@ -1852,6 +1860,9 @@ button.votes__down:disabled { cursor: default; }
 .assignee.is-open .assignee__btn { border-color: var(--line); background: var(--surface-2); }
 .assignee__btn:focus-visible { outline: none; border-color: var(--signal); }
 .assignee__chevron { width: 13px; height: 13px; flex: none; color: var(--muted); }
+/* The picture and the name stay on one line; a long name is cut with "…". */
+.assignee__btn .who { flex-wrap: nowrap; }
+.assignee__btn .who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheet__fact dt { color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 .sheet__fact dd { display: flex; align-items: center; min-height: 28px; margin: 0; color: var(--paper); font-size: 15px; }
 .sheet__author { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
@@ -1957,9 +1968,11 @@ button.votes__down:disabled { cursor: default; }
 .composer textarea:focus { outline: none; border-color: var(--signal); }
 /* @mentions: the people matching what is typed after an @, listed under the text box. */
 .composer__field { position: relative; display: grid; }
+/* Opens above the line with the @, starting at it (ItemDialog places it): the text box is at the
+   bottom of the dialog, where a list under it would be cut. */
 .mention-list {
   position: absolute;
-  top: calc(100% + 6px);
+  bottom: 100%;
   left: 0;
   z-index: 40;
   display: grid;
@@ -1979,6 +1992,9 @@ button.votes__down:disabled { cursor: default; }
 .mention-list__user { overflow: hidden; color: var(--muted); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .mention-list .who__badge { margin-left: auto; }
 .mention { color: #8fb0ff; font-weight: 600; }
+/* Web addresses in posts and comments (RichText.tsx). */
+.rich-link { color: #8fb0ff; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.rich-link:hover { color: var(--paper); }
 .composer textarea::placeholder { color: var(--muted); }
 .composer__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .composer__count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -21,7 +21,6 @@ import {
   type VoteDirection,
   type Mention,
 } from "@/lib/board";
-import { mentionPattern } from "@/lib/mentions";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import logo from "@/assets/sp-logo.png";
 import { Avatar } from "../Avatar";
@@ -35,6 +34,7 @@ import { CategoryTag, platformName } from "./CategoryTag";
 import { FieldCount } from "./FieldCount";
 import { ItemMenu } from "./ItemMenu";
 import { MediaThumb, pickFiles, uploadMedia } from "./media";
+import { richText } from "./RichText";
 import { pageUrl } from "./useItemUrl";
 import { VoteControl } from "./VoteControl";
 import { loginHref, signIn } from "./viewer";
@@ -56,17 +56,26 @@ type Thread = {
   mentions: Mention[];
 };
 
-// A comment's text with its @mentions highlighted.
-function withMentions(text: string): ReactNode[] {
-  const parts: ReactNode[] = [];
-  let last = 0;
-  for (const match of text.matchAll(mentionPattern)) {
-    const at = (match.index ?? 0) + match[1].length;
-    parts.push(text.slice(last, at), <span key={at} className="mention">@{match[2]}</span>);
-    last = at + 1 + match[2].length;
-  }
-  parts.push(text.slice(last));
-  return parts;
+// Where a character of a textarea is drawn (px from the textarea's top left), from an invisible copy
+// of it with the same box and text: to open the @mention list at the @.
+function caretAt(field: HTMLTextAreaElement, index: number) {
+  const style = getComputedStyle(field);
+  const copy = document.createElement("div");
+  const props = [
+    "boxSizing", "width", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "borderTopWidth", "borderRightWidth",
+    "borderBottomWidth", "borderLeftWidth", "fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing", "lineHeight",
+    "textTransform", "wordSpacing", "textIndent", "tabSize",
+  ] as const;
+  for (const prop of props) copy.style[prop] = style[prop];
+  Object.assign(copy.style, { position: "absolute", top: "0", left: "-9999px", visibility: "hidden", whiteSpace: "pre-wrap", overflowWrap: "break-word" });
+  copy.textContent = field.value.slice(0, index);
+  const mark = document.createElement("span");
+  mark.textContent = "@";
+  copy.appendChild(mark);
+  document.body.appendChild(copy);
+  const at = { top: mark.offsetTop - field.scrollTop, left: mark.offsetLeft - field.scrollLeft };
+  copy.remove();
+  return at;
 }
 
 // The items on the roadmap have someone who works on them.
@@ -323,13 +332,23 @@ function ItemBody({
   // @mentions: the word being typed at the caret after an @, and the people it matches.
   const textarea = useRef<HTMLTextAreaElement>(null);
   const listId = useId();
-  const [typing, setTyping] = useState<{ start: number; query: string } | null>(null);
+  // start: where the @ is; left and bottom place the list just above the @'s line, starting at it.
+  const [typing, setTyping] = useState<{ start: number; query: string; left: number; bottom: number } | null>(null);
   const [pick, setPick] = useState(0);
   const findMention = (field: HTMLTextAreaElement) => {
     const before = field.value.slice(0, field.selectionStart);
     const match = before.match(/(^|[^\w@.])@([a-z0-9_.]{0,32})$/i);
-    setTyping(match ? { start: before.length - match[2].length - 1, query: match[2].toLowerCase() } : null);
     setPick(0);
+    if (!match) return setTyping(null);
+    const start = before.length - match[2].length - 1;
+    const at = caretAt(field, start);
+    const width = Math.min(320, field.offsetWidth);
+    setTyping({
+      start,
+      query: match[2].toLowerCase(),
+      left: Math.max(0, Math.min(at.left - 8, field.offsetWidth - width)),
+      bottom: field.offsetHeight - at.top + 4,
+    });
   };
   const self = viewer?.username.toLowerCase();
   // Whose username or name starts with what is typed first, then whose name has it anywhere.
@@ -514,7 +533,7 @@ function ItemBody({
             </span>
           )}
         </div>
-        <p className="comment__body">{withMentions(comment.body)}</p>
+        <p className="comment__body">{richText(comment.body, { mentions: true })}</p>
         {comment.replies.length > 0 && <ul className="comment__replies">{comment.replies.map(renderComment)}</ul>}
       </div>
     </li>
@@ -678,7 +697,13 @@ function ItemBody({
                 required
               />
               {suggestions.length > 0 && (
-                <ul id={listId} className="mention-list" role="listbox" aria-label={b.mentionList}>
+                <ul
+                  id={listId}
+                  className="mention-list"
+                  role="listbox"
+                  aria-label={b.mentionList}
+                  style={typing ? { left: typing.left, bottom: typing.bottom } : undefined}
+                >
                   {suggestions.map((person, i) => (
                     <li
                       key={person.username}
@@ -774,7 +799,7 @@ function ItemBody({
             <h2 id="sheet-title" className="sheet__title">
               {item.title}
             </h2>
-            <p className={`sheet__desc${item.description ? "" : " is-empty"}`}>{item.description || b.noDetails}</p>
+            <p className={`sheet__desc${item.description ? "" : " is-empty"}`}>{item.description ? richText(item.description) : b.noDetails}</p>
             {thread.media.length > 0 && (
               <ul className="media-grid">
                 {thread.media.map((file) => (

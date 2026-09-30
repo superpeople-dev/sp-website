@@ -62,17 +62,20 @@ export function WorkCard({
       </div>
       <h3>
         <button type="button" className="card__open" onClick={() => onOpen("view")} tabIndex={overlay ? -1 : undefined}>
-          {item.title}
+          <span className="work__title">{item.title}</span>
         </button>
       </h3>
-      {item.description && <p className="work__desc">{item.description}</p>}
-      {showDate && <p className="work__date">{fill(t.completed.completedOn, { date })}</p>}
-      {item.commentCount > 0 && (
-        <p className="work__comments">
-          <Icon name="comment" />
-          {item.commentCount}
-        </p>
-      )}
+      {/* Every row is there on every card, empty or not, so all the cards are the same height. */}
+      <p className="work__desc">{item.description}</p>
+      <p className="work__foot">
+        {showDate && <span className="work__date">{fill(t.completed.completedOn, { date })}</span>}
+        {item.commentCount > 0 && (
+          <span className="work__comments">
+            <Icon name="comment" />
+            {item.commentCount}
+          </span>
+        )}
+      </p>
     </li>
   );
 }
