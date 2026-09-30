@@ -52,7 +52,7 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
       <Nav downloadUrl={release.downloadUrl} page="/bugs-and-ideas" />
       <main>
         <PageHead title={t.ideas.title} lead={t.ideas.lead} notice={ideas ? null : t.board.unavailable}>
-          {ideas && <AccountBar authReady={authReady} next={localeHref(lang, "/bugs-and-ideas")} viewer={viewer} />}
+          {ideas && <AccountBar authReady={authReady} next={localeHref(lang, "/bugs-and-ideas")} viewer={viewer} suggest={Boolean(board)} />}
         </PageHead>
         {board && (
           <IdeasBoard

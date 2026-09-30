@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -17,7 +17,7 @@ import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
 import { useVote } from "./useVote";
 import { VoteControl } from "./VoteControl";
-import { signIn } from "./viewer";
+import { signIn, suggestEvent } from "./viewer";
 import { useItemUrl } from "./useItemUrl";
 
 type Sort = "top" | "new";
@@ -197,10 +197,15 @@ export function IdeasBoard({
   };
 
   const canPost = viewer && !viewer.banned && !viewer.nameBlocked;
-  const openForm = () => {
-    setSent(null);
-    setComposing(true);
-  };
+  // Opened by "Suggest an idea" in the account bar above the board (AccountBar).
+  useEffect(() => {
+    const openForm = () => {
+      setSent(null);
+      setComposing(true);
+    };
+    window.addEventListener(suggestEvent, openForm);
+    return () => window.removeEventListener(suggestEvent, openForm);
+  }, []);
 
   return (
     <section id="ideas" className="flush">
@@ -228,15 +233,6 @@ export function IdeasBoard({
               <span className="panel__count">{review.length}</span>
             </p>
             <ul className="idea-list">{review.map((item) => card(item, true))}</ul>
-          </Reveal>
-        )}
-
-        {canPost && (
-          <Reveal className="ideas__top" y={16}>
-            <button type="button" className="btn btn--primary btn--sm ideas__suggest" onClick={openForm}>
-              <Icon name="plus" />
-              {r.formTitle}
-            </button>
           </Reveal>
         )}
 

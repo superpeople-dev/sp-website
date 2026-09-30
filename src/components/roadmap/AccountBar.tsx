@@ -7,9 +7,20 @@ import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { AdminPanel } from "./AdminPanel";
-import { loginHref, signOut } from "./viewer";
+import { loginHref, openSuggest, signOut } from "./viewer";
 
-export function AccountBar({ authReady, next, viewer }: { authReady: boolean; next: string; viewer: Viewer | null }) {
+// suggest: the page has the Bugs & Ideas board, whose form "Suggest an idea" opens.
+export function AccountBar({
+  authReady,
+  next,
+  viewer,
+  suggest = false,
+}: {
+  authReady: boolean;
+  next: string;
+  viewer: Viewer | null;
+  suggest?: boolean;
+}) {
   const { t } = useI18n();
   const [ask, dialog] = useConfirm();
   if (!authReady) return null;
@@ -61,6 +72,12 @@ export function AccountBar({ authReady, next, viewer }: { authReady: boolean; ne
         </button>
       </div>
       {viewer.admin && <AdminPanel viewer={viewer} />}
+      {suggest && !viewer.banned && !viewer.nameBlocked && (
+        <button type="button" className="btn btn--primary btn--sm account-bar__suggest" onClick={openSuggest}>
+          <Icon name="plus" />
+          {t.ideas.formTitle}
+        </button>
+      )}
       {dialog}
     </div>
   );
