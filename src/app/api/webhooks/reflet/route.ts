@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { itemPath } from "@/lib/board";
+import { identity } from "@/lib/discord";
 import { capital, typeAndPlatforms, type Kind } from "@/lib/kinds";
 import { getIdea, refletTag } from "@/lib/reflet";
 import { reporterIds } from "@/lib/reporters";
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: "SUPER PEOPLE Revival",
+      ...identity,
       allowed_mentions: { parse: [] },
       embeds: [
         {

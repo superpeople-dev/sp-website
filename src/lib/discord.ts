@@ -26,6 +26,10 @@ const hooks: Record<Channel, string | undefined> = {
   moderation: process.env.DISCORD_MOD_WEBHOOK_URL,
 };
 
+// Name and picture of every post, whichever webhook it goes through. Without avatar_url Discord shows
+// the webhook's own picture, which is only set on some of them.
+export const identity = { username: "SUPER PEOPLE Revival", avatar_url: `${siteUrl}/icon-512.png` };
+
 const colors = { blue: 0x8fb0ff, red: 0xef4438, green: 0x3ddc84, gold: 0xf0b719, grey: 0xbdb7b2 };
 const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
 // A mention shows the Discord name and never pings (allowed_mentions below).
@@ -38,7 +42,7 @@ async function post(channel: Channel, embed: Embed) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: "SUPER PEOPLE Revival",
+      ...identity,
       ...(embed.ping?.length ? { content: embed.ping.map((id) => `<@${id}>`).join(" ") } : {}),
       allowed_mentions: { parse: [], users: embed.ping ?? [] },
       embeds: [
