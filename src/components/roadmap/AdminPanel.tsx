@@ -614,8 +614,48 @@ function ActivityLog() {
 
 type ApiKey = { id: string; name: string; createdAt: number; lastUsedAt: number | null };
 
-// The admin's own API keys for the developer API (lib/apikeys.ts): agents use one to create, move and
-// comment on tasks as this admin. A new key is shown once, to copy; a key can be revoked at any time.
+// What an admin pastes to their agent after saving a key (step 3 of the API tab). English: agents
+// read the English docs it points to (sp-docs/CLAUDE.md section 10, sp-docs/docs/ROADMAP-API.md).
+const agentPrompt =
+  "Save this to your permanent memory (for Claude Code: my user memory, ~/.claude/CLAUDE.md), so it applies to every SUPER PEOPLE repo: " +
+  "at the end of each task, once its pull request is open, record what it did on the superpeople.dev roadmap. " +
+  "Follow sp-docs/CLAUDE.md section 10 and sp-docs/docs/ROADMAP-API.md (sp-docs is next to the other repos): " +
+  "use `node sp-docs/tools/roadmap.mjs` to find the matching item and mark it done with the PR link, or add a new completed task if it's not there. " +
+  "Only use the documented /api/dev endpoints. Never print, commit or ask for the API key. If no key is set up, skip it and tell me. " +
+  "Now check that my key works: `node sp-docs/tools/roadmap.mjs whoami`.";
+
+type System = "windows" | "unix";
+
+// A command in pieces, each coloured by what it is (CSS .tok--*); joined, they are the command.
+type Token = [kind: "cmd" | "param" | "str" | "var" | "num" | "op" | "path" | "key" | "plain", text: string];
+
+// Pasted in a terminal on the PC where the agents run: saves the key where sp-docs/tools/roadmap.mjs
+// looks for it (~/.sp-roadmap-key; on Linux and macOS readable by that user only).
+const saveTokens = (system: System, key: string): Token[] =>
+  system === "windows"
+    ? [
+        ["cmd", "Set-Content"], ["plain", " "], ["param", "-Path"], ["plain", " "],
+        ["str", '"'], ["var", "$env:USERPROFILE"], ["str", '\\.sp-roadmap-key"'], ["plain", " "],
+        ["param", "-Value"], ["plain", " "], ["str", '"'], ["key", key], ["str", '"'], ["plain", " "],
+        ["param", "-NoNewline"],
+      ]
+    : [
+        ["op", "("], ["cmd", "umask"], ["plain", " "], ["num", "077"], ["plain", " "], ["op", "&&"], ["plain", " "],
+        ["cmd", "printf"], ["plain", " "], ["str", "'%s\\n'"], ["plain", " "], ["str", "'"], ["key", key], ["str", "'"], ["plain", " "],
+        ["op", ">"], ["plain", " "], ["path", "~/.sp-roadmap-key"], ["op", ")"],
+      ];
+
+const textOf = (tokens: Token[]) => tokens.map(([, text]) => text).join("");
+const colored = (tokens: Token[]) =>
+  tokens.map(([kind, text], i) => (kind === "plain" ? text : <span key={i} className={`tok tok--${kind}`}>{text}</span>));
+// The agent's text: its `commands` coloured, the rest plain.
+const withCode = (text: string) =>
+  text.split(/(`[^`]+`)/).map((part, i) => (part.startsWith("`") ? <span key={i} className="tok tok--cmd">{part}</span> : part));
+
+// The admin's own API keys for the developer API (lib/apikeys.ts), set up in three steps: name a key,
+// save it on the PC where the agents run (a command with the key in it: the key is shown only then),
+// and paste a text to the agent so it records every pull request on the roadmap. Below, their keys,
+// each can be revoked.
 function ApiKeys() {
   const { locale, t } = useI18n();
   const a = t.admin;
@@ -626,8 +666,9 @@ function ApiKeys() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<{ key: string; name: string } | null>(null);
-  // Which of the new key's texts was just copied: the key, or one of the save commands.
-  const [copied, setCopied] = useState<string | null>(null);
+  // What was copied from the steps: the save command, the key alone, the agent's text.
+  const [copied, setCopied] = useState<Set<string>>(() => new Set());
+  const [system, setSystem] = useState<System>(() => (typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent) ? "windows" : "unix"));
   const [problem, setProblem] = useState<string | null>(null);
   const day = useMemo(() => new Intl.DateTimeFormat(localeInfo[locale].intl, { day: "numeric", month: "short", year: "numeric" }), [locale]);
 
@@ -660,22 +701,16 @@ function ApiKeys() {
     }
     const view = answer.view;
     setCreated({ key: answer.key, name: view.name });
-    setCopied(null);
+    setCopied(new Set());
     setName("");
     setData((current) => current && { ...current, keys: [view, ...current.keys] });
   };
 
   const copy = async (id: string, text: string) => {
     await navigator.clipboard.writeText(text).catch(() => null);
-    setCopied(id);
+    setCopied((current) => new Set(current).add(id));
   };
 
-  // Paste one in a terminal on the PC where the agents run: it saves the key where
-  // sp-docs/tools/roadmap.mjs looks for it (~/.sp-roadmap-key), readable by that user only on Linux.
-  const saveCommands = (key: string) => [
-    { id: "windows", label: a.apiWindows, text: `Set-Content -Path "$env:USERPROFILE\\.sp-roadmap-key" -Value "${key}" -NoNewline` },
-    { id: "unix", label: a.apiUnix, text: `(umask 077 && printf '%s\\n' '${key}' > ~/.sp-roadmap-key)` },
-  ];
 
   const revoke = async (key: ApiKey) => {
     const ok = await ask({
@@ -696,6 +731,15 @@ function ApiKeys() {
   if (failed) return <p className="thread__note">{b.actionFailed}</p>;
   if (!data) return <p className="thread__empty" aria-busy="true">…</p>;
 
+  const saved = copied.has("command") || copied.has("key");
+  const stepClass = (state: "waiting" | "active" | "done") => `apisteps__step is-${state}`;
+  const copyButton = (id: string, text: string, primary = false) => (
+    <button type="button" className={`btn btn--sm${primary && !copied.has(id) ? " btn--primary" : ""}`} onClick={() => void copy(id, text)}>
+      <Icon name={copied.has(id) ? "check" : "code"} />
+      {copied.has(id) ? a.apiCopied : a.apiCopy}
+    </button>
+  );
+
   return (
     <div className="apikeys">
       <p className="apikeys__lead">
@@ -705,48 +749,91 @@ function ApiKeys() {
         </a>
       </p>
       {data.allowed ? (
-        <form className="apikeys__form" onSubmit={(event) => void create(event)}>
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            maxLength={40}
-            placeholder={a.apiNamePlaceholder}
-            aria-label={a.apiName}
-            required
-          />
-          <button type="submit" className="btn btn--sm btn--primary" disabled={busy || !name.trim()}>
-            <Icon name="plus" />
-            {a.apiCreate}
-          </button>
-        </form>
+        <ol className="apisteps">
+          <li className={stepClass(created ? "done" : "active")}>
+            <span className="apisteps__num" aria-hidden="true">
+              {created ? <Icon name="check" /> : 1}
+            </span>
+            <div className="apisteps__body">
+              <h3>{a.apiStep1}</h3>
+              {created ? (
+                <p className="apisteps__hint">{fill(a.apiStep1Done, { name: created.name })}</p>
+              ) : (
+                <>
+                  <p className="apisteps__hint">{a.apiStep1Hint}</p>
+                  <form className="apikeys__form" onSubmit={(event) => void create(event)}>
+                    <input
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      maxLength={40}
+                      placeholder={a.apiNamePlaceholder}
+                      aria-label={a.apiName}
+                      required
+                    />
+                    <button type="submit" className="btn btn--sm btn--primary" disabled={busy || !name.trim()}>
+                      <Icon name="plus" />
+                      {a.apiCreate}
+                    </button>
+                  </form>
+                  {problem && <p className="thread__note">{problem}</p>}
+                </>
+              )}
+            </div>
+          </li>
+          <li className={stepClass(!created ? "waiting" : saved ? "done" : "active")}>
+            <span className="apisteps__num" aria-hidden="true">
+              {created && saved ? <Icon name="check" /> : 2}
+            </span>
+            <div className="apisteps__body">
+              <h3>{a.apiStep2}</h3>
+              {created && (
+                <>
+                  <p className="apisteps__hint">{a.apiStep2Hint}</p>
+                  <div className="ideas__sort apisteps__system" role="group" aria-label={a.apiStep2}>
+                    {(["windows", "unix"] as const).map((key) => (
+                      <button key={key} type="button" className={system === key ? "is-active" : undefined} aria-pressed={system === key} onClick={() => setSystem(key)}>
+                        <Icon name={key === "windows" ? "windows" : "linux"} />
+                        {key === "windows" ? a.apiWindows : a.apiUnix}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="apikeys__secret">
+                    <code>{colored(saveTokens(system, created.key))}</code>
+                    {copyButton("command", textOf(saveTokens(system, created.key)), true)}
+                  </div>
+                  <button type="button" className="apisteps__keyonly" onClick={() => void copy("key", created.key)}>
+                    {copied.has("key") ? a.apiCopied : a.apiCopyKey}
+                  </button>
+                </>
+              )}
+            </div>
+          </li>
+          <li className={stepClass(!created || !saved ? "waiting" : copied.has("agent") ? "done" : "active")}>
+            <span className="apisteps__num" aria-hidden="true">
+              {created && copied.has("agent") ? <Icon name="check" /> : 3}
+            </span>
+            <div className="apisteps__body">
+              <h3>{a.apiStep3}</h3>
+              {created && saved && (
+                <>
+                  <p className="apisteps__hint">{a.apiStep3Hint}</p>
+                  <div className="apikeys__secret apisteps__agent">
+                    <code>{withCode(agentPrompt)}</code>
+                    {copyButton("agent", agentPrompt, saved)}
+                  </div>
+                  <div className="apisteps__actions">
+                    <button type="button" className={`btn btn--sm${copied.has("agent") ? " btn--primary" : ""}`} onClick={() => setCreated(null)}>
+                      <Icon name="check" />
+                      {a.apiDone}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </li>
+        </ol>
       ) : (
         <p className="thread__note">{a.apiRole}</p>
-      )}
-      {problem && <p className="thread__note">{problem}</p>}
-      {created && (
-        <div className="apikeys__new" role="status">
-          <p>{a.apiNew}</p>
-          <div className="apikeys__secret">
-            <code>{created.key}</code>
-            <button type="button" className="btn btn--sm" onClick={() => void copy("key", created.key)}>
-              <Icon name={copied === "key" ? "check" : "code"} />
-              {copied === "key" ? a.apiCopied : a.apiCopy}
-            </button>
-          </div>
-          <p className="apikeys__hint">{a.apiSave}</p>
-          {saveCommands(created.key).map((command) => (
-            <div key={command.id} className="apikeys__command">
-              <span>{command.label}</span>
-              <div className="apikeys__secret">
-                <code>{command.text}</code>
-                <button type="button" className="btn btn--sm" onClick={() => void copy(command.id, command.text)}>
-                  <Icon name={copied === command.id ? "check" : "code"} />
-                  {copied === command.id ? a.apiCopied : a.apiCopy}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
       )}
       {data.keys.length ? (
         <ul className="bans apikeys__list">

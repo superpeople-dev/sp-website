@@ -1523,7 +1523,8 @@ button.votes__down:disabled { cursor: default; }
   .account-bar__label { display: block; grid-area: label; color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
   .account-bar__user { display: block; grid-area: user; font-size: 17px; }
   .account-bar__badge { grid-area: badge; }
-  .account-bar__suggest { order: 4; grid-column: 1 / -1; width: 100%; }
+  /* Its own row, as far from the account above (8px gap + 12px) as from the filters below (20px). */
+  .account-bar__suggest { order: 4; grid-column: 1 / -1; width: 100%; margin-top: 12px; }
 }
 .sheet--admin { width: min(640px, 100%); }
 /* One row: where the tabs don't fit (phones, long languages) it scrolls sideways. flex: none, or the
@@ -1618,8 +1619,7 @@ button.votes__down:disabled { cursor: default; }
 .activity__via { display: inline-flex; align-items: center; gap: 6px; justify-self: start; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .activity__via svg { width: 13px; height: 13px; flex: none; }
 
-/* The admin panel's API tab (ApiKeys): the new key's name and its button on one row, the key once
-   right after it is made, then the admin's keys. */
+/* The admin panel's API tab (ApiKeys): the three steps to set up a key, then the admin's keys. */
 .apikeys { display: grid; gap: 14px; }
 .apikeys__lead { margin: 0; color: var(--paper-dim); font-size: 15px; line-height: 1.5; }
 .apikeys__lead a { color: var(--paper); font-weight: 600; }
@@ -1637,14 +1637,38 @@ button.votes__down:disabled { cursor: default; }
 }
 .apikeys__form input:focus { outline: none; border-color: var(--signal); }
 .apikeys__form .btn { flex: none; }
-.apikeys__new { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid rgba(240, 183, 25, 0.45); border-radius: var(--r); background: rgba(240, 183, 25, 0.08); }
-.apikeys__new p { margin: 0; color: var(--gold); font-weight: 600; }
 .apikeys__secret { display: flex; align-items: center; gap: 8px; }
 .apikeys__secret code { flex: 1; min-width: 0; padding: 8px 10px; border-radius: var(--r); background: var(--ink); color: var(--paper); font: 13px/1.4 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; user-select: all; }
 .apikeys__secret .btn { flex: none; }
-.apikeys__new p.apikeys__hint { margin-top: 4px; color: var(--paper-dim); font-weight: 400; font-size: 14px; line-height: 1.45; }
-.apikeys__command { display: grid; gap: 4px; }
-.apikeys__command > span { color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+/* The three steps: name a key, save it on the PC, tell the agent. Those still ahead wait greyed out. */
+.apisteps { display: grid; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); list-style: none; }
+.apisteps__step { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 14px; padding: 16px; }
+.apisteps__step + .apisteps__step { border-top: 1px solid var(--line-soft); }
+.apisteps__num { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font: 700 13px var(--display); }
+.apisteps__num svg { width: 14px; height: 14px; }
+.apisteps__step.is-active .apisteps__num { border-color: var(--signal); background: var(--signal); color: #fff; }
+.apisteps__step.is-done .apisteps__num { border-color: rgba(61, 220, 132, 0.5); color: var(--green); }
+.apisteps__body { display: grid; gap: 10px; min-width: 0; }
+.apisteps__body h3 { margin: 4px 0 0; color: var(--paper); font: 700 14px/1.3 var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.apisteps__step.is-waiting h3 { color: var(--muted); }
+.apisteps__hint { margin: 0; color: var(--paper-dim); font-size: 14px; line-height: 1.45; }
+.apisteps__system { justify-self: start; }
+.apisteps__system button { display: inline-flex; align-items: center; gap: 6px; }
+.apisteps__system svg { width: 14px; height: 14px; flex: none; }
+/* The commands coloured like code (AdminPanel saveTokens): the key, the one part that is yours, stands out. */
+.tok--cmd { color: #8fb0ff; }
+.tok--param { color: #c9a7ff; }
+.tok--str { color: #a6db8e; }
+.tok--var { color: #ffd479; }
+.tok--num { color: #ff9a3c; }
+.tok--op { color: #ff8a80; }
+.tok--path { color: #7fd6e8; }
+.tok--key { padding: 0 2px; border-radius: 2px; background: rgba(240, 183, 25, 0.14); color: var(--gold); }
+.apisteps__agent code { max-height: 132px; overflow-y: auto; }
+.apisteps__keyonly { justify-self: start; padding: 0; border: 0; background: none; color: var(--muted); font: 600 13px var(--body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.apisteps__keyonly:hover,
+.apisteps__keyonly:focus-visible { outline: none; color: var(--paper); }
+.apisteps__actions { display: flex; justify-content: flex-end; }
 @media (max-width: 420px) {
   .apikeys__form,
   .apikeys__secret { flex-direction: column; align-items: stretch; }
