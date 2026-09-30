@@ -7,7 +7,7 @@ import { getIdea, refletTag } from "@/lib/reflet";
 import { reporterIds } from "@/lib/reporters";
 import { siteUrl } from "@/lib/seo";
 import { ideaTypes } from "@/lib/site";
-import { authorsOf, justCreated } from "@/lib/store";
+import { authorsOf, changedBy, justCreated } from "@/lib/store";
 
 type Payload = { event?: string; data?: { feedback?: Partial<FeedbackItem> } };
 type Announcement = { label: string; color: number; path: string };
@@ -124,7 +124,10 @@ export async function POST(request: Request) {
   const announcement = announcementFor(payload.event, feedback?.status, created, kind);
   if (!discord || !feedback?.title || !announcement) return Response.json({ ok: true });
 
-  const [reporter, votes] = await Promise.all([reporterOf(feedback), votesOf(feedback)]);
+  const [reporter, votes, change] = await Promise.all([reporterOf(feedback), votesOf(feedback), feedback.id ? changedBy(feedback.id) : null]);
+  // The admin who approved it (now open) or moved it on the roadmap, when that was done on the site.
+  const mover = !created && change && change.to === feedback.status ? change : null;
+  const moverName = mover ? (/^\d+$/.test(mover.id) ? `<@${mover.id}>` : mover.name) : null;
   const description = feedback.description?.replace(reportedLine, "");
   const place = feedback.status ? places[feedback.status] : undefined;
   const fields = [
@@ -133,6 +136,7 @@ export async function POST(request: Request) {
     place && { name: "Status", value: place, inline: true },
     votes !== null && { name: "Upvotes", value: String(votes), inline: true },
     reporter && { name: created ? "Added by" : kind.by, value: clip(reporter, 1024), inline: true },
+    moverName && { name: feedback.status === "open" ? "Approved by" : "Moved by", value: clip(moverName, 1024), inline: true },
   ].filter(Boolean);
   const response = await fetch(discord, {
     method: "POST",

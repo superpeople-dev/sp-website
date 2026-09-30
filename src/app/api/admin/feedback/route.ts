@@ -19,7 +19,7 @@ import { logEvent } from "@/lib/events";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { listStaff } from "@/lib/staff";
-import { addNotice, markCreated, profileOf, rememberAuthor, setAssignee } from "@/lib/store";
+import { addNotice, markChangedBy, markCreated, profileOf, rememberAuthor, setAssignee } from "@/lib/store";
 
 const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
 const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
@@ -121,6 +121,8 @@ export async function POST(request: NextRequest) {
     const target = { id: feedbackId, title: item.title, status: item.status };
 
     if (body.action === "status" && statuses.includes(to)) {
+      // Before the status is set: Reflet's webhook posts the change on Discord and names who did it.
+      await markChangedBy(feedbackId, { id: user.id, name: user.name, to });
       await setStatus(feedbackId, to);
       await logEvent(user, approving ? { type: "idea.approved", item: target } : { type: "item.moved", item: target, to });
     } else if (body.action === "delete") {

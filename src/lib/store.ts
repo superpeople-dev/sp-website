@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import type { FeedbackStatus } from "reflet-sdk";
 import type { ActivityEvent, Notice, Permission } from "./board";
 import type { SessionUser } from "./session";
 
@@ -192,6 +193,15 @@ export const markNoticesSeen = (userId: string) =>
   attempt("notice seen", undefined, async (client) => {
     await client.set(noticesSeenKey(userId), Date.now());
   });
+
+// Who changed an item's status on the site (app/api/admin/feedback), for the Reflet webhook's Discord
+// post to name them ("Approved by", "Moved by"): kept 10 minutes, the webhook comes within seconds.
+export type StatusChange = { id: string; name: string; to: FeedbackStatus };
+const changedByKey = (itemId: string) => `sp:changed-by:${itemId}`;
+export const markChangedBy = (itemId: string, change: StatusChange) =>
+  attempt("status change mark", null, (client) => client.set(changedByKey(itemId), change, { ex: 600 }));
+export const changedBy = (itemId: string) =>
+  attempt("status change check", null as StatusChange | null, (client) => client.get<StatusChange>(changedByKey(itemId)));
 
 // Tasks an admin just created on the site (app/api/admin/feedback): Reflet reports the status the task
 // was created in as a status change, and the Discord post should say "New task", not "Moved to".
