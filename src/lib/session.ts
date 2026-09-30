@@ -20,6 +20,8 @@ export type SessionUser = {
 
 export const sessionCookie = "sp_session";
 export const oauthCookie = "sp_oauth";
+// Set while the launcher signs in (app/api/auth/launcher): its PKCE challenge.
+export const launcherCookie = "sp_launcher";
 
 const maxAge = 60 * 60 * 24 * 30;
 
@@ -49,7 +51,12 @@ export async function sealSession(user: SessionUser) {
   return `${body}.${Buffer.from(signature).toString("base64url")}`;
 }
 
-export const readSession = (request: NextRequest) => verifySession(request.cookies.get(sessionCookie)?.value);
+// The website sends the session as a cookie; the launcher sends the same sealed session as a bearer
+// token (it signed in through /api/auth/launcher). Browsers never add an Authorization header on
+// their own, so accepting one opens no cross-site way in.
+export const readSession = (request: NextRequest) => verifySession(bearerOf(request) ?? request.cookies.get(sessionCookie)?.value);
+
+const bearerOf = (request: NextRequest) => request.headers.get("authorization")?.match(/^Bearer\s+(\S+)$/i)?.[1];
 
 export const currentSession = async () => verifySession((await cookies()).get(sessionCookie)?.value);
 
@@ -69,7 +76,7 @@ export const viewerOf = (session: SessionUser | null, { banned = false, moderati
       }
     : null;
 
-async function verifySession(value: string | undefined): Promise<SessionUser | null> {
+export async function verifySession(value: string | undefined): Promise<SessionUser | null> {
   if (!value || !process.env.AUTH_SECRET) return null;
   const [body, signature] = value.split(".");
   if (!body || !signature) return null;

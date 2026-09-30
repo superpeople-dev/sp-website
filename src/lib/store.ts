@@ -210,3 +210,14 @@ export const markCreated = (itemId: string) =>
   attempt("created mark", null, (client) => client.set(createdKey(itemId), 1, { ex: 600 }));
 export const justCreated = (itemId: string) =>
   attempt("created check", false, async (client) => (await client.exists(createdKey(itemId))) === 1);
+
+// Launcher sign-in (app/api/auth/launcher): the Discord callback leaves the sealed session here under a
+// one-time code, for two minutes, until the launcher trades the code (and its PKCE verifier) for it.
+export type LauncherLogin = { token: string; challenge: string };
+const launcherLoginKey = (code: string) => `sp:launcher-login:${code}`;
+export async function saveLauncherLogin(code: string, login: LauncherLogin) {
+  if (!redis) throw new Error("Store is not configured");
+  await redis.set(launcherLoginKey(code), login, { ex: 120 });
+}
+export const takeLauncherLogin = (code: string) =>
+  attempt("launcher login", null as LauncherLogin | null, (client) => client.getdel<LauncherLogin>(launcherLoginKey(code)));
