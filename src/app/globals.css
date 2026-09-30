@@ -1630,6 +1630,9 @@ button.votes__down:disabled { cursor: default; }
 .apikeys__secret { display: flex; align-items: center; gap: 8px; }
 .apikeys__secret code { flex: 1; min-width: 0; padding: 8px 10px; border-radius: var(--r); background: var(--ink); color: var(--paper); font: 13px/1.4 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; user-select: all; }
 .apikeys__secret .btn { flex: none; }
+.apikeys__new p.apikeys__hint { margin-top: 4px; color: var(--paper-dim); font-weight: 400; font-size: 14px; line-height: 1.45; }
+.apikeys__command { display: grid; gap: 4px; }
+.apikeys__command > span { color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 @media (max-width: 420px) {
   .apikeys__form,
   .apikeys__secret { flex-direction: column; align-items: stretch; }

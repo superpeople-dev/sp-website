@@ -221,6 +221,9 @@ export type Dictionary = {
     apiNew: string;
     apiCopy: string;
     apiCopied: string;
+    apiSave: string;
+    apiWindows: string;
+    apiUnix: string;
     apiEmpty: string;
     apiCreated: string;
     apiUsed: string;

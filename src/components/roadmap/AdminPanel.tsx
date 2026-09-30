@@ -626,7 +626,8 @@ function ApiKeys() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<{ key: string; name: string } | null>(null);
-  const [copied, setCopied] = useState(false);
+  // Which of the new key's texts was just copied: the key, or one of the save commands.
+  const [copied, setCopied] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const day = useMemo(() => new Intl.DateTimeFormat(localeInfo[locale].intl, { day: "numeric", month: "short", year: "numeric" }), [locale]);
 
@@ -659,16 +660,22 @@ function ApiKeys() {
     }
     const view = answer.view;
     setCreated({ key: answer.key, name: view.name });
-    setCopied(false);
+    setCopied(null);
     setName("");
     setData((current) => current && { ...current, keys: [view, ...current.keys] });
   };
 
-  const copy = async () => {
-    if (!created) return;
-    await navigator.clipboard.writeText(created.key).catch(() => null);
-    setCopied(true);
+  const copy = async (id: string, text: string) => {
+    await navigator.clipboard.writeText(text).catch(() => null);
+    setCopied(id);
   };
+
+  // Paste one in a terminal on the PC where the agents run: it saves the key where
+  // sp-docs/tools/roadmap.mjs looks for it (~/.sp-roadmap-key), readable by that user only on Linux.
+  const saveCommands = (key: string) => [
+    { id: "windows", label: a.apiWindows, text: `Set-Content -Path "$env:USERPROFILE\\.sp-roadmap-key" -Value "${key}" -NoNewline` },
+    { id: "unix", label: a.apiUnix, text: `(umask 077 && printf '%s\\n' '${key}' > ~/.sp-roadmap-key)` },
+  ];
 
   const revoke = async (key: ApiKey) => {
     const ok = await ask({
@@ -721,11 +728,24 @@ function ApiKeys() {
           <p>{a.apiNew}</p>
           <div className="apikeys__secret">
             <code>{created.key}</code>
-            <button type="button" className="btn btn--sm" onClick={() => void copy()}>
-              <Icon name={copied ? "check" : "code"} />
-              {copied ? a.apiCopied : a.apiCopy}
+            <button type="button" className="btn btn--sm" onClick={() => void copy("key", created.key)}>
+              <Icon name={copied === "key" ? "check" : "code"} />
+              {copied === "key" ? a.apiCopied : a.apiCopy}
             </button>
           </div>
+          <p className="apikeys__hint">{a.apiSave}</p>
+          {saveCommands(created.key).map((command) => (
+            <div key={command.id} className="apikeys__command">
+              <span>{command.label}</span>
+              <div className="apikeys__secret">
+                <code>{command.text}</code>
+                <button type="button" className="btn btn--sm" onClick={() => void copy(command.id, command.text)}>
+                  <Icon name={copied === command.id ? "check" : "code"} />
+                  {copied === command.id ? a.apiCopied : a.apiCopy}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
       {data.keys.length ? (
