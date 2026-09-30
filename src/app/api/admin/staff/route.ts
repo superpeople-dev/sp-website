@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       const wanted = Array.isArray(body.permissions) ? body.permissions : [];
       const permissions = allPermissions.filter((permission) => wanted.includes(permission)) as Permission[];
       const adding = !before || before.removed === true;
-      await saveStaff({ id, name, permissions, by: user.name, at: Date.now() });
+      await saveStaff({ id, name, permissions, by: user.name, at: Date.now(), v: 2 });
       await logEvent(user, { type: adding ? "staff.added" : "staff.changed", user: { id, name }, permissions });
     } else {
       return Response.json({ error: "invalid" }, { status: 400 });

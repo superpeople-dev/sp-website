@@ -6,8 +6,9 @@ export type TypeTag = { id: string; slug: IdeaType };
 
 // What an admin may do. Owners (lib/admins.ts) have everything and are the only ones who manage the
 // other admins; each other admin has the permissions an owner gave them (lib/staff.ts).
-export type Permission = "review" | "manage" | "comments" | "bans";
-export const allPermissions: Permission[] = ["review", "manage", "comments", "bans"];
+// activity: the admin panel's activity log; api: API keys for agents (lib/apikeys.ts, app/api/dev).
+export type Permission = "review" | "manage" | "comments" | "bans" | "activity" | "api";
+export const allPermissions: Permission[] = ["review", "manage", "comments", "bans", "activity", "api"];
 
 export type Viewer = {
   id: string;

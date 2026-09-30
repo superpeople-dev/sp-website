@@ -162,8 +162,8 @@ function AdminBody({
     ...(can(viewer, "review") ? [{ key: "review" as const, label: b.tabReview, count: data?.pending?.length }] : []),
     ...(can(viewer, "bans") && data?.bans !== null ? [{ key: "bans" as const, label: b.bansOpen, count: data?.bans?.length }] : []),
     { key: "admins", label: b.tabAdmins, count: data?.staff.length },
-    { key: "activity", label: a.tabActivity },
-    { key: "api", label: a.tabApi },
+    ...(can(viewer, "activity") ? [{ key: "activity" as const, label: a.tabActivity }] : []),
+    ...(can(viewer, "api") ? [{ key: "api" as const, label: a.tabApi }] : []),
   ];
 
   const skeleton = (

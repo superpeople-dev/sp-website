@@ -16,12 +16,16 @@ const envAdmins = (process.env.ADMIN_DISCORD_IDS ?? "")
 
 export const isOwner = (id: string) => owners.includes(id);
 
+// Admins saved before the activity and api permissions existed had both (the activity log was every
+// admin's); they keep them until an owner saves their permissions again.
+const since2: Permission[] = ["activity", "api"];
+
 // On the list in the code or the environment (the admins from before the panel managed them).
 export const isListedAdmin = (id: string) => envAdmins.includes(id) || admins.some((admin) => admin.discordId === id);
 
 const accessFrom = (id: string, entry: StaffEntry | null, roleAdmin: boolean): Access | null => {
   if (isOwner(id)) return { owner: true, permissions: allPermissions };
-  if (entry) return entry.removed ? null : { owner: false, permissions: entry.permissions };
+  if (entry) return entry.removed ? null : { owner: false, permissions: entry.v === 2 ? entry.permissions : [...entry.permissions, ...since2] };
   return roleAdmin || isListedAdmin(id) ? { owner: false, permissions: allPermissions } : null;
 };
 

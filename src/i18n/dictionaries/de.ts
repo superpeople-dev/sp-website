@@ -359,6 +359,14 @@ export const de: Dictionary = {
         label: "Sperren",
         hint: "Nutzer sperren und entsperren",
       },
+      activity: {
+        label: "Aktivität",
+        hint: "Alles sehen, was in der Community passiert (Aktivitätsprotokoll)",
+      },
+      api: {
+        label: "API",
+        hint: "API-Schlüssel erstellen, mit denen Agenten Aufgaben anlegen, verschieben und kommentieren",
+      },
     },
     noPermissions: "Keine Rechte",
     options: "Optionen für {name}",

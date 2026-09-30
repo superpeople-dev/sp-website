@@ -359,6 +359,14 @@ export const ja: Dictionary = {
         label: "BAN",
         hint: "ユーザーをBAN・BAN解除する",
       },
+      activity: {
+        label: "アクティビティ",
+        hint: "コミュニティで起きていることをすべて見る(アクティビティログ)",
+      },
+      api: {
+        label: "API",
+        hint: "エージェントがタスクを作成・移動・コメントするためのAPIキーを作成",
+      },
     },
     noPermissions: "権限なし",
     options: "{name} のオプション",

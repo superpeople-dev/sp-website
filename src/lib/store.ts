@@ -102,7 +102,8 @@ export async function setDownvote(itemId: string, userId: string, on: boolean) {
 
 // Admins as the owners set them (lib/staff.ts): their permissions, or "removed" for someone who is
 // no longer an admin even if they are on the list in lib/admins.ts or have the Discord role.
-export type StaffEntry = { id: string; name: string; permissions: Permission[]; removed?: boolean; by: string; at: number };
+// v 2: saved since the activity and api permissions exist, so its list says whether it has them.
+export type StaffEntry = { id: string; name: string; permissions: Permission[]; removed?: boolean; by: string; at: number; v?: 2 };
 const staffKey = "sp:staff";
 
 export const staffEntry = (id: string) =>

@@ -78,7 +78,7 @@ async function discordUser(code: string, redirectUri: string): Promise<SessionUs
 async function remember(user: SessionUser) {
   await rememberProfile(profileOf(user));
   if (user.admin && !isOwner(user.id) && !(await staffEntry(user.id))) {
-    await saveStaff({ id: user.id, name: user.name, permissions: allPermissions, by: "Discord role", at: Date.now() }).catch(() => null);
+    await saveStaff({ id: user.id, name: user.name, permissions: allPermissions, by: "Discord role", at: Date.now(), v: 2 }).catch(() => null);
   }
 }
 

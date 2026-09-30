@@ -359,6 +359,14 @@ export const ko: Dictionary = {
         label: "차단",
         hint: "사용자 차단 및 차단 해제",
       },
+      activity: {
+        label: "활동",
+        hint: "커뮤니티에서 일어나는 모든 일 보기(활동 기록)",
+      },
+      api: {
+        label: "API",
+        hint: "에이전트가 작업을 만들고, 옮기고, 댓글을 달 수 있는 API 키 만들기",
+      },
     },
     noPermissions: "권한 없음",
     options: "{name} 옵션",

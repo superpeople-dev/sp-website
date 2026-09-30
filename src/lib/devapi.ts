@@ -16,7 +16,9 @@ export const devError = (error: string, status: number, detail?: string) => devJ
 // The admin behind the key, or the answer to send: 401 without a working key, 403 without the permission.
 export async function devUser(request: NextRequest, permission?: Permission) {
   const user = await apiUser(request);
-  if (!user) return { error: devError("auth", 401, "Send an admin's API key: Authorization: Bearer spk_... (admin panel, API tab).") };
+  if (!user) {
+    return { error: devError("auth", 401, "Send an admin's API key: Authorization: Bearer spk_... (admin panel, API tab). A revoked key, or one whose admin lost the API permission, stops working.") };
+  }
   if (permission && !user.permissions.includes(permission)) {
     return { error: devError("forbidden", 403, `This needs the "${permission}" permission.`) };
   }

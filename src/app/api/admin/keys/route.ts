@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { canHaveKeys, createApiKey, maxKeysPerAdmin, myApiKeys, revokeApiKey } from "@/lib/apikeys";
+import { can } from "@/lib/board";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // The admin panel's API tab: an admin's own API keys for the developer API (lib/apikeys.ts). Signed
@@ -7,9 +8,10 @@ import { readSession, sameOrigin } from "@/lib/session";
 
 const nameMax = 40;
 
+// The "api" permission (owners give or take it in the Admins tab).
 async function admin(request: NextRequest) {
   const user = await readSession(request);
-  return user?.admin ? user : null;
+  return can(user, "api") ? user : null;
 }
 
 export async function GET(request: NextRequest) {

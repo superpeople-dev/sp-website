@@ -359,6 +359,14 @@ export const es: Dictionary = {
         label: "Baneos",
         hint: "Banear y desbanear usuarios",
       },
+      activity: {
+        label: "Actividad",
+        hint: "Ver todo lo que pasa en la comunidad (registro de actividad)",
+      },
+      api: {
+        label: "API",
+        hint: "Crear claves de API para que los agentes creen, muevan y comenten tareas",
+      },
     },
     noPermissions: "Sin permisos",
     options: "Opciones de {name}",

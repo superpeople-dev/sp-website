@@ -11,8 +11,9 @@ import { deleteApiKey, listApiKeys, readApiKey, saveApiKey, touchApiKey, type Ap
 // stored: it is shown once, when it is made, and can be revoked from the panel. Keys open only
 // /api/dev, never the site's own routes.
 //
-// Admin rights that come only from the Discord role are not enough for a key: the role is known
-// from a sign-in, and a key never signs in again. Those admins are added in the Admins tab first.
+// Keys need the "api" permission, which owners give or take in the Admins tab: without it an admin
+// can't make keys and the ones they have stop working. Admin rights that come only from the Discord
+// role are not enough either: the role is known from a sign-in, and a key never signs in again.
 
 export const maxKeysPerAdmin = 10;
 const keyPattern = /^spk_[A-Za-z0-9_-]{43}$/;
@@ -31,7 +32,7 @@ export const myApiKeys = async (userId: string) =>
   (await listApiKeys()).filter((record) => record.owner.id === userId).sort((a, b) => b.createdAt - a.createdAt).map(viewOf);
 
 // Whether this admin may have keys: an owner, or an admin by the Admins tab or the list in the code.
-export const canHaveKeys = async (userId: string) => (await accessOf(userId, false)) !== null;
+export const canHaveKeys = async (userId: string) => (await accessOf(userId, false))?.permissions.includes("api") ?? false;
 
 // A new key for this admin; the key itself is in the answer and nowhere else.
 export async function createApiKey(user: SessionUser, name: string) {
@@ -63,7 +64,7 @@ export async function apiUser(request: NextRequest): Promise<(SessionUser & { vi
   const record = await readApiKey(hashOf(key));
   if (!record) return null;
   const access = await accessOf(record.owner.id, false);
-  if (!access) return null;
+  if (!access?.permissions.includes("api")) return null;
   await touchApiKey(record.hash);
   return {
     ...record.owner,

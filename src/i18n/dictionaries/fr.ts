@@ -359,6 +359,14 @@ export const fr: Dictionary = {
         label: "Bannissements",
         hint: "Bannir et débannir des utilisateurs",
       },
+      activity: {
+        label: "Activité",
+        hint: "Voir tout ce qui se passe dans la communauté (journal d'activité)",
+      },
+      api: {
+        label: "API",
+        hint: "Créer des clés d'API pour que des agents créent, déplacent et commentent des tâches",
+      },
     },
     noPermissions: "Aucune permission",
     options: "Options pour {name}",

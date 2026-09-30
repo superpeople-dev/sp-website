@@ -359,6 +359,14 @@ export const en: Dictionary = {
         label: "Bans",
         hint: "Ban and unban users",
       },
+      activity: {
+        label: "Activity",
+        hint: "See everything that happens in the community (activity log)",
+      },
+      api: {
+        label: "API",
+        hint: "Make API keys so agents create, move and comment on tasks",
+      },
     },
     noPermissions: "No permissions",
     options: "Options for {name}",

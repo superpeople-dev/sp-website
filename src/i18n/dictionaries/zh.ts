@@ -357,6 +357,14 @@ export const zh: Dictionary = {
         label: "封禁",
         hint: "封禁和解封用户",
       },
+      activity: {
+        label: "动态",
+        hint: "查看社区中发生的一切（动态日志）",
+      },
+      api: {
+        label: "API",
+        hint: "创建 API 密钥，让代理创建、移动和评论任务",
+      },
     },
     noPermissions: "没有权限",
     options: "{name} 的选项",
