@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { allPermissions, shownName } from "@/lib/board";
+import { connectedPath, isChallenge } from "@/lib/launcher";
 import {
   authReady,
+  launcherCookie,
   oauthCookie,
   oauthCookieOptions,
   safeNext,
@@ -11,7 +13,7 @@ import {
   type SessionUser,
 } from "@/lib/session";
 import { isOwner } from "@/lib/staff";
-import { profileOf, rememberProfile, saveStaff, staffEntry } from "@/lib/store";
+import { profileOf, rememberProfile, saveLauncherLogin, saveStaff, staffEntry } from "@/lib/store";
 
 type DiscordUser = { id: string; username: string; global_name?: string | null; avatar?: string | null };
 
@@ -83,16 +85,27 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const [state, storedNext] = (request.cookies.get(oauthCookie)?.value ?? "").split("|");
   const next = safeNext(storedNext);
-  const response = NextResponse.redirect(new URL(next, request.url));
+  // The launcher signing in (app/api/auth/launcher): it gets a one-time code, not a cookie.
+  const challenge = request.cookies.get(launcherCookie)?.value ?? null;
+  const launcher = isChallenge(challenge);
+  const response = NextResponse.redirect(new URL(launcher ? `${connectedPath}?error=failed` : next, request.url));
   response.cookies.set(oauthCookie, "", { ...oauthCookieOptions, maxAge: 0 });
+  if (launcher) response.cookies.set(launcherCookie, "", { ...oauthCookieOptions, maxAge: 0 });
 
   const code = params.get("code");
   if (!authReady || !state || !code || params.get("state") !== state) return response;
 
   const user = await discordUser(code, `${request.nextUrl.origin}/api/auth/discord/callback`).catch(() => null);
-  if (user) {
-    response.cookies.set(sessionCookie, await sealSession(user), sessionCookieOptions);
-    await remember(user).catch(() => null);
+  if (!user) return response;
+  await remember(user).catch(() => null);
+  if (launcher) {
+    const handoff = crypto.randomUUID();
+    const saved = await saveLauncherLogin(handoff, { token: await sealSession(user), challenge })
+      .then(() => true)
+      .catch(() => false);
+    if (saved) response.headers.set("Location", new URL(`${connectedPath}?code=${handoff}`, request.url).toString());
+    return response;
   }
+  response.cookies.set(sessionCookie, await sealSession(user), sessionCookieOptions);
   return response;
 }
