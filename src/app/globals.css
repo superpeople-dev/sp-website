@@ -1933,13 +1933,14 @@ button.votes__down:disabled { cursor: default; }
   flex: none;
   place-items: center;
   align-self: flex-start;
-  margin: -4px 0 0 -5px;
+  /* Right against the end of the name (the row puts 8px between them), at its top. */
+  margin: -1px 0 0 -6px;
   border-radius: 50%;
   color: var(--muted);
   cursor: help;
   transition: color 0.15s;
 }
-.usertag svg { width: 15px; height: 15px; }
+.usertag svg { width: 11px; height: 11px; }
 .usertag:hover,
 .usertag:focus-visible { outline: none; color: var(--paper); }
 .usertag::after {
