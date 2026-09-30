@@ -10,7 +10,8 @@ import {
   spend,
 } from "@/lib/downloads";
 import { gameFileLink, signingReady } from "@/lib/s3";
-import { readSession } from "@/lib/session";
+import { readSession, sameOrigin } from "@/lib/session";
+import { isBanned } from "@/lib/store";
 
 const noStore = { "Cache-Control": "no-store" };
 
@@ -18,8 +19,11 @@ const noStore = { "Cache-Control": "no-store" };
 // Download tab, signed in with Discord. The limits are lib/downloads.ts's: past twice the game in
 // an hour, the account and the IP get no link for a day, and the answer says until when.
 export async function POST(request: NextRequest) {
+  if (!sameOrigin(request)) return Response.json({ error: "forbidden" }, { status: 403, headers: noStore });
   const user = await readSession(request);
   if (!user) return Response.json({ error: "auth" }, { status: 401, headers: noStore });
+  // Banned on the website: no game through the launcher either (as ../../pass).
+  if (!user.admin && (await isBanned(user.id))) return Response.json({ error: "banned" }, { status: 403, headers: noStore });
   if (!signingReady || !limitsReady) return Response.json({ error: "setup" }, { status: 503, headers: noStore });
 
   const body = (await request.json().catch(() => ({}))) as { path?: unknown };
