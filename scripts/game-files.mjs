@@ -79,12 +79,17 @@ const total = files.reduce((sum, f) => sum + f.size, 0);
 console.log(`${files.length} files hashed, ${(total / 1e9).toFixed(2)} GB`);
 
 // ---- the bucket serves the same bytes -------------------------------------
-// Small files whole, big ones three random 64 KiB slices each.
+// Small files whole; big ones their first and last 64 KiB (an upload cut short
+// leaves zeros up to the end, and a pak's index is at its end) and two random
+// slices.
 const SLICE = 64 * 1024;
 const WHOLE = 1024 * 1024;
 const differ = [];
 await inParallel(files, async (f) => {
-  const slices = f.size <= WHOLE ? [[0, f.size]] : Array.from({ length: 3 }, () => [randomInt(0, f.size - SLICE + 1), SLICE]);
+  const slices =
+    f.size <= WHOLE
+      ? [[0, f.size]]
+      : [[0, SLICE], [f.size - SLICE, SLICE], ...Array.from({ length: 2 }, () => [randomInt(0, f.size - SLICE + 1), SLICE])];
   const fd = openSync(join(folder, f.path), "r");
   try {
     for (const [at, length] of slices) {

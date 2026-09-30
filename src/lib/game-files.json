@@ -352,8 +352,6 @@
     {"path":"BravoHotelGame/Plugins/Online/OnlineSubsystemGeeGee/ThirdParty/lib/Release/wp_api_x64.dll","size":246152,"sha256":"9679e98fa043aa90db130721f453559caa7147e3f98741ea50b68e9f7c4d9fa7"},
     {"path":"BravoHotelGame/Plugins/VivoxCoreUE4Plugin/Source/ThirdParty/VivoxCoreLibrary/Windows/Release/x64/vivoxsdk.dll","size":12437440,"sha256":"7dcd07786ae4b216ad5347105801fa5328ef89fad8247ded764c96d20a333e26"},
     {"path":"BravoHotelGame/Plugins/ZipUtility-ue4/ThirdParty/7zpp/dll/Win64/7z.dll","size":1515200,"sha256":"5e80ba1c7283acbfdf612ea06027e1100b29183f86a577bdf00c73c6a89c834c"},
-    {"path":"Engine/Binaries/ThirdParty/BattlEye/Client/BEClient_x64.cfg","size":26,"sha256":"8fd8dd4c76ac50be0ff45d2b387826b1afb41ff4081039e4c0147860f7a8eb00"},
-    {"path":"Engine/Binaries/ThirdParty/BattlEye/Client/BEClient_x64.dll","size":5965616,"sha256":"f18142f666ad1b0813e2c5cd7969788e20a8e7ed30262f810997711e00a3fa61"},
     {"path":"Engine/Binaries/ThirdParty/CoherentUIGT/Win64/CoherentGTCore.dll","size":28269984,"sha256":"28731a3f30484ba9a2328eb8651073be0f8b9d60355a5a05e5146eae3bd89561"},
     {"path":"Engine/Binaries/ThirdParty/CoherentUIGT/Win64/CoherentGTJS.dll","size":9694592,"sha256":"ebcbc3b36e65ba1e422aa1e881479cc942511330a666c3f41124770802ca4761"},
     {"path":"Engine/Binaries/ThirdParty/CoherentUIGT/Win64/coherenticuin.dll","size":1864432,"sha256":"d789f8b13a8678ae2e40b55fa3272eb448ba4230d7c5528f2a4a8f0c370d5d0e"},
