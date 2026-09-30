@@ -4,9 +4,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { locales } from "@/i18n/config";
 
+// The page a path is on, without its language: its first segment. An item's own address (its dialog
+// open over the board, /completed/<id>/<slug>) is on the board's page, so opening or closing the
+// dialog never scrolls the page.
 const pageOf = (pathname: string) => {
-  const [, first, ...rest] = pathname.split("/");
-  return (locales as readonly string[]).includes(first) ? `/${rest.join("/")}` : pathname;
+  const parts = pathname.split("/").filter(Boolean);
+  if ((locales as readonly string[]).includes(parts[0])) parts.shift();
+  return `/${parts[0] ?? ""}`;
 };
 
 export function ScrollReset() {

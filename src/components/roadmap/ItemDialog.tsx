@@ -609,20 +609,24 @@ function ItemBody({
                 {b.commentsTitle}
                 <span className="panel__count">{count}</span>
               </h3>
-              {thread.status === "loading" && (
-                <ul className="thread__list" aria-busy="true">
-                  {[0, 1, 2].map((n) => (
-                    <li key={n} className="comment">
-                      <span className="skel skel--avatar" />
-                      <div className="comment__main">
-                        <span className="skel skel--line" style={{ width: "34%" }} />
-                        <span className="skel skel--line" />
-                        <span className="skel skel--line" style={{ width: n === 1 ? "52%" : "76%" }} />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {/* While loading: one placeholder per comment the item has (3 at most), or straight away
+                  the note that there are none, so the dialog keeps its size when they arrive. */}
+              {thread.status === "loading" &&
+                (item.commentCount > 0 ? (
+                  <ul className="thread__list" aria-busy="true">
+                    {Array.from({ length: Math.min(item.commentCount, 3) }, (_, n) => (
+                      <li key={n} className="comment">
+                        <span className="skel skel--avatar" />
+                        <div className="comment__main">
+                          <span className="skel skel--line" style={{ width: "34%" }} />
+                          <span className="skel skel--line" style={{ width: n === 1 ? "52%" : "76%" }} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="thread__empty">{b.commentsEmpty}</p>
+                ))}
               {thread.status === "error" && (
                 <p className="thread__note" role="status">
                   {b.commentsError}

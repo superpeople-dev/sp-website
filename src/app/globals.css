@@ -2003,6 +2003,8 @@ button.votes__down:disabled { cursor: default; }
 }
 .skel--avatar { width: 36px; height: 36px; border-radius: 50%; }
 .skel--line { height: 12px; margin: 4px 0; }
+/* A placeholder comment is as tall as a real one-line comment (name row, then the text). */
+.thread__list[aria-busy="true"] .comment { min-height: 61px; }
 .skel--who { width: 180px; height: 28px; border-radius: 999px; }
 @keyframes shimmer {
   from { background-position: 100% 0; }
