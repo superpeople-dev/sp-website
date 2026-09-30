@@ -1955,6 +1955,30 @@ button.votes__down:disabled { cursor: default; }
   resize: vertical;
 }
 .composer textarea:focus { outline: none; border-color: var(--signal); }
+/* @mentions: the people matching what is typed after an @, listed under the text box. */
+.composer__field { position: relative; display: grid; }
+.mention-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  display: grid;
+  gap: 2px;
+  width: min(320px, 100%);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+.mention-list li { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 7px 8px; border-radius: 4px; color: var(--paper-dim); cursor: pointer; }
+.mention-list li.is-active { background: var(--surface-3); color: var(--paper); }
+.mention-list b { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.mention-list__user { overflow: hidden; color: var(--muted); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.mention-list .who__badge { margin-left: auto; }
+.mention { color: #8fb0ff; font-weight: 600; }
 .composer textarea::placeholder { color: var(--muted); }
 .composer__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .composer__count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }

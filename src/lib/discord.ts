@@ -16,6 +16,8 @@ type Embed = {
   url?: string;
   description?: string;
   fields?: { name: string; value: string; inline?: boolean }[];
+  // Discord ids to ping (a comment's @mentions); nobody else is ever pinged.
+  ping?: string[];
 };
 
 const hooks: Record<Channel, string | undefined> = {
@@ -36,7 +38,8 @@ async function post(channel: Channel, embed: Embed) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       username: "SUPER PEOPLE Revival",
-      allowed_mentions: { parse: [] },
+      ...(embed.ping?.length ? { content: embed.ping.map((id) => `<@${id}>`).join(" ") } : {}),
+      allowed_mentions: { parse: [], users: embed.ping ?? [] },
       embeds: [
         {
           author: { name: embed.label },
@@ -62,7 +65,17 @@ export async function announce(event: ActivityEvent) {
   const onItem = event.item ? { title: event.item.title, url: itemUrl(event.item) } : {};
   const who = event.user ? { name: "User", value: person(event.user), inline: true } : null;
   const embeds: Partial<Record<ActivityEvent["type"], [Channel, Embed]>> = {
-    "comment.posted": ["community", { label: "New comment", color: colors.grey, ...onItem, description: event.text, fields: [by] }],
+    "comment.posted": [
+      "community",
+      {
+        label: "New comment",
+        color: colors.grey,
+        ...onItem,
+        description: event.text,
+        fields: [by, ...(event.mentions?.length ? [{ name: "Mentions", value: event.mentions.map(person).join(" "), inline: true }] : [])],
+        ping: event.mentions?.map((mention) => mention.id).filter((id) => /^\d+$/.test(id)),
+      },
+    ],
     "idea.posted": ["moderation", { label: "New idea to review", color: colors.gold, ...onItem, fields: [by] }],
     "idea.rejected": ["moderation", { label: "Idea rejected", color: colors.red, title: event.item?.title, fields: [by] }],
     "item.edited": ["moderation", { label: "Item edited", color: colors.grey, ...onItem, fields: [by] }],

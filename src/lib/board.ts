@@ -40,6 +40,9 @@ export type CommentView = {
   replies: CommentView[];
 };
 
+// Someone a comment can @mention on an item (lib/mentions.ts).
+export type Mention = { username: string; name: string; avatar?: string; admin: boolean };
+
 // The board an item is on, by status.
 export type BoardPath = "/bugs-and-ideas" | "/roadmap" | "/completed";
 export const boardOf = (status: FeedbackStatus): BoardPath =>
@@ -85,6 +88,8 @@ export type ActivityEvent = {
   text?: string;
   // Where an item was moved.
   to?: FeedbackStatus;
+  // The people a comment mentions (lib/mentions.ts): its Discord post pings them.
+  mentions?: { id: string; name: string }[];
   permissions?: Permission[];
 };
 

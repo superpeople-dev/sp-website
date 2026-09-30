@@ -267,6 +267,7 @@ export type Dictionary = {
     commentsError: string;
     retry: string;
     commentPlaceholder: string;
+    mentionList: string;
     commentPost: string;
     commentPosting: string;
     commentFailed: string;

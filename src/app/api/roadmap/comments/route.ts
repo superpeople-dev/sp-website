@@ -2,6 +2,7 @@ import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import type { Comment, FeedbackAuthor } from "reflet-sdk";
 import { can, type Author, type CommentView, type MediaView } from "@/lib/board";
+import { maxPings, mentionable, mentionedUsernames } from "@/lib/mentions";
 import { logEvent } from "@/lib/events";
 import { isOffensive, offensiveName } from "@/lib/moderation";
 import { addComment, deleteComment, failure, getIdea, listComments, listMedia, refletTag, userToken } from "@/lib/reflet";
@@ -62,7 +63,9 @@ export async function GET(request: NextRequest) {
     // Who the item is assigned to (none: the whole team), and for the admins who manage items, the
     // admins they can assign it to. An admin removed since then leaves it to the team again.
     const manager = viewer !== null && can(viewer, "manage");
-    const staff = assignedId || manager ? await listStaff() : [];
+    // The admins: for the assignee, the list an item manager assigns from, and who a signed-in
+    // player can @mention (with the author and the commenters).
+    const staff = assignedId || viewer ? await listStaff() : [];
     const member = (m: StaffMember): Author => ({ ...(manager && { id: m.id }), name: m.name, username: m.username, avatar: m.avatar, admin: true });
     const assigned = staff.find((m) => m.id === assignedId);
     const media: MediaView[] = files
@@ -79,6 +82,9 @@ export async function GET(request: NextRequest) {
       mine: viewer !== null && authors[comment.id]?.id === viewer.id,
       replies: (comment.replies ?? []).map(view),
     });
+    const mentions = viewer
+      ? mentionable(authors[feedbackId], flatten(comments).map((comment) => authors[comment.id]), staff).map(({ username, name, avatar, admin }) => ({ username, name, avatar, admin }))
+      : undefined;
     return Response.json(
       {
         author: authorView(authors[feedbackId], null, showId, people),
@@ -87,6 +93,7 @@ export async function GET(request: NextRequest) {
         off,
         assignee: assigned ? member(assigned) : null,
         ...(manager && { staff: staff.map(member) }),
+        ...(mentions && { mentions }),
       },
       { headers: noStore },
     );
@@ -114,7 +121,23 @@ export async function POST(request: NextRequest) {
     await rememberAuthor(id, profile);
     revalidateTag(refletTag, "max");
     const item = await getIdea(feedbackId, 60).catch(() => null);
-    await logEvent(user, { type: "comment.posted", item: item ? { id: feedbackId, title: item.title, status: item.status } : undefined, text });
+    // @mentions of the item's author, its commenters or an admin: their Discord post pings them.
+    const named = mentionedUsernames(text);
+    let mentions: { id: string; name: string }[] = [];
+    if (named.length) {
+      const [thread, staff] = await Promise.all([listComments(feedbackId).catch(() => []), listStaff()]);
+      const known = await authorsOf([feedbackId, ...flatten(thread).map((comment) => comment.id)]);
+      mentions = mentionable(known[feedbackId], flatten(thread).map((comment) => known[comment.id]), staff)
+        .filter((person) => named.includes(person.username) && person.id !== user.id)
+        .slice(0, maxPings)
+        .map((person) => ({ id: person.id, name: person.name }));
+    }
+    await logEvent(user, {
+      type: "comment.posted",
+      item: item ? { id: feedbackId, title: item.title, status: item.status } : undefined,
+      text,
+      ...(mentions.length > 0 && { mentions }),
+    });
     const comment: CommentView = {
       id,
       body: text,

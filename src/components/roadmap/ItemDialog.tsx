@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -19,7 +19,9 @@ import {
   type TypeTag,
   type Viewer,
   type VoteDirection,
+  type Mention,
 } from "@/lib/board";
+import { mentionPattern } from "@/lib/mentions";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import logo from "@/assets/sp-logo.png";
 import { Avatar } from "../Avatar";
@@ -50,7 +52,22 @@ type Thread = {
   // for an admin who manages items).
   assignee: Author | null;
   staff: Author[] | null;
+  // Who the viewer can @mention here (signed in only): the author, the commenters, the admins.
+  mentions: Mention[];
 };
+
+// A comment's text with its @mentions highlighted.
+function withMentions(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  for (const match of text.matchAll(mentionPattern)) {
+    const at = (match.index ?? 0) + match[1].length;
+    parts.push(text.slice(last, at), <span key={at} className="mention">@{match[2]}</span>);
+    last = at + 1 + match[2].length;
+  }
+  parts.push(text.slice(last));
+  return parts;
+}
 
 // The items on the roadmap have someone who works on them.
 const roadmapStatuses: FeedbackItem["status"][] = ["planned", "in_progress", "completed"];
@@ -153,7 +170,7 @@ function ItemBody({
   const b = t.board;
   const r = t.ideas;
   const [ask, confirmDialog, askReason] = useConfirm();
-  const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [], off: false, assignee: null, staff: null });
+  const [thread, setThread] = useState<Thread>({ status: "loading", comments: [], author: null, media: [], off: false, assignee: null, staff: null, mentions: [] });
   const [notice, setNotice] = useState({ show: false, text: "", icon: "check" as IconName });
   const [viewing, setViewing] = useState<MediaView | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -184,6 +201,7 @@ function ItemBody({
           off?: boolean;
           assignee?: Author | null;
           staff?: Author[];
+          mentions?: Mention[];
         };
         if (!live) return;
         setThread({
@@ -194,6 +212,7 @@ function ItemBody({
           off: data.off === true,
           assignee: data.assignee ?? null,
           staff: data.staff ?? null,
+          mentions: data.mentions ?? [],
         });
       })
       .catch(() => {
@@ -299,6 +318,63 @@ function ItemBody({
     if (!response?.ok) return window.alert(b.actionFailed);
     setThread((current) => ({ ...current, comments: prune(current.comments, comment.id) }));
     onPatch(item.id, { commentCount: Math.max(0, item.commentCount - 1 - countAll(comment.replies)) });
+  };
+
+  // @mentions: the word being typed at the caret after an @, and the people it matches.
+  const textarea = useRef<HTMLTextAreaElement>(null);
+  const listId = useId();
+  const [typing, setTyping] = useState<{ start: number; query: string } | null>(null);
+  const [pick, setPick] = useState(0);
+  const findMention = (field: HTMLTextAreaElement) => {
+    const before = field.value.slice(0, field.selectionStart);
+    const match = before.match(/(^|[^\w@.])@([a-z0-9_.]{0,32})$/i);
+    setTyping(match ? { start: before.length - match[2].length - 1, query: match[2].toLowerCase() } : null);
+    setPick(0);
+  };
+  const self = viewer?.username.toLowerCase();
+  // Whose username or name starts with what is typed first, then whose name has it anywhere.
+  const rank = (person: Mention, query: string) =>
+    person.username.startsWith(query) || person.name.toLowerCase().startsWith(query) ? 0 : person.name.toLowerCase().includes(query) ? 1 : 2;
+  const suggestions = typing
+    ? thread.mentions
+        .filter((person) => person.username !== self && rank(person, typing.query) < 2)
+        .sort((a, b) => rank(a, typing.query) - rank(b, typing.query))
+        .slice(0, 6)
+    : [];
+  const mention = (person: Mention) => {
+    const field = textarea.current;
+    if (!field || !typing) return;
+    const text = `${draft.slice(0, typing.start)}@${person.username} ${draft.slice(field.selectionStart)}`;
+    const caret = typing.start + person.username.length + 2;
+    setDraft(text);
+    setTyping(null);
+    requestAnimationFrame(() => {
+      field.focus();
+      field.setSelectionRange(caret, caret);
+    });
+  };
+  const onComposerKey = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (suggestions.length) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        setPick((n) => (n + (e.key === "ArrowDown" ? 1 : -1) + suggestions.length) % suggestions.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        mention(suggestions[Math.min(pick, suggestions.length - 1)]);
+        return;
+      }
+      if (e.key === "Escape") {
+        // Only the list closes, not the dialog (Modal listens on the document).
+        e.preventDefault();
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+        setTyping(null);
+        return;
+      }
+    }
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) e.currentTarget.form?.requestSubmit();
   };
 
   const post = async (event: FormEvent<HTMLFormElement>) => {
@@ -438,7 +514,7 @@ function ItemBody({
             </span>
           )}
         </div>
-        <p className="comment__body">{comment.body}</p>
+        <p className="comment__body">{withMentions(comment.body)}</p>
         {comment.replies.length > 0 && <ul className="comment__replies">{comment.replies.map(renderComment)}</ul>}
       </div>
     </li>
@@ -578,18 +654,54 @@ function ItemBody({
         <form className="composer" onSubmit={(e) => void post(e)}>
           <Avatar src={viewer.avatar} size={36} />
           <div className="composer__main">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) e.currentTarget.form?.requestSubmit();
-              }}
-              placeholder={b.commentPlaceholder}
-              aria-label={b.commentPlaceholder}
-              rows={3}
-              maxLength={ideaLimits.comment}
-              required
-            />
+            <div className="composer__field">
+              <textarea
+                ref={textarea}
+                value={draft}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  findMention(e.target);
+                }}
+                onKeyDown={onComposerKey}
+                onKeyUp={(e) => {
+                  if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) findMention(e.currentTarget);
+                }}
+                onClick={(e) => findMention(e.currentTarget)}
+                onBlur={() => setTyping(null)}
+                placeholder={b.commentPlaceholder}
+                aria-label={b.commentPlaceholder}
+                aria-autocomplete="list"
+                aria-controls={suggestions.length ? listId : undefined}
+                aria-activedescendant={suggestions.length ? `${listId}-${Math.min(pick, suggestions.length - 1)}` : undefined}
+                rows={3}
+                maxLength={ideaLimits.comment}
+                required
+              />
+              {suggestions.length > 0 && (
+                <ul id={listId} className="mention-list" role="listbox" aria-label={b.mentionList}>
+                  {suggestions.map((person, i) => (
+                    <li
+                      key={person.username}
+                      id={`${listId}-${i}`}
+                      role="option"
+                      aria-selected={i === Math.min(pick, suggestions.length - 1)}
+                      className={i === Math.min(pick, suggestions.length - 1) ? "is-active" : undefined}
+                      // Chosen before the textarea loses focus (which closes the list).
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        mention(person);
+                      }}
+                      onMouseEnter={() => setPick(i)}
+                    >
+                      <Avatar src={person.avatar} size={24} />
+                      <b>{person.name}</b>
+                      <span className="mention-list__user">@{person.username}</span>
+                      {person.admin && <span className="who__badge">{b.admin}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <div className="composer__foot">
               {failed ? (
                 <span className="composer__error" role="status">
