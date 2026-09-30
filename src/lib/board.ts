@@ -40,6 +40,17 @@ export type CommentView = {
   replies: CommentView[];
 };
 
+// A notification (the bell in the account bar): an admin assigned you a task, or someone mentioned
+// you in a comment (text: the comment).
+export type Notice = {
+  id: string;
+  type: "assigned" | "mention";
+  at: number;
+  actor: { name: string; avatar?: string };
+  item: { id: string; title: string; status?: FeedbackStatus };
+  text?: string;
+};
+
 // Someone a comment can @mention on an item (lib/mentions.ts).
 export type Mention = { username: string; name: string; avatar?: string; admin: boolean };
 

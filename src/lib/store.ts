@@ -1,5 +1,5 @@
 import { Redis } from "@upstash/redis";
-import type { ActivityEvent, Permission } from "./board";
+import type { ActivityEvent, Notice, Permission } from "./board";
 import type { SessionUser } from "./session";
 
 const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
@@ -169,6 +169,29 @@ export async function setAssignee(itemId: string, staffId: string | null, by: st
   if (staffId) await redis.hset(assigneesKey, { [itemId]: { id: staffId, by, at: Date.now() } satisfies Assignment });
   else await redis.hdel(assigneesKey, itemId);
 }
+
+// Someone's notifications, newest first, the last 50; and when they last opened the list (what came
+// after is new).
+const noticesKey = (userId: string) => `sp:notices:${userId}`;
+const noticesSeenKey = (userId: string) => `sp:notices-seen:${userId}`;
+const keptNotices = 50;
+
+export const addNotice = (userId: string, notice: Omit<Notice, "id" | "at">) =>
+  attempt("notice save", undefined, async (client) => {
+    await client.lpush(noticesKey(userId), { id: crypto.randomUUID(), at: Date.now(), ...notice } satisfies Notice);
+    await client.ltrim(noticesKey(userId), 0, keptNotices - 1);
+  });
+
+export const readNotices = (userId: string) =>
+  attempt("notice list", { notices: [] as Notice[], seen: 0 }, async (client) => {
+    const [notices, seen] = await Promise.all([client.lrange<Notice>(noticesKey(userId), 0, keptNotices - 1), client.get<number>(noticesSeenKey(userId))]);
+    return { notices, seen: Number(seen) || 0 };
+  });
+
+export const markNoticesSeen = (userId: string) =>
+  attempt("notice seen", undefined, async (client) => {
+    await client.set(noticesSeenKey(userId), Date.now());
+  });
 
 // Tasks an admin just created on the site (app/api/admin/feedback): Reflet reports the status the task
 // was created in as a status change, and the Discord post should say "New task", not "Moved to".

@@ -1319,14 +1319,61 @@ button.votes__down:disabled { cursor: default; }
 /* Desktop: who is signed in on the left; Admin panel, then Suggest an idea, on the right. At 1140px and
    below, Admin panel and Sign out are square icon buttons, so the name keeps its room. Phone: avatar,
    name, Admin panel and Sign out on the first row, Suggest alone on the second. */
-.account-bar__admin { flex: none; margin-left: auto; }
+.account-bar { position: relative; }
+.account-bar__admin { flex: none; }
 .account-bar__suggest { flex: none; }
+/* The bell (NotificationBell): assigned a task, mentioned in a comment. Its list opens under it,
+   on phones as wide as the account bar. */
+.account-bar__bell { position: relative; flex: none; }
+.bell__btn { position: relative; justify-content: center; width: 38px; padding: 0; }
+.bell__count {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--signal);
+  color: #fff;
+  font: 700 11px/18px var(--display);
+  letter-spacing: 0;
+  text-align: center;
+}
+.bell__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(440px, 70vh);
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+.bell__title { margin: 6px 8px 8px; color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.bell__empty { margin: 4px 8px 10px; color: var(--paper-dim); font-size: 14px; line-height: 1.5; }
+.notice { display: flex; gap: 10px; padding: 10px 8px; border-radius: 4px; color: var(--paper-dim); text-decoration: none; }
+.notice:hover,
+.notice:focus-visible { outline: none; background: var(--surface-3); color: var(--paper); }
+.notice.is-new { background: rgba(239, 68, 56, 0.08); }
+.notice__main { display: grid; gap: 3px; min-width: 0; font-size: 14px; line-height: 1.4; }
+.notice__text b { color: var(--paper); font-weight: 600; overflow-wrap: anywhere; }
+.notice__quote { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+.notice time { color: var(--muted); font-size: 12.5px; }
+/* The page head is a layer of its own (isolation): lifted above the board while the list is open, or the
+   board would cover it. Only then, as its glow reaches down behind the board. */
+.page-head:has(.bell__panel) { z-index: 10; }
 .account-bar__who { margin-right: auto; }
 @media (max-width: 1140px) {
   .account-bar__admin-label,
   .account-bar__out-label { display: none; }
   .account-bar__out,
-  .account-bar__admin {
+  .account-bar__admin,
+  .account-bar .bell__btn {
     justify-content: center;
     width: 38px;
     height: 38px;
@@ -1337,16 +1384,21 @@ button.votes__down:disabled { cursor: default; }
     color: var(--paper-dim);
   }
   .account-bar__out:hover,
-  .account-bar__admin:hover { border-color: rgba(255, 248, 244, 0.3); color: var(--paper); transform: none; }
+  .account-bar__admin:hover,
+  .account-bar .bell__btn:hover { border-color: rgba(255, 248, 244, 0.3); color: var(--paper); transform: none; }
 }
 @media (max-width: 700px) {
   .account-bar { flex-direction: column; align-items: stretch; }
   .account-bar:has(.account-bar__who) { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; }
-  .account-bar:has(.account-bar__admin) { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+  .account-bar:has(.account-bar__admin),
+  .account-bar:has(.account-bar__bell) { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+  .account-bar:has(.account-bar__bell):has(.account-bar__admin) { grid-template-columns: auto minmax(0, 1fr) auto auto auto; }
   .account-bar__who { display: contents; }
   .account-bar__id { margin-left: 4px; }
-  .account-bar__admin { order: 1; margin-left: 0; }
-  .account-bar__out { order: 2; }
+  .account-bar__bell { position: static; order: 1; }
+  .bell__panel { left: 0; width: auto; }
+  .account-bar__admin { order: 2; margin-left: 0; }
+  .account-bar__out { order: 3; }
   .account-bar__avatar { width: 40px; height: 40px; }
   .account-bar__id {
     display: grid;
@@ -1360,7 +1412,7 @@ button.votes__down:disabled { cursor: default; }
   .account-bar__label { display: block; grid-area: label; color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
   .account-bar__user { display: block; grid-area: user; font-size: 17px; }
   .account-bar__badge { grid-area: badge; }
-  .account-bar__suggest { order: 3; grid-column: 1 / -1; width: 100%; }
+  .account-bar__suggest { order: 4; grid-column: 1 / -1; width: 100%; }
 }
 .sheet--admin { width: min(640px, 100%); }
 .admin-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 16px 0 20px; border-bottom: 1px solid var(--line-soft); }

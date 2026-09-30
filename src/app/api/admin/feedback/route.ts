@@ -19,7 +19,7 @@ import { logEvent } from "@/lib/events";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { listStaff } from "@/lib/staff";
-import { markCreated, profileOf, rememberAuthor, setAssignee } from "@/lib/store";
+import { addNotice, markCreated, profileOf, rememberAuthor, setAssignee } from "@/lib/store";
 
 const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
 const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
@@ -133,6 +133,10 @@ export async function POST(request: NextRequest) {
       const assignee = body.assignee === null ? null : ((await listStaff()).find((member) => member.id === body.assignee) ?? null);
       if (body.assignee !== null && !assignee) return Response.json({ error: "invalid" }, { status: 400 });
       await setAssignee(feedbackId, assignee?.id ?? null, user.id);
+      // The admin it is given to finds it under their bell (not when they took it themselves).
+      if (assignee && assignee.id !== user.id) {
+        await addNotice(assignee.id, { type: "assigned", actor: { name: user.name, avatar: user.avatar }, item: target });
+      }
       await logEvent(
         user,
         assignee ? { type: "item.assigned", item: target, user: { id: assignee.id, name: assignee.name } } : { type: "item.unassigned", item: target },

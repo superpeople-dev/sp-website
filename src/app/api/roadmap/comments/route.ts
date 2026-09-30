@@ -10,6 +10,7 @@ import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits, mediaLimits } from "@/lib/site";
 import { adminCheck, listStaff, type StaffMember } from "@/lib/staff";
 import {
+  addNotice,
   assigneeOf,
   authorsOf,
   commentsOff,
@@ -131,6 +132,15 @@ export async function POST(request: NextRequest) {
         .filter((person) => named.includes(person.username) && person.id !== user.id)
         .slice(0, maxPings)
         .map((person) => ({ id: person.id, name: person.name }));
+    }
+    // Each person mentioned finds it under their bell too.
+    const where = item ? { id: feedbackId, title: item.title, status: item.status } : null;
+    if (where) {
+      await Promise.all(
+        mentions.map((person) =>
+          addNotice(person.id, { type: "mention", actor: { name: user.name, avatar: user.avatar }, item: where, text: text.slice(0, 200) }),
+        ),
+      );
     }
     await logEvent(user, {
       type: "comment.posted",

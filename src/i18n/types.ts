@@ -249,6 +249,10 @@ export type Dictionary = {
     assignedTo: string;
     assignTeam: string;
     toastAssigned: string;
+    notifications: string;
+    noticesEmpty: string;
+    noticeAssigned: string;
+    noticeMention: string;
     mediaUploadFailed: string;
     close: string;
     edit: string;

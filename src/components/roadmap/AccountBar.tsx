@@ -7,6 +7,7 @@ import { Avatar } from "../Avatar";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon } from "../Icon";
 import { AdminPanel } from "./AdminPanel";
+import { NotificationBell } from "./NotificationBell";
 import { loginHref, openSuggest, signOut } from "./viewer";
 
 // suggest: the page has the Bugs & Ideas board, whose form "Suggest an idea" opens.
@@ -71,6 +72,7 @@ export function AccountBar({
           <span className="account-bar__out-label">{t.board.signOut}</span>
         </button>
       </div>
+      <NotificationBell />
       {viewer.admin && <AdminPanel viewer={viewer} />}
       {suggest && !viewer.banned && !viewer.nameBlocked && (
         <button type="button" className="btn btn--primary btn--sm account-bar__suggest" onClick={openSuggest}>
