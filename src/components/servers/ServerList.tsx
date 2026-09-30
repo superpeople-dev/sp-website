@@ -10,6 +10,8 @@ import { Reveal } from "../motion";
 import { historyId, ServerHistory } from "./ServerHistory";
 
 const POLL_MS = 30_000;
+// The region filter only helps with a longer list: hidden below this many servers.
+const REGION_FILTER_FROM = 6;
 
 // A clock that ticks every 10 s, so "updated … ago" stays true without re-rendering every second.
 // The server snapshot is null: the relative time only appears once the page runs in the browser.
@@ -69,7 +71,9 @@ export function ServerList({ initial, history }: { initial: List; history: Histo
     () => [...new Set(list.servers.map((srv) => srv.continent).filter((c): c is Continent => c !== null))],
     [list.servers],
   );
-  const active = continent !== "all" && continents.includes(continent) ? continent : "all";
+  const regionFilter = list.servers.length >= REGION_FILTER_FROM && continents.length > 1;
+  // A region picked earlier only applies while the filter is there to take it back.
+  const active = regionFilter && continent !== "all" && continents.includes(continent) ? continent : "all";
   const shown = active === "all" ? list.servers : list.servers.filter((srv) => srv.continent === active);
   const online = list.servers.filter((srv) => srv.online).length;
 
@@ -114,7 +118,7 @@ export function ServerList({ initial, history }: { initial: List; history: Histo
             </p>
             <p className="servers__updated">{updated()}</p>
           </div>
-          {continents.length > 1 && (
+          {regionFilter && (
             <FilterPicker
               label={s.filterLabel}
               options={[
