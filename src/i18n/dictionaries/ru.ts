@@ -429,6 +429,7 @@ export const ru: Dictionary = {
     deleteCommentTitle: "Удалить этот комментарий?",
     deleteCommentBody: "Это навсегда: комментарий удалится для всех, и вернуть его будет нельзя.",
     ban: "Заблокировать игрока",
+    banShort: "Бан",
     shareItem: "Поделиться",
     linkCopied: "Ссылка скопирована",
     banTitle: "Заблокировать {name}?",

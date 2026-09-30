@@ -429,6 +429,7 @@ export const ja: Dictionary = {
     deleteCommentTitle: "このコメントを削除しますか？",
     deleteCommentBody: "元に戻せません。全員の画面から削除され、復元できません。",
     ban: "プレイヤーを BAN",
+    banShort: "BAN",
     shareItem: "共有",
     linkCopied: "リンクをコピーしました",
     banTitle: "{name} を BAN しますか？",

@@ -429,6 +429,7 @@ export const fr: Dictionary = {
     deleteCommentTitle: "Supprimer ce commentaire ?",
     deleteCommentBody: "C'est définitif : il sera supprimé pour tout le monde et ne pourra pas être récupéré.",
     ban: "Bannir le joueur",
+    banShort: "Bannir",
     shareItem: "Partager",
     linkCopied: "Lien copié",
     banTitle: "Bannir {name} ?",

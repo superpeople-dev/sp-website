@@ -59,7 +59,12 @@ export function AccountBar({
           <span className="account-bar__name">{fill(t.board.signedInAs, { name })}</span>
           <span className="account-bar__label">{t.board.signedIn}</span>
           <b className="account-bar__user">{name}</b>
-          {viewer.admin && <span className="account-bar__badge">{t.board.admin}</span>}
+          {viewer.admin && (
+            <span className="account-bar__badge">
+              <Icon name="shield" />
+              {t.board.admin}
+            </span>
+          )}
         </span>
         <button
           type="button"

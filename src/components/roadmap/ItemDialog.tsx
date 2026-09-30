@@ -460,6 +460,13 @@ function ItemBody({
   const isBanned = (author: Author | null) => Boolean(author?.banned || (author?.id && bannedIds.includes(author.id)));
   // Nobody sees someone's Discord username next to their name; an admin gets an "i" at its top right
   // with the username in a tooltip, to know who it is on Discord.
+  const adminBadge = (
+    <span className="who__badge">
+      <Icon name="shield" />
+      {b.admin}
+    </span>
+  );
+
   const userTag = (user?: string | null) =>
     viewer?.admin && user ? (
       <span className="usertag" tabIndex={0} role="note" aria-label={`Discord: @${user}`} data-tip={`@${user}`}>
@@ -493,7 +500,7 @@ function ItemBody({
         <Avatar src={author.avatar} size={28} />
         <b>{name}</b>
         {userTag(user)}
-        {author.admin && <span className="who__badge">{b.admin}</span>}
+        {author.admin && adminBadge}
       </span>
     );
   };
@@ -502,8 +509,9 @@ function ItemBody({
     if (!canBan(author)) return null;
     if (bannedIds.includes(author.id)) return <span className="who__banned">{b.banned}</span>;
     return (
-      <button type="button" className="icon-btn icon-btn--danger" onClick={() => void banAuthor(author)} aria-label={b.ban} title={b.ban}>
+      <button type="button" className="ban-btn" onClick={() => void banAuthor(author)} aria-label={b.ban} title={b.ban}>
         <Icon name="ban" />
+        {b.banShort}
       </button>
     );
   };
@@ -521,7 +529,7 @@ function ItemBody({
             <>
               <b>{commentAuthor(comment)?.name ?? b.team}</b>
               {userTag(commentAuthor(comment)?.user)}
-              {comment.author?.admin && <span className="who__badge">{b.admin}</span>}
+              {comment.author?.admin && adminBadge}
             </>
           )}
           <time dateTime={new Date(comment.createdAt).toISOString()}>{format.stamp.format(comment.createdAt)}</time>
@@ -730,7 +738,7 @@ function ItemBody({
                       <Avatar src={person.avatar} size={24} />
                       <b>{person.name}</b>
                       <span className="mention-list__user">@{person.username}</span>
-                      {person.admin && <span className="who__badge">{b.admin}</span>}
+                      {person.admin && adminBadge}
                     </li>
                   ))}
                 </ul>

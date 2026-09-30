@@ -427,6 +427,7 @@ export const zh: Dictionary = {
     deleteCommentTitle: "删除这条评论？",
     deleteCommentBody: "此操作无法撤销：评论将对所有人删除，且无法恢复。",
     ban: "封禁玩家",
+    banShort: "封禁",
     shareItem: "分享",
     linkCopied: "链接已复制",
     banTitle: "封禁 {name}？",

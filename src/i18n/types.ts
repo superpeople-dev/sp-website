@@ -280,6 +280,7 @@ export type Dictionary = {
     deleteCommentTitle: string;
     deleteCommentBody: string;
     ban: string;
+    banShort: string;
     shareItem: string;
     linkCopied: string;
     banTitle: string;

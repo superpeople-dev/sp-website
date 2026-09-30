@@ -1289,15 +1289,19 @@ button.votes__down:disabled { cursor: default; }
 .account-bar__label,
 .account-bar__user { display: none; }
 .account-bar__badge {
+  display: inline-flex;
   flex: none;
+  align-items: center;
+  gap: 5px;
   padding: 3px 8px;
-  border: 1px solid rgba(240, 183, 25, 0.5);
   border-radius: 2px;
-  color: var(--gold);
+  background: var(--gold);
+  color: #1c1405;
   font: 700 11px var(--display);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+.account-bar__badge svg { width: 11px; height: 11px; flex: none; }
 .account-bar__out {
   display: inline-flex;
   flex: none;
@@ -1917,7 +1921,7 @@ button.votes__down:disabled { cursor: default; }
 .assignee__btn .who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheet__fact dt { color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 .sheet__fact dd { display: flex; align-items: center; min-height: 28px; margin: 0; color: var(--paper); font-size: 15px; }
-.sheet__author { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.sheet__author { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .sheet__votes { display: inline-flex; align-items: center; gap: 6px; font: 800 17px var(--display); }
 .sheet__votes svg { width: 16px; height: 16px; }
 
@@ -1963,15 +1967,44 @@ button.votes__down:disabled { cursor: default; }
 .usertag:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 /* The facts box would cut the tooltip of the "Posted by" name. */
 .sheet__facts:has(.usertag) { overflow: visible; }
+/* ADMIN: a gold chip with a shield. */
 .who__badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
   padding: 2px 6px;
   border-radius: 2px;
-  background: rgba(240, 183, 25, 0.14);
-  color: var(--gold);
+  background: var(--gold);
+  color: #1c1405;
   font: 700 10px var(--display);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+.who__badge svg { width: 10px; height: 10px; flex: none; }
+/* Closer to the name when the admins' "i" is between them. */
+.usertag + .who__badge { margin-left: -3px; }
+/* Ban a player: the icon and the word. */
+.ban-btn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(239, 68, 56, 0.45);
+  border-radius: var(--r);
+  background: none;
+  color: var(--signal-hi);
+  font: 700 11px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.ban-btn svg { width: 13px; height: 13px; }
+.ban-btn:hover { border-color: var(--signal); background: rgba(239, 68, 56, 0.12); }
+.ban-btn:focus-visible { outline: none; border-color: var(--signal); }
 .who__team { color: var(--paper-dim); }
 .who__banned { color: var(--signal-hi); font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 /* A banned person: the same name, struck through, then "(banned)". */
@@ -1993,7 +2026,7 @@ button.votes__down:disabled { cursor: default; }
 .comment__head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 28px; }
 .comment__head b { font-weight: 600; }
 .comment__head time { color: var(--muted); font-size: 13px; }
-.comment__tools { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.comment__tools { display: flex; align-items: center; gap: 4px; }
 .comment__body { margin: 0; color: var(--paper-dim); white-space: pre-line; overflow-wrap: anywhere; }
 .comment__replies { margin-top: 10px; padding-left: 14px; border-left: 2px solid var(--line-soft); }
 .thread__empty,

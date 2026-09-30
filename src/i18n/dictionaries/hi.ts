@@ -429,6 +429,7 @@ export const hi: Dictionary = {
     deleteCommentTitle: "यह कमेंट हटाएँ?",
     deleteCommentBody: "यह हमेशा के लिए है: कमेंट सबके लिए हट जाएगा और वापस नहीं आएगा।",
     ban: "खिलाड़ी को बैन करें",
+    banShort: "बैन",
     shareItem: "शेयर करें",
     linkCopied: "लिंक कॉपी हो गया",
     banTitle: "{name} को बैन करें?",

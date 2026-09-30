@@ -429,6 +429,7 @@ export const ko: Dictionary = {
     deleteCommentTitle: "이 댓글을 삭제할까요?",
     deleteCommentBody: "되돌릴 수 없어요. 모두에게서 삭제되며 복구할 수 없습니다.",
     ban: "플레이어 차단",
+    banShort: "차단",
     shareItem: "공유",
     linkCopied: "링크를 복사했어요",
     banTitle: "{name} 님을 차단할까요?",
