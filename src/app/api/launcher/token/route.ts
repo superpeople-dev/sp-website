@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { challengeOf, profileOfSession } from "@/lib/launcher";
 import { verifySession } from "@/lib/session";
-import { takeLauncherLogin } from "@/lib/store";
+import { isBanned, takeLauncherLogin } from "@/lib/store";
 
 // The launcher trades the one-time code from /launcher/connected, with the PKCE verifier behind its
 // challenge, for the player's session (lib/launcher.ts). Each code works once, for two minutes.
@@ -19,5 +19,7 @@ export async function POST(request: NextRequest) {
   }
   const user = await verifySession(login.token);
   if (!user) return Response.json({ error: "invalid" }, { status: 400 });
+  // Banned on the website since the code was made: not into the launcher either.
+  if (!user.admin && (await isBanned(user.id))) return Response.json({ error: "banned" }, { status: 403 });
   return Response.json({ token: login.token, profile: profileOfSession(user) }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -10,7 +10,9 @@ const redis = url && token ? new Redis({ url, token }) : null;
 export const storeReady = redis !== null;
 
 export type Profile = { id: string; name: string; username: string; avatar: string; admin: boolean };
-export type Ban = Omit<Profile, "admin"> & { by: string; at: number; reason?: string };
+// lockout: banned from everything (lib/honeypot.ts), not only from posting and voting: no sign-in on the
+// website or in the launcher, and any session they had stops working.
+export type Ban = Omit<Profile, "admin"> & { by: string; at: number; reason?: string; lockout?: boolean };
 
 const bansKey = "sp:bans";
 const authorsKey = "sp:authors";
@@ -34,6 +36,7 @@ async function attempt<T>(action: string, fallback: T, run: (client: Redis) => P
 }
 
 export const isBanned = (id: string) => attempt("ban check", false, async (client) => (await client.hexists(bansKey, id)) === 1);
+export const banOf = (id: string) => attempt("ban lookup", null as Ban | null, (client) => client.hget<Ban>(bansKey, id));
 
 export const listBans = () =>
   attempt("ban list", [] as Ban[], async (client) =>

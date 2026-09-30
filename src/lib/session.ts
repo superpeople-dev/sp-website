@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import type { Permission, Viewer } from "./board";
 import { offensiveName } from "./moderation";
 import { accessOf } from "./staff";
+import { banOf } from "./store";
 
 export { isListedAdmin } from "./staff";
 
@@ -92,7 +93,9 @@ export async function verifySession(value: string | undefined): Promise<SessionU
     if (typeof data.exp !== "number" || data.exp < Date.now()) return null;
     const id = String(data.id);
     const name = String(data.name);
-    const access = await accessOf(id, data.admin === true);
+    const [access, ban] = await Promise.all([accessOf(id, data.admin === true), banOf(id)]);
+    // Locked out (the honeypot): the session is gone, here and in the launcher.
+    if (ban?.lockout && !access) return null;
     return {
       id,
       name,

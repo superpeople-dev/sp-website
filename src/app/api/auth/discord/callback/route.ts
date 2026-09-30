@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { allPermissions, shownName } from "@/lib/board";
+import { clearTrapMark, lockOut, trapMark } from "@/lib/honeypot";
 import { connectedPath, isChallenge } from "@/lib/launcher";
 import {
   authReady,
@@ -12,8 +13,8 @@ import {
   sessionCookieOptions,
   type SessionUser,
 } from "@/lib/session";
-import { isOwner } from "@/lib/staff";
-import { profileOf, rememberProfile, saveLauncherLogin, saveStaff, staffEntry } from "@/lib/store";
+import { accessOf, isOwner } from "@/lib/staff";
+import { banOf, profileOf, rememberProfile, saveLauncherLogin, saveStaff, staffEntry } from "@/lib/store";
 
 type DiscordUser = { id: string; username: string; global_name?: string | null; avatar?: string | null };
 
@@ -97,6 +98,18 @@ export async function GET(request: NextRequest) {
 
   const user = await discordUser(code, `${request.nextUrl.origin}/api/auth/discord/callback`).catch(() => null);
   if (!user) return response;
+  // Bans (never an admin's): probing the decoy routes before signing in (lib/honeypot.ts) bans them
+  // from everything now. Banned from everything: no sign-in at all. Any ban: not into the launcher,
+  // whose Play button would let them into the game.
+  const mark = trapMark(request);
+  if (mark) clearTrapMark(response);
+  const admin = (await accessOf(user.id, user.admin)) !== null;
+  if (!admin && mark) await lockOut(user, `Honeypot (before signing in): ${mark}`);
+  const ban = admin ? null : await banOf(user.id);
+  if (ban && (ban.lockout || launcher)) {
+    response.headers.set("Location", new URL(launcher ? `${connectedPath}?error=banned` : "/banned", request.url).toString());
+    return response;
+  }
   await remember(user).catch(() => null);
   if (launcher) {
     const handoff = crypto.randomUUID();
