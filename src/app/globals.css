@@ -1526,15 +1526,25 @@ button.votes__down:disabled { cursor: default; }
   .account-bar__suggest { order: 4; grid-column: 1 / -1; width: 100%; }
 }
 .sheet--admin { width: min(640px, 100%); }
-/* One row: where the tabs don't fit (phones, long languages) it scrolls sideways. */
-.admin-tabs { display: flex; gap: 4px; padding: 6px 16px 0 20px; overflow-x: auto; border-bottom: 1px solid var(--line-soft); scrollbar-width: none; }
+/* One row: where the tabs don't fit (phones, long languages) it scrolls sideways. flex: none, or the
+   sheet's column squeezes it (a scrolling box may shrink) under a long list; the line under it is a
+   shadow, so the active tab's underline covers it without sticking out (no vertical scroll). */
+.admin-tabs {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  padding: 6px 16px 0 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-shadow: inset 0 -1px 0 var(--line-soft);
+  scrollbar-width: none;
+}
 .admin-tabs::-webkit-scrollbar { display: none; }
 .admin-tabs button { flex: none; }
 .admin-tabs button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: -1px;
   padding: 10px 12px;
   border: 0;
   border-bottom: 2px solid transparent;
@@ -1602,6 +1612,8 @@ button.votes__down:disabled { cursor: default; }
 .activity__main b { color: var(--paper); font-weight: 600; }
 .activity__main a { color: var(--paper); font-weight: 600; }
 .activity__main blockquote { margin: 0; padding: 6px 10px; border-left: 2px solid var(--line); color: var(--muted); font-size: 15px; white-space: pre-line; overflow-wrap: anywhere; }
+/* A new idea's description: two lines (the whole of it is on the idea). */
+.activity__row--idea-posted blockquote { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; }
 /* Done by an agent with an admin's API key. */
 .activity__via { display: inline-flex; align-items: center; gap: 6px; justify-self: start; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .activity__via svg { width: 13px; height: 13px; flex: none; }
