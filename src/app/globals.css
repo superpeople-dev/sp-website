@@ -1933,18 +1933,15 @@ button.votes__down:disabled { cursor: default; }
   flex: none;
   place-items: center;
   align-self: flex-start;
-  width: 14px;
-  height: 14px;
-  margin: -3px 0 0 -5px;
-  border: 1px solid var(--muted);
+  margin: -4px 0 0 -5px;
   border-radius: 50%;
   color: var(--muted);
-  font: italic 700 9px/1 var(--body);
   cursor: help;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s;
 }
+.usertag svg { width: 15px; height: 15px; }
 .usertag:hover,
-.usertag:focus-visible { outline: none; border-color: var(--paper-dim); color: var(--paper); }
+.usertag:focus-visible { outline: none; color: var(--paper); }
 .usertag::after {
   content: attr(data-tip);
   position: absolute;

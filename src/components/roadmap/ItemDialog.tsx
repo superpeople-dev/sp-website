@@ -463,7 +463,7 @@ function ItemBody({
   const userTag = (user?: string | null) =>
     viewer?.admin && user ? (
       <span className="usertag" tabIndex={0} role="note" aria-label={`Discord: @${user}`} data-tip={`@${user}`}>
-        i
+        <Icon name="info" />
       </span>
     ) : null;
 

@@ -59,6 +59,7 @@ const paths = {
   up: <path {...stroke} strokeWidth={2.6} d="m6 15 6-6 6 6" />,
   // Reddit's vote arrow, outlined (filled in CSS once you voted); pointed down by rotating it.
   vote: <path {...stroke} strokeWidth={1.8} d="M12 3.5 4.5 11.5H9V20h6v-8.5h4.5L12 3.5Z" />,
+  info: <path {...stroke} strokeWidth={2} d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5.5M12 7.6v.01" />,
   bell: <path {...stroke} strokeWidth={2} d="M6 8.5a6 6 0 1 1 12 0c0 6.5 3 8.5 3 8.5H3s3-2 3-8.5ZM10.3 20.5a2 2 0 0 0 3.4 0" />,
   // The same arrow, pointing down: flipped in the drawing, not with a CSS transform.
   voteDown: <path {...stroke} strokeWidth={1.8} d="M12 20.5 19.5 12.5H15V4H9v8.5H4.5L12 20.5Z" />,
