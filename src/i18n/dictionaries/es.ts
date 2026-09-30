@@ -62,8 +62,8 @@ export const es: Dictionary = {
         body: "Descarga el instalador y ejecútalo. Windows puede mostrar un aviso de SmartScreen porque la aplicación es nueva. Haz clic en «Más información» y luego en «Ejecutar de todas formas».",
       },
       {
-        title: "Consigue tu clave",
-        body: "Únete a nuestro Discord y escribe `/authkey` al bot. Pega la clave en el launcher una sola vez. Se guarda cifrada en tu PC.",
+        title: "Conecta Discord",
+        body: "Abre el launcher y pulsa **Connect with Discord**. Inicia sesión una sola vez: el launcher mantiene la sesión.",
       },
       {
         title: "Descarga y juega",
@@ -156,7 +156,7 @@ export const es: Dictionary = {
       },
       {
         q: "¿Cómo empiezo?",
-        a: "Consigue el launcher, que puede descargar los archivos compatibles del juego desde archive.org y prepararlos por ti. No necesitas tener el juego instalado. De hecho, si tienes instalada y actualizada la versión anterior de Steam, no funcionará con este proyecto.\n\nPuedes descargar el launcher desde GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nCuando tengas el launcher, también necesitarás una clave de autenticación. Puedes generarla en Discord usando `/authkey` en el canal 🤖・bot.\n\nCuando hace falta, el launcher añade temporalmente entradas a tu archivo hosts de Windows para que el juego se conecte al servidor de la comunidad en lugar de a los servicios originales de Super People. Estos cambios se deshacen al salir del juego.",
+        a: "Consigue el launcher, que puede descargar los archivos compatibles del juego desde archive.org y prepararlos por ti. No necesitas tener el juego instalado. De hecho, si tienes instalada y actualizada la versión anterior de Steam, no funcionará con este proyecto.\n\nPuedes descargar el launcher desde GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nCuando tengas el launcher, pulsa «Connect with Discord» e inicia sesión con tu cuenta de Discord. Si tenías una clave del launcher, tu cuenta y tu progreso se conservan.\n\nCuando hace falta, el launcher añade temporalmente entradas a tu archivo hosts de Windows para que el juego se conecte al servidor de la comunidad en lugar de a los servicios originales de Super People. Estos cambios se deshacen al salir del juego.",
       },
       {
         q: "¿Necesito tener el juego o Steam?",

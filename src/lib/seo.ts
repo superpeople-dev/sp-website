@@ -305,7 +305,7 @@ export function llmsTxt() {
 ## How to play
 
 1. Download the launcher: ${siteUrl}/download
-2. Join the Discord (${site.discord}) and type /authkey to the bot to get a personal launcher key.
+2. In the launcher, press "Connect with Discord" and sign in with your Discord account.
 3. In the launcher, pick a folder that already has the game or let it download the game, then press Play.
 
 ## Links

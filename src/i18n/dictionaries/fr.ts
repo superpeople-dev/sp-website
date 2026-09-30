@@ -62,8 +62,8 @@ export const fr: Dictionary = {
         body: "Téléchargez l'installateur et lancez-le. Windows peut afficher un avertissement SmartScreen, car l'application est récente. Cliquez sur « Informations complémentaires », puis sur « Exécuter quand même ».",
       },
       {
-        title: "Obtenez votre clé",
-        body: "Rejoignez notre Discord et envoyez `/authkey` au bot. Collez la clé une seule fois dans le launcher. Elle est stockée chiffrée sur votre PC.",
+        title: "Connectez Discord",
+        body: "Ouvrez le launcher et cliquez sur **Connect with Discord**. Connectez-vous une seule fois : le launcher reste connecté.",
       },
       {
         title: "Téléchargez et jouez",
@@ -156,7 +156,7 @@ export const fr: Dictionary = {
       },
       {
         q: "Comment commencer ?",
-        a: "Commencez par récupérer le launcher : il peut télécharger les fichiers du jeu compatibles depuis archive.org et les installer pour vous. Pas besoin d'avoir déjà une copie du jeu installée. D'ailleurs, si vous avez installé et mis à jour l'ancienne version Steam, elle ne fonctionnera pas avec ce projet.\n\nVous pouvez télécharger le launcher sur GitHub :\nhttps://github.com/superpeople-dev/sp-launcher\n\nUne fois le launcher récupéré, il vous faudra aussi une clé d'authentification. Vous pouvez en générer une sur notre Discord avec la commande `/authkey` dans le salon 🤖・bot.\n\nSi nécessaire, le launcher ajoute temporairement des entrées à votre fichier hosts Windows pour que le jeu se connecte au serveur communautaire plutôt qu'aux services d'origine de Super People. Ces modifications sont annulées à la fermeture du jeu.",
+        a: "Commencez par récupérer le launcher : il peut télécharger les fichiers du jeu compatibles depuis archive.org et les installer pour vous. Pas besoin d'avoir déjà une copie du jeu installée. D'ailleurs, si vous avez installé et mis à jour l'ancienne version Steam, elle ne fonctionnera pas avec ce projet.\n\nVous pouvez télécharger le launcher sur GitHub :\nhttps://github.com/superpeople-dev/sp-launcher\n\nUne fois le launcher récupéré, cliquez sur « Connect with Discord » et connectez-vous avec votre compte Discord. Si vous aviez une clé du launcher, votre compte et votre progression vous suivent.\n\nSi nécessaire, le launcher ajoute temporairement des entrées à votre fichier hosts Windows pour que le jeu se connecte au serveur communautaire plutôt qu'aux services d'origine de Super People. Ces modifications sont annulées à la fermeture du jeu.",
       },
       {
         q: "Faut-il posséder le jeu ou avoir Steam ?",

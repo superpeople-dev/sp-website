@@ -62,8 +62,8 @@ export const de: Dictionary = {
         body: "Lade den Installer herunter und starte ihn. Windows zeigt eventuell eine SmartScreen-Warnung, weil die App neu ist. Klicke auf „Weitere Informationen“ und dann auf „Trotzdem ausführen“.",
       },
       {
-        title: "Schlüssel holen",
-        body: "Tritt unserem Discord bei und schreib dem Bot `/authkey`. Füge den Schlüssel einmal in den Launcher ein. Er wird verschlüsselt auf deinem PC gespeichert.",
+        title: "Discord verbinden",
+        body: "Öffne den Launcher und klicke auf **Connect with Discord**. Du meldest dich nur einmal an: Der Launcher bleibt angemeldet.",
       },
       {
         title: "Herunterladen und spielen",
@@ -156,7 +156,7 @@ export const de: Dictionary = {
       },
       {
         q: "Wie lege ich los?",
-        a: "Hol dir den Launcher. Er kann die passenden Spieldateien von archive.org herunterladen und für dich einrichten. Du musst das Spiel also nicht schon installiert haben. Im Gegenteil: Wenn du die frühere Steam-Version installiert und aktualisiert hast, funktioniert sie mit diesem Projekt nicht.\n\nDen Launcher gibt es zum Download auf GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nSobald du den Launcher hast, brauchst du außerdem einen Authentifizierungsschlüssel. Den erstellst du im Discord, indem du im Kanal 🤖・bot `/authkey` eingibst.\n\nBei Bedarf fügt der Launcher vorübergehend Einträge in deine Windows-hosts-Datei ein, damit sich das Spiel mit dem Community-Server verbindet statt mit den ursprünglichen Diensten von Super People. Sobald das Spiel beendet wird, werden diese Änderungen wieder rückgängig gemacht.",
+        a: "Hol dir den Launcher. Er kann die passenden Spieldateien von archive.org herunterladen und für dich einrichten. Du musst das Spiel also nicht schon installiert haben. Im Gegenteil: Wenn du die frühere Steam-Version installiert und aktualisiert hast, funktioniert sie mit diesem Projekt nicht.\n\nDen Launcher gibt es zum Download auf GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nSobald du den Launcher hast, klickst du auf „Connect with Discord“ und meldest dich mit deinem Discord-Konto an. Hattest du einen Launcher-Schlüssel, bleiben dein Konto und dein Fortschritt erhalten.\n\nBei Bedarf fügt der Launcher vorübergehend Einträge in deine Windows-hosts-Datei ein, damit sich das Spiel mit dem Community-Server verbindet statt mit den ursprünglichen Diensten von Super People. Sobald das Spiel beendet wird, werden diese Änderungen wieder rückgängig gemacht.",
       },
       {
         q: "Muss ich das Spiel besitzen oder Steam haben?",
