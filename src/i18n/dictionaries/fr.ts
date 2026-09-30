@@ -4,7 +4,7 @@ export const fr: Dictionary = {
   nav: {
     home: "Accueil",
     ideas: "Bugs et idées",
-    roadmap: "Feuille de route",
+    roadmap: "Roadmap",
     completed: "Réalisé",
     servers: "Serveurs",
     homeHint: "Le projet, comment jouer et la FAQ",
@@ -85,7 +85,7 @@ export const fr: Dictionary = {
     inProgress: "En cours",
     upNext: "À venir",
     done: "Fait",
-    roadmapCta: "Voir la feuille de route et voter",
+    roadmapCta: "Voir la roadmap et voter",
     viewCompleted: "Voir tout ce qui est terminé",
     doneItems: [
       "Ouverture et fermeture des portes",
@@ -206,7 +206,7 @@ export const fr: Dictionary = {
   },
   ideas: {
     title: "Bugs et idées",
-    lead: "Proposez des fonctionnalités, signalez des bugs et votez pour ce qui compte le plus pour vous. Les idées les plus demandées passent à la feuille de route.",
+    lead: "Proposez des fonctionnalités, signalez des bugs et votez pour ce qui compte le plus pour vous. Les idées les plus demandées passent à la roadmap.",
     sortTop: "Populaires",
     sortNew: "Récentes",
     empty: "Aucune idée pour l'instant. Soyez le premier à en proposer une.",
@@ -254,14 +254,14 @@ export const fr: Dictionary = {
     seoDescription: "Proposez des fonctionnalités pour la relance de SUPER PEOPLE, signalez des bugs et votez pour la suite du projet.",
   },
   plan: {
-    title: "Feuille de route",
+    title: "Roadmap",
     lead: "Ce qu'on fera ensuite, ce sur quoi on travaille en ce moment et ce qui vient d'être terminé.",
     todo: "À faire",
     doing: "En cours",
     done: "Terminé",
     empty: "Rien pour l'instant",
     seeAll: "Voir tout le travail réalisé",
-    seoTitle: "Feuille de route",
+    seoTitle: "Roadmap",
     seoDescription: "Découvrez ce que l'équipe de relance de SUPER PEOPLE prévoit, ce qui est en cours et ce qui vient d'être terminé.",
   },
   completed: {
@@ -309,7 +309,7 @@ export const fr: Dictionary = {
       },
       manage: {
         label: "Gestion",
-        hint: "Modifier, déplacer et supprimer les idées et la feuille de route",
+        hint: "Modifier, déplacer et supprimer les idées et la roadmap",
       },
       comments: {
         label: "Commentaires",
@@ -373,7 +373,7 @@ export const fr: Dictionary = {
     signInHint: "Connectez-vous avec Discord pour voter et proposer des idées.",
     unavailable: "Le tableau n'est pas disponible pour le moment. Revenez bientôt.",
     admin: "Admin",
-    toRoadmap: "Ajouter à la feuille de route",
+    toRoadmap: "Ajouter à la roadmap",
     back: "Reculer",
     forward: "Avancer",
     reopen: "Rouvrir",
@@ -479,7 +479,7 @@ export const fr: Dictionary = {
       sections: [
         { title: "Qui sommes-nous", body: "SUPER PEOPLE Revival est un projet de fans bénévole et non commercial. Pour toute question ou demande liée à la confidentialité, écrivez à contact@superpeople.dev ou contactez-nous sur notre serveur Discord." },
         { title: "Connexion avec Discord", body: "Quand vous vous connectez, Discord nous transmet votre identifiant, votre nom d'utilisateur, votre nom d'affichage et votre avatar. Si notre serveur est configuré pour cela, nous vérifions aussi vos rôles sur le serveur Discord de SUPER PEOPLE pour savoir si vous êtes modérateur. Nous conservons votre identifiant, votre nom d'affichage, votre avatar et votre statut de modérateur dans un cookie signé sur votre appareil. Nous ne recevons ni votre adresse courriel ni votre mot de passe. Votre nom d'utilisateur est enregistré dans ce même cookie." },
-        { title: "Idées, votes et commentaires", body: "Les idées, votes et commentaires sont stockés par Reflet, le service de suggestions qui alimente notre feuille de route, avec votre identifiant Discord, votre nom d'affichage et votre avatar. Votre nom d'affichage et votre avatar sont visibles publiquement à côté de vos publications. Nous conservons aussi votre identifiant Discord, votre nom d'utilisateur, votre nom d'affichage et votre avatar avec chaque idée et chaque commentaire que vous publiez, dans une petite base de données hébergée par Upstash, afin d'afficher votre profil à côté de vos commentaires et de permettre aux modérateurs d'agir en cas d'abus. Si un modérateur bannit votre compte, votre identifiant Discord, votre nom et votre avatar restent sur notre liste de bannissements jusqu'à la levée du bannissement." },
+        { title: "Idées, votes et commentaires", body: "Les idées, votes et commentaires sont stockés par Reflet, le service de suggestions qui alimente notre roadmap, avec votre identifiant Discord, votre nom d'affichage et votre avatar. Votre nom d'affichage et votre avatar sont visibles publiquement à côté de vos publications. Nous conservons aussi votre identifiant Discord, votre nom d'utilisateur, votre nom d'affichage et votre avatar avec chaque idée et chaque commentaire que vous publiez, dans une petite base de données hébergée par Upstash, afin d'afficher votre profil à côté de vos commentaires et de permettre aux modérateurs d'agir en cas d'abus. Si un modérateur bannit votre compte, votre identifiant Discord, votre nom et votre avatar restent sur notre liste de bannissements jusqu'à la levée du bannissement." },
         { title: "Témoins (cookies)", body: "Nous utilisons seulement les témoins nécessaires à la connexion : sp_session vous garde connecté jusqu'à 30 jours, et sp_oauth sécurise la connexion pendant 10 minutes. Aucun témoin publicitaire ou de suivi, et aucun outil d'analyse." },
         { title: "Services que nous utilisons", body: "Vercel héberge ce site et traite des données techniques comme les adresses IP dans ses journaux de serveur. Discord gère la connexion. Reflet stocke les suggestions. GitHub héberge les téléchargements et le code source du launcher. Chacun a sa propre politique de confidentialité. Nous ne vendons jamais vos données et ne les utilisons pas à des fins publicitaires. Upstash stocke les informations de profil liées aux publications ainsi que la liste des bannissements." },
         { title: "Durée de conservation", body: "Votre témoin de connexion dure jusqu'à votre déconnexion, ou 30 jours au maximum. Les idées, votes et commentaires restent en ligne jusqu'à ce qu'un modérateur les supprime ou que vous nous le demandiez." },
