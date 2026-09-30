@@ -28,6 +28,7 @@ import { Modal } from "../Modal";
 type Pending = { id: string; title: string; createdAt: number; author: string | null };
 type Overview = { pending: Pending[] | null; bans: Ban[] | null; downloadBlocks?: Block[] | null; staff: StaffMember[] };
 type Tab = "review" | "bans" | "admins" | "activity" | "api";
+const tabIcons: Record<Tab, IconName> = { review: "clock", bans: "ban", admins: "shield", activity: "activity", api: "code" };
 
 const post = (url: string, body: object) =>
   fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
@@ -360,6 +361,7 @@ function AdminBody({
             className={tab === entry.key ? "is-active" : undefined}
             onClick={() => setTab(entry.key)}
           >
+            <Icon name={tabIcons[entry.key]} />
             {entry.label}
             {entry.count !== undefined && <span className="panel__count">{entry.count}</span>}
           </button>

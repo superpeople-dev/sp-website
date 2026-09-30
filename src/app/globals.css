@@ -1542,6 +1542,7 @@ button.votes__down:disabled { cursor: default; }
 }
 .admin-tabs::-webkit-scrollbar { display: none; }
 .admin-tabs button { flex: none; }
+.admin-tabs button svg { width: 15px; height: 15px; flex: none; }
 .admin-tabs button {
   display: inline-flex;
   align-items: center;
