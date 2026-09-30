@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import type { Continent, GameServer, ServerList as List } from "@/lib/servers";
+import type { Continent, GameServer, ServerList as List, ServerHistory as History } from "@/lib/servers";
 import { FilterPicker } from "../FilterPicker";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
+import { historyId, ServerHistory } from "./ServerHistory";
 
 const POLL_MS = 30_000;
 
@@ -18,12 +19,14 @@ const subscribeClock = (tick: () => void) => {
 };
 const clockNow = () => Math.floor(Date.now() / 10_000) * 10;
 
-export function ServerList({ initial }: { initial: List }) {
+export function ServerList({ initial, history }: { initial: List; history: History | null }) {
   const { locale, t } = useI18n();
   const s = t.servers;
   const [list, setList] = useState(initial);
   const initialUpdated = initial.updated;
   const [continent, setContinent] = useState<Continent | "all">("all");
+  // The server the charts show (null: the first one with a history).
+  const [charted, setCharted] = useState<string | null>(null);
   const now = useSyncExternalStore(subscribeClock, clockNow, () => null);
   const intl = localeInfo[locale].intl;
   const regions = useMemo(() => new Intl.DisplayNames([intl], { type: "region" }), [intl]);
@@ -87,7 +90,16 @@ export function ServerList({ initial }: { initial: List }) {
     [
       srv.match && s.match[srv.match],
       srv.players !== null && (srv.players === 1 ? s.onePlayer : fill(s.players, { count: String(srv.players) })),
+      srv.ping !== null && fill(s.ping, { ms: String(srv.ping) }),
     ].filter(Boolean);
+
+  // A card's chart button: that server in the charts under the list.
+  const showHistory = (name: string) => {
+    setCharted(name);
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(historyId)?.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+  };
+  const charts = new Set(history?.servers.map((srv) => srv.name));
 
   return (
     <section className="flush">
@@ -125,6 +137,17 @@ export function ServerList({ initial }: { initial: List }) {
                       <span className="server__dot" aria-hidden="true" />
                       {srv.name}
                     </h3>
+                    {charts.has(srv.name) && (
+                      <button
+                        type="button"
+                        className="server__chart"
+                        onClick={() => showHistory(srv.name)}
+                        aria-label={fill(s.showHistory, { name: srv.name })}
+                        title={fill(s.showHistory, { name: srv.name })}
+                      >
+                        <Icon name="chart" />
+                      </button>
+                    )}
                     <span className="server__status">{srv.online ? s.online : s.offline}</span>
                   </div>
                   <p className="server__where">
@@ -143,6 +166,12 @@ export function ServerList({ initial }: { initial: List }) {
             <p className="servers__empty">{s.empty}</p>
           )}
         </Reveal>
+
+        {history && (
+          <Reveal delay={0.12} y={16}>
+            <ServerHistory initial={history} servers={list.servers} selected={charted} onSelect={setCharted} />
+          </Reveal>
+        )}
       </div>
     </section>
   );

@@ -15,7 +15,7 @@ export const localeUrl = (locale: Locale, page: PagePath = "") =>
   locale === "en" && !page ? siteUrl : `${siteUrl}${localeHref(locale, page)}`;
 
 // Preview image links carry a version (?v=): the deploy's commit, plus what the image shows when it
-// changes on its own (the servers' status, an item's score). Browsers and apps like Discord keep an
+// changes on its own (an item's score). Browsers and apps like Discord keep an
 // image for hours under the same link; a new version is a new link, so they fetch the new image.
 const build = (process.env.VERCEL_GIT_COMMIT_SHA ?? "").slice(0, 7);
 const versioned = (path: string, live = "") => {
@@ -24,8 +24,7 @@ const versioned = (path: string, live = "") => {
 };
 
 // Home keeps its hand-made image; every other page has one built by app/og/[lang]/[image]/route.tsx.
-export const ogImagePath = (locale: Locale, page: PagePath = "", live = "") =>
-  versioned(page ? `/og/${locale}${page}.png` : `/og/${locale}.jpg`, live);
+export const ogImagePath = (locale: Locale, page: PagePath = "") => versioned(page ? `/og/${locale}${page}.png` : `/og/${locale}.jpg`);
 
 export function languageAlternates(absolute = false, page: PagePath = "", suffix = ""): Record<string, string> {
   const link = (l: Locale) => (absolute ? localeUrl(l, page) : localeHref(l, page)) + suffix;
@@ -94,8 +93,7 @@ export type SharedItem = {
 export const itemSuffix = (item: Pick<SharedItem, "id" | "slug">) => `/${item.id}${item.slug ? `/${item.slug}` : ""}`;
 const itemImage = (locale: Locale, item: SharedItem) => versioned(`/og/${locale}/item/${item.id}.png`, `${item.score}.${item.comments}`);
 
-// live: what the page's image shows that changes between deploys (the servers' status), for its link.
-export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null, live = ""): Metadata {
+export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedItem | null): Metadata {
   const d = dictionaries[locale];
   const t = d.seo;
   const info = localeInfo[locale];
@@ -109,7 +107,7 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
   const image = item
     ? { url: itemImage(locale, item), width: 1200, height: 630, alt: item.title, type: "image/png" }
     : sub
-      ? { url: ogImagePath(locale, page, live), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
+      ? { url: ogImagePath(locale, page), width: 1200, height: 630, alt: pageTitle, type: "image/png" }
       : { url: ogImagePath(locale), width: 1200, height: 630, alt: t.ogAlt, type: "image/jpeg" };
   return {
     metadataBase: new URL(siteUrl),

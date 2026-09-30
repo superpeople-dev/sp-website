@@ -89,6 +89,8 @@ const paths = {
     />
   ),
   play: <path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.9l10.3-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5Z" />,
+  // A line chart: a server's history (Servers page).
+  chart: <path {...stroke} strokeWidth={2} d="M4 4v16h16M7.5 15l3.5-4 3 3 5-6.5" />,
   server: (
     <g {...stroke} strokeWidth={2}>
       <rect x="3.5" y="4" width="17" height="6.5" rx="1.5" />

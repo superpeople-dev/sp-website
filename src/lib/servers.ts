@@ -2,6 +2,8 @@
 // That route never carries addresses; it answers 404 until listenServers.publicStatus is on.
 const statusUrl = process.env.SERVER_STATUS_URL || "http://64.226.112.204:8080/ds/api/listen/public";
 const REVALIDATE_SECONDS = 15;
+// The charts' samples (sp-backend lib/listen-history.js), a new point every 5 minutes at most.
+const HISTORY_REVALIDATE_SECONDS = 60;
 
 export type Mode = "any" | "solo" | "duo" | "trio" | "squad";
 export type View = "any" | "fpp" | "tpp";
@@ -15,6 +17,8 @@ export type GameServer = {
   view: View;
   match: MatchState;
   players: number | null;
+  // Round trip in ms between the backend and the server (not the visitor's own ping), while online.
+  ping: number | null;
   country: string | null;
   continent: Continent | null;
 };
@@ -29,6 +33,7 @@ type RawServer = {
   state_index?: unknown;
   map?: unknown;
   players?: unknown;
+  ping?: unknown;
   country?: unknown;
 };
 
@@ -82,6 +87,7 @@ function toServer(raw: RawServer): GameServer {
   // show only the name's region than a wrong country (backend: country= in listen-servers.txt).
   const country = named && located && named !== located ? null : found;
   const players = Number.isInteger(raw.players) && (raw.players as number) >= 0 ? (raw.players as number) : null;
+  const ping = Number.isInteger(raw.ping) && (raw.ping as number) >= 0 ? (raw.ping as number) : null;
   return {
     name,
     online,
@@ -89,6 +95,7 @@ function toServer(raw: RawServer): GameServer {
     view: views.has(raw.view as View) ? (raw.view as View) : "any",
     match: online ? matchOf(raw.state_index, raw.map) : null,
     players: online ? players : null,
+    ping: online ? ping : null,
     country,
     continent: named ?? located,
   };
@@ -106,6 +113,39 @@ export async function getServers(): Promise<ServerList | null> {
       .sort((a, b) => Number(b.online) - Number(a.online) || a.name.localeCompare(b.name));
     const updated = Number(body.d.updated);
     return { updated: Number.isFinite(updated) ? updated : Math.floor(Date.now() / 1000), servers };
+  } catch {
+    return null;
+  }
+}
+
+// The charts' periods: 5-minute points over 24 hours, 30-minute over 7 days, 2-hour over 30 days.
+export const historyRanges = ["24h", "7d", "30d"] as const;
+export type HistoryRange = (typeof historyRanges)[number];
+export const isHistoryRange = (value: unknown): value is HistoryRange => historyRanges.includes(value as HistoryRange);
+
+// One bucket: its start (unix seconds), the share of checks the server was online (0 to 1), the
+// average and the most players while online, the average ping while online. A bucket without any
+// check is not there.
+export type HistoryPoint = { t: number; up: number; players: number | null; peak: number | null; ping: number | null };
+export type ServerHistory = { range: HistoryRange; bucket: number; from: number; to: number; servers: { name: string; points: HistoryPoint[] }[] };
+
+const numberOrNull = (value: unknown) => (typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null);
+
+// Null when the backend cannot be reached, is older than the charts or has the list off.
+export async function getHistory(range: HistoryRange): Promise<ServerHistory | null> {
+  try {
+    const res = await fetch(`${statusUrl}/history?range=${range}`, { cache: "force-cache", next: { revalidate: HISTORY_REVALIDATE_SECONDS } });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { d?: { bucket?: unknown; from?: unknown; to?: unknown; servers?: unknown } };
+    const d = body.d;
+    if (!d || !Array.isArray(d.servers) || typeof d.bucket !== "number" || typeof d.from !== "number" || typeof d.to !== "number") return null;
+    const servers = (d.servers as { name?: unknown; points?: unknown }[]).map((srv) => ({
+      name: String(srv.name ?? "").trim() || "Server",
+      points: (Array.isArray(srv.points) ? (srv.points as unknown[]) : [])
+        .filter((p): p is unknown[] => Array.isArray(p) && typeof p[0] === "number" && typeof p[1] === "number")
+        .map((p) => ({ t: p[0] as number, up: p[1] as number, players: numberOrNull(p[2]), peak: numberOrNull(p[3]), ping: numberOrNull(p[4]) })),
+    }));
+    return { range, bucket: d.bucket, from: d.from, to: d.to, servers };
   } catch {
     return null;
   }

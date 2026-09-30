@@ -178,7 +178,6 @@ export type Dictionary = {
     offline: string;
     summary: string;
     allOnline: string;
-    allOperational: string;
     players: string;
     onePlayer: string;
     modes: Record<"any" | "solo" | "duo" | "trio" | "squad", string>;
@@ -191,6 +190,25 @@ export type Dictionary = {
     updated: string;
     empty: string;
     unavailable: string;
+    ping: string;
+    pingTitle: string;
+    history: string;
+    historyLead: string;
+    historyServer: string;
+    historyRange: string;
+    rangeShort: Record<"24h" | "7d" | "30d", string>;
+    rangeNames: Record<"24h" | "7d" | "30d", string>;
+    peak: string;
+    average: string;
+    uptime: string;
+    avgPing: string;
+    playersChart: string;
+    pingChart: string;
+    peakAverage: string;
+    noPing: string;
+    historyEmpty: string;
+    historyError: string;
+    showHistory: string;
   };
   admin: {
     tabActivity: string;

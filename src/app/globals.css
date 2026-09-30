@@ -1025,6 +1025,103 @@ html[lang="zh-Hans"] .ideas__filter-btn { letter-spacing: 0.02em; }
   .servers__pulse.is-on,
   .server.is-online .server__dot { animation: none; }
 }
+/* A card's chart button: that server in the history under the list. */
+.server__chart {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0 -4px 0 auto;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.server__chart svg { width: 14px; height: 14px; }
+.server__chart:hover,
+.server__chart:focus-visible { outline: none; border-color: rgba(255, 248, 244, 0.3); color: var(--paper); }
+
+/* Server history (ServerHistory). Desktop: the title left, the server and the period right, the four
+   figures in a row, the two charts side by side (from 900px: the figures two by two, the charts stacked). Phones: the title, then the
+   server and the period on one row (two rows on the smallest), the figures two by two. */
+/* html's scroll-padding already keeps it clear of the menu bar. */
+.history { display: grid; gap: 16px; margin-top: 28px; padding: 0; scroll-margin-top: 16px; }
+.history__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.history__intro { min-width: 0; }
+.history__title { margin: 0; font: 900 clamp(28px, 4vw, 40px)/1 var(--display); letter-spacing: 0.02em; text-transform: uppercase; }
+.history__lead { margin: 6px 0 0; color: var(--muted); }
+.history__controls { display: flex; flex: none; align-items: center; gap: 10px; min-width: 0; }
+.history__server { min-width: 0; max-width: 260px; }
+.history__server-btn { width: 100%; max-width: 260px; }
+.history__server-btn span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.history__server-one { cursor: default; }
+.history__body { display: grid; gap: 12px; transition: opacity 0.2s; }
+.history__body.is-loading { opacity: 0.5; }
+.history__stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.history__stat { min-width: 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.history__stat dt { overflow: hidden; color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.14em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.history__stat dd { margin: 6px 0 0; color: var(--paper); font: 700 26px/1.1 var(--display); letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; }
+.history__charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.chart { min-width: 0; margin: 0; padding: 14px 16px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.chart__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.chart__title { color: var(--paper-dim); font: 700 13px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+.chart__now { color: var(--paper); font: 700 15px var(--display); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.chart__plot { position: relative; touch-action: pan-y; }
+.chart svg { display: block; overflow: visible; }
+.chart--players { color: var(--green); }
+.chart--ping { color: #8fb0ff; }
+.chart__line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chart__dot { fill: currentColor; }
+.chart__grid { stroke: var(--line-soft); stroke-width: 1; }
+.chart__axis { fill: var(--muted); font: 600 11px var(--body); }
+/* The server was offline. */
+.chart__offline { fill: rgba(239, 68, 56, 0.1); }
+.chart__hover line { stroke: rgba(255, 248, 244, 0.35); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart__hover circle { fill: currentColor; stroke: var(--surface); stroke-width: 2; }
+.chart__tip {
+  position: absolute;
+  top: 2px;
+  z-index: 2;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: 180px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.chart__tip-time { color: var(--muted); font-size: 12px; line-height: 1.35; }
+.chart__tip b { color: var(--paper); font: 700 13px var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+@media (max-width: 900px) {
+  .history__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .history__charts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .history__head { flex-direction: column; align-items: stretch; gap: 14px; }
+  .history__controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .history__server,
+  .history__server-btn { max-width: none; }
+  .history__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .history__stat { padding: 12px 14px; }
+  .history__stat dd { font-size: 22px; }
+  .chart { padding: 12px 12px 8px; }
+}
+@media (max-width: 400px) {
+  .history__stat { padding: 10px 12px; }
+  .history__stat dt { letter-spacing: 0.08em; }
+  .history__controls { grid-template-columns: minmax(0, 1fr); }
+  .history__range { display: flex; }
+  .history__range button { flex: 1; }
+}
 .idea-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .idea {
   display: grid;
