@@ -17,6 +17,7 @@ import {
   type Permission,
   type Viewer,
 } from "@/lib/board";
+import type { Block } from "@/lib/downloads";
 import type { StaffMember } from "@/lib/staff";
 import type { Ban } from "@/lib/store";
 import { Avatar } from "../Avatar";
@@ -25,7 +26,7 @@ import { Icon, type IconName } from "../Icon";
 import { Modal } from "../Modal";
 
 type Pending = { id: string; title: string; createdAt: number; author: string | null };
-type Overview = { pending: Pending[] | null; bans: Ban[] | null; staff: StaffMember[] };
+type Overview = { pending: Pending[] | null; bans: Ban[] | null; downloadBlocks?: Block[] | null; staff: StaffMember[] };
 type Tab = "review" | "bans" | "admins" | "activity" | "api";
 
 const post = (url: string, body: object) =>
@@ -96,6 +97,14 @@ function AdminBody({
     () => new Intl.DateTimeFormat(localeInfo[locale].intl, { day: "numeric", month: "short", year: "numeric" }),
     [locale],
   );
+  const moment = useMemo(
+    () => new Intl.DateTimeFormat(localeInfo[locale].intl, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }),
+    [locale],
+  );
+  const gigabytes = useMemo(
+    () => new Intl.NumberFormat(localeInfo[locale].intl, { style: "unit", unit: "gigabyte", maximumFractionDigits: 0 }),
+    [locale],
+  );
 
   const load = useCallback(async () => {
     const response = await fetch("/api/admin/overview", { cache: "no-store" }).catch(() => null);
@@ -158,9 +167,17 @@ function AdminBody({
     drop("bans", ban.id);
   };
 
+  const unblock = async (block: Block) => {
+    setBusy(block.account);
+    const response = await post("/api/admin/downloads", { action: "unblock", account: block.account });
+    setBusy(null);
+    if (!response?.ok) return window.alert(b.actionFailed);
+    setData((current) => current && { ...current, downloadBlocks: current.downloadBlocks?.filter((entry) => entry.account !== block.account) ?? null });
+  };
+
   const tabs: { key: Tab; label: string; count?: number }[] = [
     ...(can(viewer, "review") ? [{ key: "review" as const, label: b.tabReview, count: data?.pending?.length }] : []),
-    ...(can(viewer, "bans") && data?.bans !== null ? [{ key: "bans" as const, label: b.bansOpen, count: data?.bans?.length }] : []),
+    ...(can(viewer, "bans") && data?.bans !== null ? [{ key: "bans" as const, label: b.bansOpen, count: data ? (data.bans?.length ?? 0) + (data.downloadBlocks?.length ?? 0) : undefined }] : []),
     { key: "admins", label: b.tabAdmins, count: data?.staff.length },
     ...(can(viewer, "activity") ? [{ key: "activity" as const, label: a.tabActivity }] : []),
     ...(can(viewer, "api") ? [{ key: "api" as const, label: a.tabApi }] : []),
@@ -214,6 +231,30 @@ function AdminBody({
       </ul>
     );
   };
+
+  // Download limits: players stopped from downloading the game for a day (lib/downloads.ts).
+  const blocks = () =>
+    data?.downloadBlocks?.length ? (
+      <>
+        <h3 className="bans__heading">{b.downloadBlocks}</h3>
+        <ul className="bans">
+          {data.downloadBlocks.map((block) => (
+            <li key={block.account} className="bans__row">
+              <span className="admin-review__icon" aria-hidden="true">
+                <Icon name="clock" />
+              </span>
+              <div className="bans__who">
+                <b>{block.name}</b>
+                <span>{fill(b.downloadBlocked, { amount: gigabytes.format(block.bytes / 1e9), date: moment.format(block.until) })}</span>
+              </div>
+              <button type="button" className="btn btn--sm" disabled={busy === block.account} onClick={() => void unblock(block)}>
+                {b.unblock}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </>
+    ) : null;
 
   const bans = () =>
     data?.bans?.length ? (
@@ -336,7 +377,10 @@ function AdminBody({
         ) : tab === "review" ? (
           review()
         ) : tab === "bans" ? (
-          bans()
+          <>
+            {bans()}
+            {blocks()}
+          </>
         ) : (
           staff()
         )}

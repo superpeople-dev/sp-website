@@ -2368,6 +2368,8 @@ button.votes__down:disabled { cursor: default; }
 .bans__who { display: grid; gap: 4px; min-width: 0; }
 .bans__who b { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 600; overflow-wrap: anywhere; }
 .bans__who > span { color: var(--muted); font-size: 13px; }
+/* "Download limits", under the bans in the same tab. */
+.bans__heading { margin: 22px 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 
 .skel {
   display: block;
