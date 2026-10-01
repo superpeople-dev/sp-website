@@ -211,6 +211,7 @@ export async function logAuth(event: AuthEvent, who: Player, where: "website" | 
 
 export const launcherActions = [
   "download.started",
+  "download.switched",
   "download.finished",
   "download.failed",
   "verify.ok",
@@ -225,7 +226,8 @@ export type LauncherDetails = {
   seconds?: number;
   version?: string;
   reason?: string;
-  // Where the files came from: the team's storage, or the backup copy.
+  // Where the files come from: the team's storage, or the backup copy (for "download.switched", the
+  // one that took over).
   source?: "storage" | "backup";
   // The launcher's race between the two before a big download (bytes per second; the backup at
   // 1e12 when its archive was already downloaded).
@@ -279,6 +281,7 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
   const [label, color] = (
     {
       "download.started": ["Download started", colors.blue],
+      "download.switched": ["Download switched source", colors.gold],
       "download.finished": ["Game installed", colors.green],
       "download.failed": ["Download failed", colors.red],
       "verify.ok": ["Files verified: all fine", colors.green],
@@ -300,7 +303,9 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
     add("Last hour", size);
     add("Blocked until", details.until ? stamp(details.until) : undefined);
   }
-  if (details.source && action !== "limit" && action !== "uninstalled") add("From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
+  if (details.source && action !== "limit" && action !== "uninstalled") {
+    add(action === "download.switched" ? "Now from" : "From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
+  }
   if (details.speeds) {
     const speed = (bytes: number) => (bytes >= 1e12 ? "already downloaded" : `${(bytes / 1e6).toFixed(1)} MB/s`);
     add("Speed test", `Storage ${speed(details.speeds.storage)}, backup ${speed(details.speeds.backup)}`);

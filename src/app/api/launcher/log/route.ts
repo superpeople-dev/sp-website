@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     version: typeof body.version === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(body.version) ? body.version : undefined,
     reason: typeof body.reason === "string" && body.reason.trim() ? body.reason.trim().slice(0, 300) : undefined,
     source: body.source === "backup" ? "backup" : body.source === "storage" ? "storage" : undefined,
-    speeds: action === "download.finished" || action === "verify.repaired" ? speedsOf(body.speeds) : undefined,
+    speeds: ["download.started", "download.finished", "verify.repaired"].includes(action) ? speedsOf(body.speeds) : undefined,
     hardware: extras ? hardwareOf(body.hardware) : undefined,
     location: extras ? locationOf(request) : undefined,
     // As Vercel saw the connection (lib/downloads.ts clientIp); only an address's own characters.
