@@ -18,7 +18,7 @@ export function GET() {
         method: "POST",
         path: "/api/dev/items",
         body: { title: "3-100 chars", description: "up to 2000 chars", type: "bug-report", platform: "game", status: "completed", assignee: "me" },
-        does: 'Create an item. status: open (an idea on Bugs & Ideas), planned (To do), in_progress or completed. assignee is optional; a task created in_progress is yours unless it says otherwise. Needs "manage".',
+        does: 'Create an item. status: open (an idea on Bugs & Ideas), planned (To do), in_progress or completed. assignee is optional; a task created in_progress is yours unless it says otherwise. pending: true when Reflet holds it until it is approved; it is created, shows on the site once approved, and is not to be sent again. Needs "manage".',
       },
       { method: "GET", path: "/api/dev/items/{id}", does: "One item." },
       {

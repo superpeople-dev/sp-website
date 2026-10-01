@@ -86,9 +86,10 @@ export async function POST(request: NextRequest) {
     } else if (task.status === "in_progress") {
       assignee = people.staff.find((member) => member.id === user.id) ?? null;
     }
-    const item = await createTask(user, { ...task, type: body.type as string, platform: platform?.id });
+    const { item, pending } = await createTask(user, { ...task, type: body.type as string, platform: platform?.id });
     if (assignee) await assignTask(user, item, assignee);
-    return devJson({ item: taskView(item, tags, assignee && { id: assignee.id, name: assignee.name }) }, 201);
+    // pending: created, but Reflet shows it (and finds it by id) only once it approves it; not to be created again.
+    return devJson({ item: taskView(item, tags, assignee && { id: assignee.id, name: assignee.name }), pending }, 201);
   } catch (err) {
     return failure("dev create", err);
   }

@@ -29,25 +29,52 @@ export function checkNewTask(task: NewTask) {
 }
 
 // type: an ideaTypes slug; platform: a category id (or anything else for none).
-export async function createTask(user: Actor, task: NewTask): Promise<FeedbackItem> {
+// pending: Reflet holds every item made through its API until it is approved (by its own triage, or
+// by someone in Reflet's dashboard), and answers "not found" for it until then. The item exists all
+// the same, so it is not created again; it shows on the site once Reflet approves it.
+export async function createTask(user: Actor, task: NewTask): Promise<{ item: FeedbackItem; pending: boolean }> {
   const { title, description, status } = task;
   const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
-  const typeId = types.find((type) => type.slug === task.type)?.id;
-  const platformId = categories.find((category) => category.id === task.platform)?.id;
+  const type = types.find((entry) => entry.slug === task.type);
+  const platform = categories.find((category) => category.id === task.platform);
   // Reflet no longer creates an item without a description: a task without details is created with
   // its title as the description, which is then cleared (kept if Reflet refuses).
-  const { feedbackId } = await createIdea(title, description || title, await userToken(user), typeId);
+  const { feedbackId, isApproved } = await createIdea(title, description || title, await userToken(user), type?.id);
+  const pending = isApproved === false;
   // Before the status is set: Reflet reports it as a status change (api/webhooks/reflet).
   await markCreated(feedbackId);
   await Promise.all([
     setStatus(feedbackId, status),
     rememberAuthor(feedbackId, profileOf(user)),
-    platformId ? updateTags(feedbackId, [platformId], []).catch(() => null) : null,
-    description ? null : updateIdea(feedbackId, title, "").catch(() => null),
+    platform ? updateTags(feedbackId, [platform.id], []).catch(() => null) : null,
+    // Not while it waits: Reflet's triage drops its verdict when the text changes, and the item stays held.
+    description || pending ? null : updateIdea(feedbackId, title, "").catch(() => null),
   ]);
   revalidateTag(refletTag, { expire: 0 });
   await logEvent(user, { type: "item.created", item: { id: feedbackId, title, status }, to: status, via: user.via });
-  return { ...(await getIdea(feedbackId)), status };
+  if (!pending) return { item: { ...(await getIdea(feedbackId)), status }, pending };
+  const now = Date.now();
+  const tags = [
+    type && { id: type.id, name: type.slug, slug: type.slug, color: "" },
+    platform && { id: platform.id, name: platform.name, color: platform.color },
+  ].filter((tag) => Boolean(tag)) as FeedbackItem["tags"];
+  const item: FeedbackItem = {
+    id: feedbackId,
+    title,
+    description: description || title,
+    status,
+    tags,
+    author: { isExternal: true, name: user.name, avatar: user.avatar || undefined },
+    voteCount: 1,
+    hasVoted: true,
+    commentCount: 0,
+    isPinned: false,
+    organizationStatus: null,
+    createdAt: now,
+    updatedAt: now,
+    ...(status === "completed" && { completedAt: now }),
+  };
+  return { item, pending };
 }
 
 // A new title and description, and the type and platform (tag ids; an empty one takes it off).

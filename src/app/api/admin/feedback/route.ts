@@ -38,8 +38,8 @@ async function create(user: SessionUser, body: Body) {
     return Response.json({ error: "invalid" }, { status: 400 });
   }
   try {
-    const item = await createTask(user, { title, description, status, type: String(body.type ?? ""), platform: String(body.platform ?? "") });
-    return Response.json({ item });
+    const { item, pending } = await createTask(user, { title, description, status, type: String(body.type ?? ""), platform: String(body.platform ?? "") });
+    return Response.json({ item, pending });
   } catch (error) {
     return failure("create task", error);
   }
