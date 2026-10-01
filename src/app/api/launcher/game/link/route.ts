@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
 import {
   LINK_SECONDS,
   blockOf,
@@ -9,6 +9,7 @@ import {
   reusedLink,
   spend,
 } from "@/lib/downloads";
+import { logLauncher } from "@/lib/discord";
 import { gameFileLink, signingReady } from "@/lib/s3";
 import { readSession, sameOrigin } from "@/lib/session";
 import { isBanned } from "@/lib/store";
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
     if (reused) return Response.json({ url: reused }, { headers: noStore });
     if (!user.admin) {
       const blocked = await spend(user, ip, file.size);
+      if (blocked) after(() => logLauncher("limit", user, { bytes: blocked.bytes, until: blocked.until }));
       if (blocked) return Response.json({ error: "limit", until: blocked.until }, { status: 429, headers: noStore });
     }
     const url = gameFileLink(file.path, LINK_SECONDS);

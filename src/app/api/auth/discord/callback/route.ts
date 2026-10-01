@@ -1,5 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { allPermissions, shownName } from "@/lib/board";
+import { logAuth } from "@/lib/discord";
 import { clearTrapMark, lockOut, trapMark } from "@/lib/honeypot";
 import { connectedPath, isChallenge } from "@/lib/launcher";
 import {
@@ -107,6 +108,7 @@ export async function GET(request: NextRequest) {
   if (!admin && mark) await lockOut(user, `Honeypot (before signing in): ${mark}`);
   const ban = admin ? null : await banOf(user.id);
   if (ban && (ban.lockout || launcher)) {
+    after(() => logAuth("refused", user, launcher ? "launcher" : "website", ban.lockout ? "Locked out (honeypot)" : "Banned"));
     response.headers.set("Location", new URL(launcher ? `${connectedPath}?error=banned` : "/banned", request.url).toString());
     return response;
   }
@@ -120,5 +122,7 @@ export async function GET(request: NextRequest) {
     return response;
   }
   response.cookies.set(sessionCookie, await sealSession(user), sessionCookieOptions);
+  // #discord-auth-logs. The launcher's sign-in is logged when it takes its session (api/launcher/token).
+  after(() => logAuth("signed_in", user, "website"));
   return response;
 }

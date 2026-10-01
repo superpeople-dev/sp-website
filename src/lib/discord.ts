@@ -8,8 +8,12 @@ import { siteUrl } from "./seo";
 // DISCORD_MOD_WEBHOOK_URL, meant for a private staff channel; without it those are not posted.
 // Approvals and moves are already posted by the Reflet webhook (app/api/webhooks/reflet). A deleted
 // idea or task is posted to both: the community sees it went, the staff channel keeps the record.
+// Two log channels for the staff: DISCORD_AUTH_LOG_WEBHOOK_URL (#discord-auth-logs) hears every
+// Discord sign-in and sign-out, on the website and in the launcher; DISCORD_LAUNCHER_LOG_WEBHOOK_URL
+// (#launcher-logs) what players do with the game in the launcher (download, verify, uninstall) and
+// the download limits. Without them those are not posted. Never an IP.
 
-type Channel = "community" | "moderation";
+type Channel = "community" | "moderation" | "auth" | "launcher";
 type Embed = {
   label: string;
   color: number;
@@ -19,11 +23,15 @@ type Embed = {
   fields?: { name: string; value: string; inline?: boolean }[];
   // Discord ids to ping (a comment's @mentions); nobody else is ever pinged.
   ping?: string[];
+  // A picture at the top right (the player's Discord avatar in the logs).
+  thumbnail?: string;
 };
 
 const hooks: Record<Channel, string | undefined> = {
   community: process.env.DISCORD_WEBHOOK_URL,
   moderation: process.env.DISCORD_MOD_WEBHOOK_URL,
+  auth: process.env.DISCORD_AUTH_LOG_WEBHOOK_URL,
+  launcher: process.env.DISCORD_LAUNCHER_LOG_WEBHOOK_URL,
 };
 
 // Name and picture of every post, whichever webhook it goes through. Without avatar_url Discord shows
@@ -52,6 +60,7 @@ async function post(channel: Channel, embed: Embed) {
           url: embed.url,
           description: embed.description ? clip(embed.description, 1000) : undefined,
           color: embed.color,
+          thumbnail: embed.thumbnail ? { url: embed.thumbnail } : undefined,
           fields: embed.fields?.map((field) => ({ ...field, value: clip(field.value, 1024) })),
           footer: { text: "superpeople.dev" },
           timestamp: new Date().toISOString(),
@@ -153,4 +162,105 @@ export async function announceVote(
       { name: "Score", value: String(score), inline: true },
     ],
   });
+}
+
+// ------------------------------------------------------------------- logs ---
+
+export type Player = { id: string; name: string; username?: string; avatar?: string };
+
+const playerFields = (who: Player) => [
+  { name: "Player", value: `${person(who)}\n${who.name}${who.username ? ` (@${who.username})` : ""}`, inline: true },
+  { name: "Discord ID", value: who.id, inline: true },
+];
+// Discord shows these in each reader's own time zone.
+const stamp = (ms: number, style: "F" | "R" = "F") => `<t:${Math.floor(ms / 1000)}:${style}>`;
+const now = () => `${stamp(Date.now())} (${stamp(Date.now(), "R")})`;
+const gigabytes = (bytes: number) => `${(bytes / 1e9).toFixed(bytes >= 1e10 ? 0 : 1)} GB`;
+function duration(seconds: number) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return h ? `${h} h ${m} min` : m ? `${m} min` : `${Math.round(seconds)} s`;
+}
+// Text a launcher sent: shown as is, never formatted (no links, no mentions).
+const verbatim = (text: string) => `\`\`\`\n${clip(text.replaceAll("`", "'"), 900)}\n\`\`\``;
+
+export type AuthEvent = "signed_in" | "signed_out" | "refused";
+
+// #discord-auth-logs: a Discord account signed in or out of the website or the launcher, or was
+// refused (banned).
+export async function logAuth(event: AuthEvent, who: Player, where: "website" | "launcher", reason?: string) {
+  const launcher = where === "launcher";
+  const label = {
+    signed_in: launcher ? "Connected to the launcher" : "Signed in on the website",
+    signed_out: launcher ? "Disconnected from the launcher" : "Signed out of the website",
+    refused: launcher ? "Launcher sign-in refused" : "Website sign-in refused",
+  }[event];
+  await post("auth", {
+    label,
+    color: { signed_in: colors.green, signed_out: colors.grey, refused: colors.red }[event],
+    thumbnail: who.avatar,
+    fields: [
+      ...playerFields(who),
+      { name: "Where", value: launcher ? "Launcher" : "Website", inline: true },
+      { name: "When", value: now(), inline: false },
+      ...(reason ? [{ name: "Reason", value: reason, inline: false }] : []),
+    ],
+  });
+}
+
+export const launcherActions = [
+  "download.started",
+  "download.finished",
+  "download.failed",
+  "verify.ok",
+  "verify.repaired",
+  "uninstalled",
+] as const;
+export type LauncherAction = (typeof launcherActions)[number] | "limit";
+export type LauncherDetails = {
+  files?: number;
+  bytes?: number;
+  seconds?: number;
+  version?: string;
+  reason?: string;
+  // Where the files came from: the team's storage, or the backup copy.
+  source?: "storage" | "backup";
+  // A download limit's end (Unix ms).
+  until?: number;
+};
+
+// #launcher-logs: what a player did with the game in the launcher, and the download limits.
+export async function logLauncher(action: LauncherAction, who: Player, details: LauncherDetails) {
+  const fields: { name: string; value: string; inline?: boolean }[] = [...playerFields(who)];
+  const add = (name: string, value: string | undefined, inline = true) => value && fields.push({ name, value, inline });
+  const files = details.files !== undefined ? `${details.files} file${details.files === 1 ? "" : "s"}` : undefined;
+  const size = details.bytes !== undefined ? gigabytes(details.bytes) : undefined;
+  const [label, color] = (
+    {
+      "download.started": ["Download started", colors.blue],
+      "download.finished": ["Game installed", colors.green],
+      "download.failed": ["Download failed", colors.red],
+      "verify.ok": ["Files verified: all fine", colors.green],
+      "verify.repaired": ["Files repaired", colors.gold],
+      uninstalled: ["Game uninstalled", colors.grey],
+      limit: ["Download limit reached", colors.red],
+    } as const
+  )[action];
+  if (action === "download.started") add("To download", [size, files].filter(Boolean).join(", "));
+  if (action === "download.finished") {
+    add("Downloaded", [size, files].filter(Boolean).join(", "));
+    add("Took", details.seconds !== undefined ? duration(details.seconds) : undefined);
+  }
+  if (action === "verify.ok") add("Checked", files);
+  if (action === "verify.repaired") add("Downloaded again", [files, size].filter(Boolean).join(", "));
+  if (action === "uninstalled") add("Space freed", size);
+  if (action === "limit") {
+    add("Last hour", size);
+    add("Blocked until", details.until ? stamp(details.until) : undefined);
+  }
+  if (details.source && action !== "limit" && action !== "uninstalled") add("From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
+  add("Launcher", details.version ? `v${details.version}` : undefined);
+  add("When", now(), false);
+  if (details.reason) add("Reason", verbatim(details.reason), false);
+  await post("launcher", { label, color, thumbnail: who.avatar, fields });
 }

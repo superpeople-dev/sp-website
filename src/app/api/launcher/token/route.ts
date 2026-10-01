@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
+import { logAuth } from "@/lib/discord";
 import { challengeOf, profileOfSession } from "@/lib/launcher";
 import { verifySession } from "@/lib/session";
 import { isBanned, takeLauncherLogin } from "@/lib/store";
@@ -20,6 +21,10 @@ export async function POST(request: NextRequest) {
   const user = await verifySession(login.token);
   if (!user) return Response.json({ error: "invalid" }, { status: 400 });
   // Banned on the website since the code was made: not into the launcher either.
-  if (!user.admin && (await isBanned(user.id))) return Response.json({ error: "banned" }, { status: 403 });
+  if (!user.admin && (await isBanned(user.id))) {
+    after(() => logAuth("refused", user, "launcher", "Banned"));
+    return Response.json({ error: "banned" }, { status: 403 });
+  }
+  after(() => logAuth("signed_in", user, "launcher"));
   return Response.json({ token: login.token, profile: profileOfSession(user) }, { headers: { "Cache-Control": "no-store" } });
 }

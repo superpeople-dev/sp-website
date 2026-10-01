@@ -102,6 +102,14 @@ export async function listBlocks(now = Date.now()): Promise<Block[]> {
 }
 
 // Lifts an account's block, and the one on the IP it downloaded from.
+// How many times `key` was counted this hour, this time included (the launcher's reports to
+// #launcher-logs are capped with it).
+export async function countThisHour(key: string, now = Date.now()) {
+  const counter = `sp:count:${key}:${Math.floor(now / HOUR)}`;
+  const [count] = await client().multi().incr(counter).expire(counter, 2 * 3600).exec<[number, number]>();
+  return count;
+}
+
 export async function unblock(accountId: string) {
   const block = await client().hget<Stored>(blocksKey, `account:${accountId}`);
   const keys = [`account:${accountId}`];
