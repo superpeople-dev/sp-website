@@ -5,7 +5,7 @@ import { can, type Author, type CommentView, type MediaView } from "@/lib/board"
 import { maxPings, mentionable, mentionedUsernames } from "@/lib/mentions";
 import { logEvent } from "@/lib/events";
 import { isOffensive, offensiveName } from "@/lib/moderation";
-import { addComment, deleteComment, failure, getIdea, listComments, listMedia, refletTag, userToken } from "@/lib/reflet";
+import { addComment, deleteComment, failure, getAnyIdea, listComments, listMedia, refletTag, userToken } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { ideaLimits, mediaLimits } from "@/lib/site";
 import { adminCheck, listStaff, type StaffMember } from "@/lib/staff";
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     const profile = profileOf(user);
     await rememberAuthor(id, profile);
     revalidateTag(refletTag, "max");
-    const item = await getIdea(feedbackId, 60).catch(() => null);
+    const item = await getAnyIdea(feedbackId).catch(() => null);
     // @mentions of the item's author, its commenters or an admin: their Discord post pings them.
     const named = mentionedUsernames(text);
     let mentions: { id: string; name: string }[] = [];
@@ -173,7 +173,7 @@ export async function PATCH(request: NextRequest) {
   if (!feedbackId || typeof body.off !== "boolean") return Response.json({ error: "invalid" }, { status: 400 });
   try {
     await setCommentsOff(feedbackId, body.off);
-    const item = await getIdea(feedbackId, 60).catch(() => null);
+    const item = await getAnyIdea(feedbackId).catch(() => null);
     await logEvent(user, {
       type: body.off ? "comments.off" : "comments.on",
       item: item ? { id: feedbackId, title: item.title, status: item.status } : undefined,
@@ -198,7 +198,7 @@ export async function DELETE(request: NextRequest) {
     const [comments, authors, item] = await Promise.all([
       listComments(feedbackId),
       authorsOf([commentId]),
-      getIdea(feedbackId, 60).catch(() => null),
+      getAnyIdea(feedbackId).catch(() => null),
     ]);
     const comment = flatten(comments).find((entry) => entry.id === commentId);
     if (!comment) return Response.json({ error: "missing" }, { status: 404 });

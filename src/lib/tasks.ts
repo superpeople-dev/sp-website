@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { logEvent } from "./events";
-import { createIdea, getIdea, getTags, refletTag, setStatus, updateIdea, updateTags, userToken } from "./reflet";
+import { createIdea, getAnyIdea, getTags, refletTag, setPublication, setStatus, updateIdea, updateTags, userToken, type Publication } from "./reflet";
 import type { SessionUser } from "./session";
 import { ideaLimits } from "./site";
 import type { StaffMember } from "./staff";
@@ -29,9 +29,9 @@ export function checkNewTask(task: NewTask) {
 }
 
 // type: an ideaTypes slug; platform: a category id (or anything else for none).
-// pending: Reflet holds every item made through its API until it is approved (by its own triage, or
-// by someone in Reflet's dashboard), and answers "not found" for it until then. The item exists all
-// the same, so it is not created again; it shows on the site once Reflet approves it.
+// pending: Reflet holds what its API makes until it is published (lib/reflet.ts). What an admin makes
+// is published at once; pending is true only when Reflet refused that: the item exists all the same
+// (so it is not created again) and shows on the site once it is approved in Reflet.
 export async function createTask(user: Actor, task: NewTask): Promise<{ item: FeedbackItem; pending: boolean }> {
   const { title, description, status } = task;
   const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
@@ -40,41 +40,19 @@ export async function createTask(user: Actor, task: NewTask): Promise<{ item: Fe
   // Reflet no longer creates an item without a description: a task without details is created with
   // its title as the description, which is then cleared (kept if Reflet refuses).
   const { feedbackId, isApproved } = await createIdea(title, description || title, await userToken(user), type?.id);
-  const pending = isApproved === false;
   // Before the status is set: Reflet reports it as a status change (api/webhooks/reflet).
   await markCreated(feedbackId);
+  const pending = isApproved === false && !(await setPublication(feedbackId, "approved").then(() => true, () => false));
   await Promise.all([
     setStatus(feedbackId, status),
     rememberAuthor(feedbackId, profileOf(user)),
     platform ? updateTags(feedbackId, [platform.id], []).catch(() => null) : null,
-    // Not while it waits: Reflet's triage drops its verdict when the text changes, and the item stays held.
+    // Not while it is held: Reflet's triage drops its verdict when the text changes, and the item stays held.
     description || pending ? null : updateIdea(feedbackId, title, "").catch(() => null),
   ]);
   revalidateTag(refletTag, { expire: 0 });
   await logEvent(user, { type: "item.created", item: { id: feedbackId, title, status }, to: status, via: user.via });
-  if (!pending) return { item: { ...(await getIdea(feedbackId)), status }, pending };
-  const now = Date.now();
-  const tags = [
-    type && { id: type.id, name: type.slug, slug: type.slug, color: "" },
-    platform && { id: platform.id, name: platform.name, color: platform.color },
-  ].filter((tag) => Boolean(tag)) as FeedbackItem["tags"];
-  const item: FeedbackItem = {
-    id: feedbackId,
-    title,
-    description: description || title,
-    status,
-    tags,
-    author: { isExternal: true, name: user.name, avatar: user.avatar || undefined },
-    voteCount: 1,
-    hasVoted: true,
-    commentCount: 0,
-    isPinned: false,
-    organizationStatus: null,
-    createdAt: now,
-    updatedAt: now,
-    ...(status === "completed" && { completedAt: now }),
-  };
-  return { item, pending };
+  return { item: { ...(await getAnyIdea(feedbackId)), status }, pending };
 }
 
 // A new title and description, and the type and platform (tag ids; an empty one takes it off).
@@ -82,7 +60,7 @@ export async function createTask(user: Actor, task: NewTask): Promise<{ item: Fe
 export async function editTask(feedbackId: string, edit: { title: string; description: string; typeId?: unknown; categoryId?: unknown }) {
   const { title, description } = edit;
   if (title.length < 3 || title.length > ideaLimits.titleMax || description.length > ideaLimits.description) return false;
-  const [{ categories, types }, item] = await Promise.all([getTags(), getIdea(feedbackId)]);
+  const [{ categories, types }, item] = await Promise.all([getTags(), getAnyIdea(feedbackId)]);
   const managed = new Set([...categories, ...types].map((tag) => tag.id));
   const wanted = [
     types.find((type) => type.id === edit.typeId)?.id,
@@ -96,13 +74,15 @@ export async function editTask(feedbackId: string, edit: { title: string; descri
   return true;
 }
 
-// Moves an item; from "under review" to "open" is approving it.
-export async function moveTask(user: Actor, item: FeedbackItem, to: FeedbackStatus) {
+// Moves an item; from "under review" to "open" is approving it. Approving an idea, or moving one Reflet
+// still holds out of review, publishes it (lib/reflet.ts): else nobody but the admins would see it.
+export async function moveTask(user: Actor, item: FeedbackItem & { publication?: Publication }, to: FeedbackStatus) {
   const target = { id: item.id, title: item.title, status: item.status };
   // Before the status is set: Reflet's webhook posts the change on Discord and names who did it.
   await markChangedBy(item.id, { id: user.id, name: user.name, to });
   await setStatus(item.id, to);
   const approving = item.status === "under_review" && to === "open";
+  if (to !== "under_review" && (approving || item.publication === "pending")) await setPublication(item.id, "approved");
   await logEvent(user, approving ? { type: "idea.approved", item: target, via: user.via } : { type: "item.moved", item: target, to, via: user.via });
 }
 

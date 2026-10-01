@@ -154,10 +154,25 @@ export async function setStatus(feedbackId: string, status: FeedbackStatus) {
 export const deleteIdea = (feedbackId: string) =>
   call("/api/v1/admin/feedback/delete", { method: "POST", admin: true, body: { feedbackId } });
 
+// Ideas waiting for an admin's review. With the secret key: Reflet hides what it holds (below) from the
+// public key, and a new idea is held until it is approved.
 export const listPending = async () => {
-  const { items } = await call<FeedbackListResponse>("/api/v1/feedback/list?status=under_review&sortBy=newest&limit=100");
+  const { items } = await call<FeedbackListResponse>("/api/v1/feedback/list?status=under_review&sortBy=newest&limit=100", { admin: true });
   return items;
 };
+
+// Reflet holds what is made through its API until it is published (its own triage, its dashboard, or
+// setPublication) and answers "not found" for it to the public key until then. publication: where an
+// item stands ("pending" while held).
+export type Publication = "internal" | "pending" | "approved" | "rejected";
+
+// The item even while Reflet holds it (the secret key sees those). For admins' actions and checks on
+// the server only, never for what a page shows everyone.
+export const getAnyIdea = (feedbackId: string) =>
+  call<FeedbackItem & { publication?: Publication }>(`/api/v1/feedback/item?id=${encodeURIComponent(feedbackId)}`, { admin: true });
+
+export const setPublication = (feedbackId: string, state: Publication) =>
+  call("/api/v1/admin/feedback/publication", { method: "POST", admin: true, body: { feedbackId, state } });
 
 export type RefletMedia = { _id: string; url: string | null; mimeType: string; filename: string; createdAt: number };
 

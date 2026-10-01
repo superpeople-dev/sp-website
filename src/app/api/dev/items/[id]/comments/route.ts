@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { can } from "@/lib/board";
 import { devError, devJson, devUser } from "@/lib/devapi";
 import { logEvent } from "@/lib/events";
-import { addComment, failure, getIdea, refletTag, RefletRequestError, userToken } from "@/lib/reflet";
+import { addComment, failure, getAnyIdea, refletTag, RefletRequestError, userToken } from "@/lib/reflet";
 import { ideaLimits } from "@/lib/site";
 import { commentsOff } from "@/lib/store";
 
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: RouteContext<"/api/
   const text = typeof body?.body === "string" ? body.body.trim() : "";
   if (!text || text.length > ideaLimits.comment) return devError("invalid", 400, `body is 1 to ${ideaLimits.comment} characters`);
   try {
-    const item = await getIdea(id).catch((err: unknown) => {
+    const item = await getAnyIdea(id).catch((err: unknown) => {
       if (err instanceof RefletRequestError && err.status === 404) return null;
       throw err;
     });

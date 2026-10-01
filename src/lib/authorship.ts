@@ -1,4 +1,4 @@
-import { getIdea, listPending } from "./reflet";
+import { getAnyIdea, listPending } from "./reflet";
 import type { SessionUser } from "./session";
 import { authorsOf, storeReady } from "./store";
 
@@ -14,6 +14,6 @@ export async function pendingCount(user: SessionUser) {
 export async function ownsIdea(user: SessionUser, feedbackId: string) {
   if (user.admin) return true;
   if (storeReady) return (await authorsOf([feedbackId]))[feedbackId]?.id === user.id;
-  const item = await getIdea(feedbackId);
+  const item = await getAnyIdea(feedbackId);
   return item.author?.name === user.name && Date.now() - item.createdAt < recent;
 }

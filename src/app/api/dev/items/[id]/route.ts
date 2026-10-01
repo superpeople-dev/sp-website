@@ -4,7 +4,7 @@ import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { can } from "@/lib/board";
 import { assigneeFrom, assignments, devError, devJson, devUser, platformOf, taskView, typeSlugs } from "@/lib/devapi";
 import { logEvent } from "@/lib/events";
-import { failure, getIdea, getTags, refletTag, RefletRequestError } from "@/lib/reflet";
+import { failure, getAnyIdea, getTags, refletTag, RefletRequestError } from "@/lib/reflet";
 import type { StaffMember } from "@/lib/staff";
 import { assignTask, editTask, moveTask, statuses } from "@/lib/tasks";
 
@@ -12,7 +12,7 @@ type Context = RouteContext<"/api/dev/items/[id]">;
 
 async function itemOr404(id: string): Promise<FeedbackItem | Response> {
   try {
-    return await getIdea(id);
+    return await getAnyIdea(id);
   } catch (err) {
     if (err instanceof RefletRequestError && err.status === 404) return devError("not_found", 404, "No item with this id.");
     throw err;
@@ -95,7 +95,7 @@ export async function PATCH(request: NextRequest, { params }: Context) {
       await moveTask(user, item, to);
     }
     revalidateTag(refletTag, { expire: 0 });
-    item = await getIdea(id);
+    item = await getAnyIdea(id);
     if (to !== undefined) item = { ...item, status: to };
     const changing = assignee !== undefined && (assignee?.id ?? null) !== (current?.id ?? null);
     if (changing) await assignTask(user, item, assignee ?? null);

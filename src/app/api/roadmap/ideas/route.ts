@@ -2,7 +2,7 @@ import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import { pendingCount } from "@/lib/authorship";
 import { logEvent } from "@/lib/events";
-import { createIdea, failure, getIdeaFor, getTags, refletTag, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
+import { createIdea, failure, getAnyIdea, getTags, refletTag, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { isOffensive, offensiveName } from "@/lib/moderation";
 import { ideaLimits, ideaTypes } from "@/lib/site";
@@ -42,10 +42,11 @@ export async function POST(request: NextRequest) {
       rememberAuthor(feedbackId, profileOf(user)),
       platformId ? updateTags(feedbackId, [platformId], []).catch(() => null) : null,
     ]);
-    // Like Reddit, a post starts with its author's upvote. Reflet's vote toggles, so only when the
-    // author has none yet; a failure here doesn't fail the post.
-    await getIdeaFor(feedbackId, token)
-      .then((item) => (item.hasVoted ? null : voteIdea(feedbackId, token)))
+    // Like Reddit, a post starts with its author's upvote. Reflet's vote toggles, so only when it has
+    // no vote yet (nobody else can see it: Reflet holds a new idea, which is also why it is read with
+    // the secret key); a failure here doesn't fail the post.
+    await getAnyIdea(feedbackId)
+      .then((item) => (item.voteCount ? null : voteIdea(feedbackId, token)))
       .catch(() => null);
     await logEvent(user, {
       type: "idea.posted",

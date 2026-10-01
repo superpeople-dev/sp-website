@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import type { FeedbackStatus } from "reflet-sdk";
-import { deleteIdea, failure, getIdea, refletTag, RefletRequestError } from "@/lib/reflet";
+import { deleteIdea, failure, getAnyIdea, refletTag, RefletRequestError } from "@/lib/reflet";
 import { can } from "@/lib/board";
 import { logEvent } from "@/lib/events";
 import { typeAndPlatforms } from "@/lib/kinds";
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Deleting something Reflet no longer has is done already (it can remove an item on its own).
-    const item = await getIdea(feedbackId).catch((error: unknown) => {
+    const item = await getAnyIdea(feedbackId).catch((error: unknown) => {
       if (body.action === "delete" && error instanceof RefletRequestError && error.status === 404) return null;
       throw error;
     });

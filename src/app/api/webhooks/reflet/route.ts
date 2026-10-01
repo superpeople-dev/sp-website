@@ -4,7 +4,7 @@ import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { itemPath } from "@/lib/board";
 import { identity } from "@/lib/discord";
 import { capital, typeAndPlatforms, type Kind } from "@/lib/kinds";
-import { getIdea, refletTag } from "@/lib/reflet";
+import { getAnyIdea, refletTag } from "@/lib/reflet";
 import { reporterIds } from "@/lib/reporters";
 import { siteUrl } from "@/lib/seo";
 import { authorsOf, changedBy, justCreated } from "@/lib/store";
@@ -70,7 +70,7 @@ async function reporterOf(feedback: Partial<FeedbackItem>) {
 async function votesOf(feedback: Partial<FeedbackItem>) {
   if (typeof feedback.voteCount === "number") return feedback.voteCount;
   if (!feedback.id) return null;
-  return (await getIdea(feedback.id).catch(() => null))?.voteCount ?? null;
+  return (await getAnyIdea(feedback.id).catch(() => null))?.voteCount ?? null;
 }
 
 export async function POST(request: Request) {
