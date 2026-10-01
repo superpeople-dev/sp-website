@@ -1,6 +1,24 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "sp-website", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000, "autoPort": true }
+    {
+      "name": "sp-website",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "launcher-mock",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\kapitche\\AppData\\Local\\Temp\\claude\\C--Users-kapitche-Documents-GitHub-sp-website\\657f5758-d6b3-41ea-b5a5-8313da8fa4c1\\scratchpad\\spl-storj\\node_modules\\vite\\bin\\vite.js",
+        "C:\\Users\\kapitche\\AppData\\Local\\Temp\\claude\\C--Users-kapitche-Documents-GitHub-sp-website\\657f5758-d6b3-41ea-b5a5-8313da8fa4c1\\scratchpad\\spl-storj"
+      ],
+      "port": 1420
+    }
   ]
 }
