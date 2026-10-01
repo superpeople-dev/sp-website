@@ -278,6 +278,7 @@ export const ko: Dictionary = {
     other: "기타",
     empty: "아직 완료된 작업이 없습니다.",
     completedOn: "{date} 완료",
+    createdOn: "{date} 생성",
     changelogTitle: "릴리스 노트",
     changelogEmpty: "아직 게시된 릴리스가 없습니다.",
     related: "관련",

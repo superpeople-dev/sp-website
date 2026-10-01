@@ -1733,7 +1733,10 @@ button.votes__down:disabled { cursor: default; }
 /* Roadmap cards are all the same height: a top row as tall as the votes (with or without them), a
    title of two lines, two lines of description (kept empty when there is none; line breaks become
    spaces) and one line for the date and the comments, each cut with "…". */
-.work h3 { height: 2.4em; margin: 8px 0 0; font-size: 17px; line-height: 1.2; letter-spacing: 0.03em; overflow-wrap: anywhere; }
+/* The title (one or two lines), the description (two lines, three under a one-line title: WorkCard
+   measures it), the date and the comments, one after the other: a card is as tall as what it holds. */
+.work__text { display: grid; }
+.work h3 { margin: 8px 0 0; font-size: 17px; line-height: 1.2; letter-spacing: 0.03em; overflow-wrap: anywhere; }
 .work h3 .card__open { display: block; max-width: 100%; }
 .work__title { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .work__top { display: flex; align-items: center; gap: 12px; height: 28px; }
@@ -1772,7 +1775,6 @@ button.votes__down:disabled { cursor: default; }
 .add-task:hover { border-color: var(--signal); background: rgba(239, 68, 56, 0.06); color: var(--paper); }
 .work__desc {
   display: -webkit-box;
-  height: 2.9em;
   margin: 6px 0 0;
   overflow: hidden;
   color: var(--paper-dim);
@@ -1782,8 +1784,9 @@ button.votes__down:disabled { cursor: default; }
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
-.work__foot { display: flex; align-items: center; gap: 14px; height: 20px; margin: 6px 0 0; overflow: hidden; white-space: nowrap; }
-.work__date { overflow: hidden; color: var(--muted); font-size: 14px; text-overflow: ellipsis; }
+/* When it was created (or completed), then the comments under it: both lines on every card. */
+.work__date { height: 20px; margin: 6px 0 0; overflow: hidden; color: var(--muted); font-size: 14px; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.work__foot { display: flex; align-items: center; gap: 14px; height: 20px; margin: 4px 0 0; overflow: hidden; white-space: nowrap; }
 
 .admin-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .admin-actions[aria-busy="true"] { opacity: 0.55; }

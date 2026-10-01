@@ -278,6 +278,7 @@ export const hi: Dictionary = {
     other: "अन्य",
     empty: "अभी कुछ पूरा नहीं हुआ।",
     completedOn: "{date} को पूरा हुआ",
+    createdOn: "{date} को बना",
     changelogTitle: "रिलीज़ नोट्स",
     changelogEmpty: "अभी कोई रिलीज़ पोस्ट नहीं हुई।",
     related: "संबंधित",

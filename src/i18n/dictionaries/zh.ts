@@ -276,6 +276,7 @@ export const zh: Dictionary = {
     other: "其他",
     empty: "还没有已完成的工作。",
     completedOn: "完成于 {date}",
+    createdOn: "创建于 {date}",
     changelogTitle: "版本说明",
     changelogEmpty: "还没有发布任何版本。",
     related: "相关",

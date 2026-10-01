@@ -135,7 +135,6 @@ export function PlanBoard({
                     item,
                     categories,
                     admin: canDrag ? admin : null,
-                    showDate: column.key === "completed",
                     onOpen: (mode) => open(item.id, mode),
                     onVote: authReady ? (direction) => void vote(item, direction) : undefined,
                     // Not while a vote is sending (useVote ignores those clicks): the arrows would lose their hover
@@ -178,7 +177,6 @@ export function PlanBoard({
                   item={moving}
                   categories={categories}
                   admin={null}
-                  showDate={moving.status === "completed"}
                   onOpen={() => undefined}
                   overlay
                 />

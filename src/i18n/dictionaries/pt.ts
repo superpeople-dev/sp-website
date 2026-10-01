@@ -278,6 +278,7 @@ export const pt: Dictionary = {
     other: "Outros",
     empty: "Nada concluído ainda.",
     completedOn: "Concluído em {date}",
+    createdOn: "Criado em {date}",
     changelogTitle: "Notas de versão",
     changelogEmpty: "Nenhuma versão publicada ainda.",
     related: "Relacionado",

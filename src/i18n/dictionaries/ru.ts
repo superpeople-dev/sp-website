@@ -278,6 +278,7 @@ export const ru: Dictionary = {
     other: "Другое",
     empty: "Пока ничего не готово.",
     completedOn: "Готово {date}",
+    createdOn: "Создано {date}",
     changelogTitle: "Примечания к выпускам",
     changelogEmpty: "Пока нет опубликованных версий.",
     related: "Связано",

@@ -163,6 +163,7 @@ export type Dictionary = {
     other: string;
     empty: string;
     completedOn: string;
+    createdOn: string;
     changelogTitle: string;
     changelogEmpty: string;
     related: string;

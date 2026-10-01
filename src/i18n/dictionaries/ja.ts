@@ -278,6 +278,7 @@ export const ja: Dictionary = {
     other: "その他",
     empty: "完了した作業はまだありません。",
     completedOn: "{date} 完了",
+    createdOn: "{date} 作成",
     changelogTitle: "リリースノート",
     changelogEmpty: "まだ公開されたリリースはありません。",
     related: "関連",

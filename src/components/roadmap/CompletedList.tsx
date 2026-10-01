@@ -90,7 +90,6 @@ export function CompletedList({
                   item={item}
                   categories={categories}
                   admin={can(viewer, "manage") ? admin : null}
-                  showDate
                   onOpen={(mode) => setOpened({ id: item.id, mode })}
                 />
               ))}
