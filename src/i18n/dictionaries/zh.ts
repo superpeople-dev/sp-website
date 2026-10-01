@@ -23,7 +23,7 @@ export const zh: Dictionary = {
   hero: {
     lines: [{ white: "他们停服了。" }, { red: "我们亲手重建。" }],
     title: "他们停服了。我们亲手重建。",
-    lede: "SUPER PEOPLE 停服后，我们没有放弃。我们一点一点把游戏重新带了回来，让所有人都能再次开玩，接下来做什么由社区决定。",
+    lede: "SUPER PEOPLE 停服后，我们不想让它就此消失。我们一点一点把游戏重新带了回来，让所有人都能再次开玩，接下来做什么由社区决定。",
     download: "下载启动器",
     discord: "加入 Discord",
     updated: "更新于",

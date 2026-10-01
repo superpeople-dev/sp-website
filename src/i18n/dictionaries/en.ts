@@ -23,7 +23,7 @@ export const en: Dictionary = {
   hero: {
     lines: [{ white: "They shut it" }, { white: "down.", red: "So we" }, { red: "rebuilt it." }],
     title: "They shut it down. So we rebuilt it.",
-    lede: "When SUPER PEOPLE shut down, we didn't let it die. We brought it back piece by piece so everyone can play again, and the community decides what comes next.",
+    lede: "When SUPER PEOPLE shut down, we didn't want to let it die. We brought it back piece by piece so everyone can play again, and the community decides what comes next.",
     download: "Download launcher",
     discord: "Join the Discord",
     updated: "Updated",

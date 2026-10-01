@@ -23,7 +23,7 @@ export const pt: Dictionary = {
   hero: {
     lines: [{ white: "Desligaram." }, { red: "Então nós" }, { red: "reconstruímos." }],
     title: "Desligaram. Então nós reconstruímos.",
-    lede: "Quando SUPER PEOPLE saiu do ar, não deixamos o jogo morrer. Trouxemos ele de volta peça por peça para todo mundo voltar a jogar, e a comunidade decide o que vem a seguir.",
+    lede: "Quando SUPER PEOPLE saiu do ar, não quisemos deixar o jogo morrer. Trouxemos ele de volta peça por peça para todo mundo voltar a jogar, e a comunidade decide o que vem a seguir.",
     download: "Baixar o launcher",
     discord: "Entrar no Discord",
     updated: "Atualizado",

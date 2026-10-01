@@ -23,7 +23,7 @@ export const es: Dictionary = {
   hero: {
     lines: [{ white: "Lo cerraron." }, { red: "Así que lo" }, { red: "reconstruimos." }],
     title: "Lo cerraron. Así que lo reconstruimos.",
-    lede: "Cuando SUPER PEOPLE cerró, no dejamos que muriera. Lo trajimos de vuelta pieza a pieza para que todos puedan jugar otra vez, y la comunidad decide lo que viene después.",
+    lede: "Cuando SUPER PEOPLE cerró, no quisimos dejar que muriera. Lo trajimos de vuelta pieza a pieza para que todos puedan jugar otra vez, y la comunidad decide lo que viene después.",
     download: "Descargar el launcher",
     discord: "Únete al Discord",
     updated: "Actualizado",
