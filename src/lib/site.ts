@@ -49,6 +49,6 @@ export const ideaTypes = [
   { slug: "other", icon: "other" },
 ] as const;
 
-export const legalUpdated = "2026-09-30";
+export const legalUpdated = "2026-10-01";
 
 export const galleryImages: StaticImageData[] = [powers, vehicle, jetpack, squad, fight, tower];
