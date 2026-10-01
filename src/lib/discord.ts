@@ -215,6 +215,7 @@ export const launcherActions = [
   "verify.ok",
   "verify.repaired",
   "uninstalled",
+  "game.launched",
 ] as const;
 export type LauncherAction = (typeof launcherActions)[number] | "limit";
 export type LauncherDetails = {
@@ -227,7 +228,32 @@ export type LauncherDetails = {
   source?: "storage" | "backup";
   // A download limit's end (Unix ms).
   until?: number;
+  // The player's PC, when the game starts (sp-launcher hardware.rs).
+  hardware?: Hardware;
 };
+
+export type Hardware = {
+  cpu?: string;
+  threads?: number;
+  ramGb?: number;
+  gpus?: { name: string; vramGb?: number }[];
+  os?: string;
+  screen?: string;
+  screens?: number;
+};
+
+function hardwareText(pc: Hardware) {
+  const gpus = (pc.gpus ?? []).map((gpu) => (gpu.vramGb ? `${gpu.name} (${gpu.vramGb} GB)` : gpu.name)).join(", ");
+  return [
+    pc.cpu && `CPU:    ${pc.cpu}${pc.threads ? ` (${pc.threads} threads)` : ""}`,
+    gpus && `GPU:    ${gpus}`,
+    pc.ramGb && `RAM:    ${pc.ramGb} GB`,
+    pc.os && `OS:     ${pc.os}`,
+    pc.screen && `Screen: ${pc.screen}${pc.screens && pc.screens > 1 ? ` (${pc.screens} screens)` : ""}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 // #launcher-logs: what a player did with the game in the launcher, and the download limits.
 export async function logLauncher(action: LauncherAction, who: Player, details: LauncherDetails) {
@@ -243,6 +269,7 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
       "verify.ok": ["Files verified: all fine", colors.green],
       "verify.repaired": ["Files repaired", colors.gold],
       uninstalled: ["Game uninstalled", colors.grey],
+      "game.launched": ["Game launched", colors.blue],
       limit: ["Download limit reached", colors.red],
     } as const
   )[action];
@@ -261,6 +288,7 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
   if (details.source && action !== "limit" && action !== "uninstalled") add("From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
   add("Launcher", details.version ? `v${details.version}` : undefined);
   add("When", now(), false);
+  if (details.hardware) add("Hardware", verbatim(hardwareText(details.hardware) || "unknown"), false);
   if (details.reason) add("Reason", verbatim(details.reason), false);
   await post("launcher", { label, color, thumbnail: who.avatar, fields });
 }
