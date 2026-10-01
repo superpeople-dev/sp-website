@@ -23,7 +23,7 @@ export const ko: Dictionary = {
   hero: {
     lines: [{ white: "서버가" }, { white: "꺼졌다.", red: "그래서" }, { red: "다시 만들었다." }],
     title: "서버가 꺼졌다. 그래서 다시 만들었다.",
-    lede: "슈퍼피플(SUPER PEOPLE)은 완전히 서비스를 종료했습니다. 다시 플레이할 수 있도록 서버를 처음부터 새로 만들고 있습니다.",
+    lede: "슈퍼피플(SUPER PEOPLE)이 서비스를 종료했을 때, 우리는 포기하지 않았습니다. 하나하나 다시 만들어 누구나 다시 플레이할 수 있게 했고, 앞으로의 방향은 커뮤니티가 정합니다.",
     download: "런처 다운로드",
     discord: "Discord 참여하기",
     updated: "업데이트",

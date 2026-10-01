@@ -23,7 +23,7 @@ export const fr: Dictionary = {
   hero: {
     lines: [{ white: "Ils l'ont" }, { white: "fermé.", red: "On l'a" }, { red: "reconstruit." }],
     title: "Ils l'ont fermé. On l'a reconstruit.",
-    lede: "SUPER PEOPLE a fermé pour de bon. Nous reconstruisons ses serveurs de zéro pour que vous puissiez rejouer.",
+    lede: "Quand SUPER PEOPLE a fermé, nous ne l'avons pas laissé mourir. Nous l'avons ramené pièce par pièce pour que tout le monde puisse rejouer, et la communauté décide de la suite.",
     download: "Télécharger le launcher",
     discord: "Rejoindre le Discord",
     updated: "Mis à jour",

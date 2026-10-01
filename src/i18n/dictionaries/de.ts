@@ -23,7 +23,7 @@ export const de: Dictionary = {
   hero: {
     lines: [{ white: "Abgeschaltet." }, { red: "Also bauen wir" }, { red: "es neu auf." }],
     title: "Abgeschaltet. Also bauen wir es neu auf.",
-    lede: "SUPER PEOPLE ist endgültig offline. Wir bauen die Server von Grund auf neu, damit du wieder spielen kannst.",
+    lede: "Als SUPER PEOPLE abgeschaltet wurde, ließen wir es nicht sterben. Stück für Stück haben wir es zurückgeholt, damit alle wieder spielen können, und die Community entscheidet, was als Nächstes kommt.",
     download: "Launcher herunterladen",
     discord: "Discord beitreten",
     updated: "Aktualisiert",

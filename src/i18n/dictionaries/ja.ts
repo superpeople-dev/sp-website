@@ -23,7 +23,7 @@ export const ja: Dictionary = {
   hero: {
     lines: [{ white: "サーバーは消えた。" }, { red: "だから作り直した。" }],
     title: "サーバーは消えた。だから作り直した。",
-    lede: "SUPER PEOPLE は完全にサービスを終了しました。もう一度遊べるように、私たちはサーバーをゼロから作り直しています。",
+    lede: "SUPER PEOPLE がサービスを終了しても、私たちは諦めませんでした。ひとつずつ作り直して誰もがまた遊べるようにし、これからのことはコミュニティと一緒に決めていきます。",
     download: "ランチャーをダウンロード",
     discord: "Discord に参加",
     updated: "更新",
