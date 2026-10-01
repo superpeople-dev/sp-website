@@ -371,7 +371,14 @@ h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacin
 .hero__line { display: block; overflow: hidden; white-space: nowrap; padding: 0.16em 0 0.06em; margin: -0.16em 0 -0.06em; }
 .hero__line > span { display: inline-block; }
 .hero h1 em { font-style: normal; color: var(--signal); }
-.hero__lede { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.5; color: var(--paper-dim); max-width: 660px; margin: 24px 0 32px; }
+.hero__lede { font-size: clamp(19px, 1.7vw, 22px); line-height: 1.5; color: var(--paper-dim); max-width: 660px; margin: 24px 0 32px; text-wrap: pretty; }
+/* Desktop: a narrower column, so the line under the title reads on three lines, not two long ones.
+   In em, so it holds as the font size changes. Japanese and Chinese are their own lengths. */
+@media (min-width: 1141px) {
+  .hero__lede { max-width: 19em; }
+  html[lang="ja"] .hero__lede { max-width: 21em; }
+  html[lang="zh-Hans"] .hero__lede { max-width: 15em; }
+}
 .hero__meta {
   margin-top: 20px;
   font: 600 14px var(--display);
