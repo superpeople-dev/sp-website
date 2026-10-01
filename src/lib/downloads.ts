@@ -10,6 +10,16 @@ export const gameSize = gameFiles.reduce((sum, file) => sum + file.size, 0);
 const byPath = new Map(gameFiles.map((file) => [file.path, file]));
 export const gameFile = (path: string) => byPath.get(path) ?? null;
 
+// The backup copy (app/api/launcher/game): the same files in one 7z on archive.org, which the
+// launchers before 0.4.3 downloaded whole, under \`folder\` inside it. The launcher checks what it
+// unpacks against the list above, like any other download. Every file of the list is in it at the
+// same size (checked against archive.org's listing of the archive).
+export const backup = {
+  url: "https://archive.org/download/SPShippingDev/Manifest%20%232065353802481281242.7z",
+  folder: "Manifest #2065353802481281242/",
+  size: 29_710_037_796,
+};
+
 // Download limits. Links are handed out per file, to signed-in players; what they add up to is
 // counted per Discord account and per IP over the last hour. Past twice the whole game, that
 // account and that IP get no more links for a day (an admin can lift it sooner). A link works for
