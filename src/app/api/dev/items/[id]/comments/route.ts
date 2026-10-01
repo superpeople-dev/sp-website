@@ -7,7 +7,7 @@ import { addComment, failure, getIdea, refletTag, RefletRequestError, userToken 
 import { ideaLimits } from "@/lib/site";
 import { commentsOff } from "@/lib/store";
 
-// A comment as the key's admin: where an agent says what was done ("Fixed in https://github.com/…").
+// A comment as the key's admin: where an agent says what was done.
 export async function POST(request: NextRequest, { params }: RouteContext<"/api/dev/items/[id]/comments">) {
   const { user, error } = await devUser(request);
   if (error) return error;

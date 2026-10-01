@@ -169,6 +169,13 @@ type Assignment = { id: string; by: string; at: number };
 export const assigneeOf = (itemId: string) =>
   attempt("assignee lookup", null as string | null, async (client) => (await client.hget<Assignment>(assigneesKey, itemId))?.id ?? null);
 
+// Every item that is assigned, and to whom (item id: Discord id), in one read (the developer API's lists).
+export const allAssignees = () =>
+  attempt("assignee list", {} as Record<string, string>, async (client) => {
+    const all = (await client.hgetall<Record<string, Assignment>>(assigneesKey)) ?? {};
+    return Object.fromEntries(Object.entries(all).map(([itemId, assignment]) => [itemId, assignment.id]));
+  });
+
 export async function setAssignee(itemId: string, staffId: string | null, by: string) {
   if (!redis) throw new Error("Store is not configured");
   if (staffId) await redis.hset(assigneesKey, { [itemId]: { id: staffId, by, at: Date.now() } satisfies Assignment });

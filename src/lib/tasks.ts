@@ -4,10 +4,11 @@ import { logEvent } from "./events";
 import { createIdea, getIdea, getTags, refletTag, setStatus, updateIdea, updateTags, userToken } from "./reflet";
 import type { SessionUser } from "./session";
 import { ideaLimits } from "./site";
-import { markChangedBy, markCreated, profileOf, rememberAuthor } from "./store";
+import type { StaffMember } from "./staff";
+import { addNotice, markChangedBy, markCreated, profileOf, rememberAuthor, setAssignee } from "./store";
 
 // What admins do to items, from the admin panel and the item dialog (app/api/admin/feedback) and
-// from the developer API (app/api/dev): create a task or an idea, edit one, move one. Each is posted
+// from the developer API (app/api/dev): create a task or an idea, edit one, move one, assign one. Each is posted
 // on Discord by Reflet's webhook (app/api/webhooks/reflet) and written to the activity log.
 
 export const statuses: FeedbackStatus[] = ["open", "under_review", "planned", "in_progress", "completed", "closed"];
@@ -76,4 +77,20 @@ export async function moveTask(user: Actor, item: FeedbackItem, to: FeedbackStat
   await setStatus(item.id, to);
   const approving = item.status === "under_review" && to === "open";
   await logEvent(user, approving ? { type: "idea.approved", item: target, via: user.via } : { type: "item.moved", item: target, to, via: user.via });
+}
+
+// Gives an item to an admin (one of listStaff()), or back to the whole team (null). The admin it is
+// given to finds it under their bell (not when they took it themselves).
+export async function assignTask(user: Actor, item: Pick<FeedbackItem, "id" | "title" | "status">, assignee: Pick<StaffMember, "id" | "name"> | null) {
+  const target = { id: item.id, title: item.title, status: item.status };
+  await setAssignee(item.id, assignee?.id ?? null, user.id);
+  if (assignee && assignee.id !== user.id) {
+    await addNotice(assignee.id, { type: "assigned", actor: { name: user.name, avatar: user.avatar }, item: target });
+  }
+  await logEvent(
+    user,
+    assignee
+      ? { type: "item.assigned", item: target, user: { id: assignee.id, name: assignee.name }, via: user.via }
+      : { type: "item.unassigned", item: target, via: user.via },
+  );
 }

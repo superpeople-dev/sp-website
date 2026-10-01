@@ -2,10 +2,11 @@ import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { can } from "@/lib/board";
-import { devError, devJson, devUser, platformOf, taskView, typeSlugs } from "@/lib/devapi";
+import { assigneeFrom, assignments, devError, devJson, devUser, platformOf, taskView, typeSlugs } from "@/lib/devapi";
 import { logEvent } from "@/lib/events";
 import { failure, getIdea, getTags, refletTag, RefletRequestError } from "@/lib/reflet";
-import { editTask, moveTask, statuses } from "@/lib/tasks";
+import type { StaffMember } from "@/lib/staff";
+import { assignTask, editTask, moveTask, statuses } from "@/lib/tasks";
 
 type Context = RouteContext<"/api/dev/items/[id]">;
 
@@ -25,14 +26,16 @@ export async function GET(request: NextRequest, { params }: Context) {
   try {
     const item = await itemOr404(id);
     if (item instanceof Response) return item;
-    return devJson({ item: taskView(item, await getTags()) });
+    const [tags, people] = await Promise.all([getTags(), assignments()]);
+    return devJson({ item: taskView(item, tags, people.of(id)) });
   } catch (err) {
     return failure("dev item", err);
   }
 }
 
-// Moves and/or edits: only the fields sent change. Approving an idea under review (to open) needs
-// "review", anything else "manage", as on the site.
+// Moves, edits and/or assigns: only the fields sent change. Approving an idea under review (to open)
+// needs "review", anything else "manage", as on the site. An item moved to In progress that nobody
+// has yet becomes the key's admin's, unless assignee says otherwise.
 export async function PATCH(request: NextRequest, { params }: Context) {
   const { user, error } = await devUser(request);
   if (error) return error;
@@ -42,7 +45,8 @@ export async function PATCH(request: NextRequest, { params }: Context) {
   const to = body.status as FeedbackStatus | undefined;
   if (to !== undefined && !statuses.includes(to)) return devError("invalid", 400, `status is one of: ${statuses.join(", ")}`);
   const editing = ["title", "description", "type", "platform"].some((key) => body[key] !== undefined);
-  if (to === undefined && !editing) return devError("invalid", 400, "Send status and/or title, description, type, platform.");
+  const assigning = body.assignee !== undefined;
+  if (to === undefined && !editing && !assigning) return devError("invalid", 400, "Send status, assignee and/or title, description, type, platform.");
   if (body.type !== undefined && !typeSlugs.includes(body.type as (typeof typeSlugs)[number])) {
     return devError("invalid", 400, `type is one of: ${typeSlugs.join(", ")}`);
   }
@@ -51,9 +55,22 @@ export async function PATCH(request: NextRequest, { params }: Context) {
     if (found instanceof Response) return found;
     let item = found;
     const approving = item.status === "under_review" && to === "open";
-    if ((editing || (to !== undefined && !approving)) && !can(user, "manage")) return devError("forbidden", 403, 'This needs the "manage" permission.');
+    if ((editing || assigning || (to !== undefined && !approving)) && !can(user, "manage")) {
+      return devError("forbidden", 403, 'This needs the "manage" permission.');
+    }
     if (approving && !can(user, "review") && !can(user, "manage")) return devError("forbidden", 403, 'This needs the "review" permission.');
-    const tags = await getTags();
+    const [tags, people] = await Promise.all([getTags(), assignments()]);
+
+    // undefined: the assignee stays as it is.
+    const current = people.of(id);
+    let assignee: StaffMember | null | undefined;
+    if (assigning) {
+      const named = assigneeFrom(body.assignee, user, people.staff);
+      if ("error" in named) return devError("invalid", 400, named.error);
+      assignee = named.member;
+    } else if (to === "in_progress" && item.status !== "in_progress" && !current) {
+      assignee = people.staff.find((member) => member.id === user.id);
+    }
 
     if (editing) {
       const platform = body.platform === undefined ? undefined : platformOf(body.platform, tags.categories);
@@ -79,7 +96,11 @@ export async function PATCH(request: NextRequest, { params }: Context) {
     }
     revalidateTag(refletTag, { expire: 0 });
     item = await getIdea(id);
-    return devJson({ item: taskView(to !== undefined ? { ...item, status: to } : item, tags) });
+    if (to !== undefined) item = { ...item, status: to };
+    const changing = assignee !== undefined && (assignee?.id ?? null) !== (current?.id ?? null);
+    if (changing) await assignTask(user, item, assignee ?? null);
+    const now = assignee === undefined ? current : assignee && { id: assignee.id, name: assignee.name };
+    return devJson({ item: taskView(item, tags, now) });
   } catch (err) {
     return failure("dev update", err);
   }

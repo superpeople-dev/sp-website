@@ -8,8 +8,7 @@ import { typeAndPlatforms } from "@/lib/kinds";
 import { readSession, sameOrigin, type SessionUser } from "@/lib/session";
 import { ideaLimits } from "@/lib/site";
 import { listStaff } from "@/lib/staff";
-import { addNotice, setAssignee } from "@/lib/store";
-import { createTask, editTask, moveTask, statuses } from "@/lib/tasks";
+import { assignTask, createTask, editTask, moveTask, statuses } from "@/lib/tasks";
 
 // The admin panel and the item dialog create tasks on the roadmap (the developer API may also create ideas).
 const boardStatuses: FeedbackStatus[] = ["planned", "in_progress", "completed"];
@@ -89,15 +88,7 @@ export async function POST(request: NextRequest) {
       // Only to someone who is an admin now.
       const assignee = body.assignee === null ? null : ((await listStaff()).find((member) => member.id === body.assignee) ?? null);
       if (body.assignee !== null && !assignee) return Response.json({ error: "invalid" }, { status: 400 });
-      await setAssignee(feedbackId, assignee?.id ?? null, user.id);
-      // The admin it is given to finds it under their bell (not when they took it themselves).
-      if (assignee && assignee.id !== user.id) {
-        await addNotice(assignee.id, { type: "assigned", actor: { name: user.name, avatar: user.avatar }, item: target });
-      }
-      await logEvent(
-        user,
-        assignee ? { type: "item.assigned", item: target, user: { id: assignee.id, name: assignee.name } } : { type: "item.unassigned", item: target },
-      );
+      await assignTask(user, item, assignee);
       return Response.json({ ok: true });
     } else {
       return Response.json({ error: "invalid" }, { status: 400 });

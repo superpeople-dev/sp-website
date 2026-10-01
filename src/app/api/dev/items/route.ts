@@ -1,15 +1,16 @@
 import type { NextRequest } from "next/server";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { can } from "@/lib/board";
-import { devError, devJson, devUser, plainText, platformOf, taskView, typeSlugs } from "@/lib/devapi";
+import { assigneeFrom, assignments, devError, devJson, devUser, plainText, platformOf, taskView, typeSlugs } from "@/lib/devapi";
 import { failure, getTags, listByStatus, listPending } from "@/lib/reflet";
-import { checkNewTask, createTask, statuses } from "@/lib/tasks";
+import type { StaffMember } from "@/lib/staff";
+import { assignTask, checkNewTask, createTask, statuses } from "@/lib/tasks";
 
 const defaultStatuses: FeedbackStatus[] = ["open", "planned", "in_progress"];
 const defaultLimit = 50;
 const maxLimit = 500;
 
-// GET: items by status, newest change first, filtered by type, platform and search words.
+// GET: items by status, newest change first, filtered by type, platform, assignee and search words.
 export async function GET(request: NextRequest) {
   const { user, error } = await devUser(request);
   if (error) return error;
@@ -24,10 +25,18 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(maxLimit, Math.max(1, Number(params.get("limit")) || defaultLimit));
   const words = plainText(params.get("q") ?? "").split(/\s+/).filter(Boolean);
   try {
-    const tags = await getTags();
+    const [tags, people] = await Promise.all([getTags(), assignments()]);
     const platformParam = params.get("platform");
     const platform = platformParam ? platformOf(platformParam, tags.categories) : undefined;
     if (platformParam && platform === undefined) return devError("invalid", 400, "platform is a platform id or name from GET /api/dev/meta, or other");
+    // assignee: "me", "team" (nobody's in particular) or an admin; not sent, anyone's.
+    const assigneeParam = params.get("assignee");
+    let assignedTo: string | null | undefined;
+    if (assigneeParam) {
+      const named = assigneeFrom(assigneeParam, user, people.staff);
+      if ("error" in named) return devError("invalid", 400, named.error);
+      assignedTo = named.member?.id ?? null;
+    }
     // Ideas waiting for review only for admins who review them, as on the site.
     const lists = await Promise.all(
       wanted.map((status): Promise<FeedbackItem[]> =>
@@ -36,9 +45,10 @@ export async function GET(request: NextRequest) {
     );
     const views = lists
       .flat()
-      .map((item) => taskView(item, tags))
+      .map((item) => taskView(item, tags, people.of(item.id)))
       .filter((item) => !type || item.type === type)
       .filter((item) => platform === undefined || item.platform === (platform?.name ?? null))
+      .filter((item) => assignedTo === undefined || (item.assignee?.id ?? null) === assignedTo)
       .filter((item) => {
         const text = plainText(`${item.title} ${item.description}`);
         return words.every((word) => text.includes(word));
@@ -50,7 +60,8 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: a new item, as the key's admin ("manage").
+// POST: a new item, as the key's admin ("manage"). assignee: who works on it; a task created In
+// progress is the key's admin's unless it says otherwise.
 export async function POST(request: NextRequest) {
   const { user, error } = await devUser(request, "manage");
   if (error) return error;
@@ -64,11 +75,20 @@ export async function POST(request: NextRequest) {
   if (problem === "status") return devError("invalid", 400, "status is open, planned, in_progress or completed");
   if (!typeSlugs.includes(body.type as (typeof typeSlugs)[number])) return devError("invalid", 400, `type is one of: ${typeSlugs.join(", ")}`);
   try {
-    const tags = await getTags();
+    const [tags, people] = await Promise.all([getTags(), assignments()]);
     const platform = platformOf(body.platform, tags.categories);
     if (platform === undefined) return devError("invalid", 400, "platform is a platform id or name from GET /api/dev/meta, or other");
+    let assignee: StaffMember | null = null;
+    if (body.assignee !== undefined) {
+      const named = assigneeFrom(body.assignee, user, people.staff);
+      if ("error" in named) return devError("invalid", 400, named.error);
+      assignee = named.member;
+    } else if (task.status === "in_progress") {
+      assignee = people.staff.find((member) => member.id === user.id) ?? null;
+    }
     const item = await createTask(user, { ...task, type: body.type as string, platform: platform?.id });
-    return devJson({ item: taskView(item, tags) }, 201);
+    if (assignee) await assignTask(user, item, assignee);
+    return devJson({ item: taskView(item, tags, assignee && { id: assignee.id, name: assignee.name }) }, 201);
   } catch (err) {
     return failure("dev create", err);
   }
