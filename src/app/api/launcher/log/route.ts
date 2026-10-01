@@ -15,6 +15,15 @@ const count = (value: unknown, max: number) =>
 const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
 
+// Where the player is: the country and region Vercel finds for their connection (its own headers,
+// which a client cannot set). Never the IP, never the city.
+function locationOf(request: NextRequest) {
+  const country = request.headers.get("x-vercel-ip-country")?.toUpperCase();
+  if (!country || !/^[A-Z]{2}$/.test(country)) return undefined;
+  const region = request.headers.get("x-vercel-ip-country-region")?.toUpperCase();
+  return { country, region: region && /^[A-Z0-9]{1,3}$/.test(region) ? region : undefined };
+}
+
 // The PC the game started on (sp-launcher hardware.rs): only these fields, each checked.
 function hardwareOf(value: unknown): Hardware | undefined {
   if (!value || typeof value !== "object") return undefined;
@@ -55,6 +64,7 @@ export async function POST(request: NextRequest) {
     reason: typeof body.reason === "string" && body.reason.trim() ? body.reason.trim().slice(0, 300) : undefined,
     source: body.source === "backup" ? "backup" : body.source === "storage" ? "storage" : undefined,
     hardware: action === "game.launched" ? hardwareOf(body.hardware) : undefined,
+    location: action === "game.launched" ? locationOf(request) : undefined,
   };
   after(() => logLauncher(action, user, details));
   return new Response(null, { status: 204 });

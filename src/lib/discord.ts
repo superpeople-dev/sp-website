@@ -230,7 +230,16 @@ export type LauncherDetails = {
   until?: number;
   // The player's PC, when the game starts (sp-launcher hardware.rs).
   hardware?: Hardware;
+  // Where the player is, as Vercel places their connection: ISO country, and its region's code.
+  location?: { country: string; region?: string };
 };
+
+// "🇧🇷 Brazil (SP)": the flag, the country's English name, the region's code when there is one.
+function place({ country, region }: { country: string; region?: string }) {
+  const flag = String.fromCodePoint(...[...country].map((letter) => 0x1f1e6 + letter.charCodeAt(0) - 65));
+  const name = new Intl.DisplayNames(["en"], { type: "region" }).of(country) ?? country;
+  return `${flag} ${name}${region ? ` (${region})` : ""}`;
+}
 
 export type Hardware = {
   cpu?: string;
@@ -287,6 +296,7 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
   }
   if (details.source && action !== "limit" && action !== "uninstalled") add("From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
   add("Launcher", details.version ? `v${details.version}` : undefined);
+  add("Location", details.location ? place(details.location) : undefined);
   add("When", now(), false);
   if (details.hardware) add("Hardware", verbatim(hardwareText(details.hardware) || "unknown"), false);
   if (details.reason) add("Reason", verbatim(details.reason), false);
