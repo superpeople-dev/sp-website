@@ -4,13 +4,27 @@ import { createHash, createHmac } from "node:crypto";
 // handed to signed-in players by app/api/launcher/game/link. The bucket itself is private: without
 // a link from here, nobody downloads anything. The key only needs to read that one bucket; it is
 // set in Vercel, never in the launcher.
-const endpoint = (process.env.STORJ_S3_ENDPOINT || "https://gateway.storjshare.io").replace(/\/+$/, "");
-const bucket = process.env.STORJ_BUCKET || "sp-launcher-files";
-const prefix = process.env.STORJ_PREFIX ?? "game/";
-const accessKey = process.env.STORJ_ACCESS_KEY_ID;
-const secretKey = process.env.STORJ_SECRET_ACCESS_KEY;
+// Pasted values often carry a space or a line break, which would break every signature.
+const env = (name: string) => process.env[name]?.trim() || undefined;
+const endpoint = (env("STORJ_S3_ENDPOINT") || "https://gateway.storjshare.io").replace(/\/+$/, "");
+const bucket = env("STORJ_BUCKET") || "sp-launcher-files";
+const prefix = env("STORJ_PREFIX") ?? "game/";
+const accessKey = env("STORJ_ACCESS_KEY_ID");
+const secretKey = env("STORJ_SECRET_ACCESS_KEY");
 // Storj's gateway takes any region; it only has to be the one signed.
-const region = process.env.STORJ_REGION || "us-1";
+const region = env("STORJ_REGION") || "us-1";
+
+// What the admin check (app/api/admin/storage) may say about the settings: never the key itself.
+export const storageSettings = () => ({
+  endpoint,
+  bucket,
+  prefix,
+  region,
+  accessKeyLength: accessKey?.length ?? 0,
+  secretKeyLength: secretKey?.length ?? 0,
+  // Spaces or line breaks that were pasted along with a key (now ignored).
+  pastedWhitespace: ["STORJ_ACCESS_KEY_ID", "STORJ_SECRET_ACCESS_KEY"].filter((name) => /\s/.test(process.env[name] ?? "")),
+});
 
 export const signingReady = Boolean(accessKey && secretKey);
 
