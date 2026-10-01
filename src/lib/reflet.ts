@@ -96,15 +96,36 @@ export const createIdea = (title: string, description: string, token: string, ta
     token,
   });
 
-type RefletTag = Category & { slug?: string };
+type RefletTag = Category & { slug?: string; isPublic?: boolean };
 
 const typeSlugs: readonly string[] = ideaTypes.map((type) => type.slug);
 
+// Reflet gives the public key (the boards, the launcher, /api/dev) only the tags marked public, and
+// its own type tags (Bug Report, Feature Request, ...) start private: every item would read as
+// "other". A type tag that is not public is made public, tried once per server.
+const publishing = new Set<string>();
+async function publishTypes(types: RefletTag[]) {
+  const hidden = types.filter((tag) => tag.isPublic !== true && !publishing.has(tag.id));
+  await Promise.all(
+    hidden.map(async (tag) => {
+      publishing.add(tag.id);
+      try {
+        await call("/api/v1/admin/tag/update", { method: "POST", admin: true, body: { tagId: tag.id, isPublic: true } });
+        console.info(`[reflet] made the type tag "${tag.name}" public`);
+      } catch (error) {
+        console.error(`[reflet] could not make the type tag "${tag.name}" public: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }),
+  );
+}
+
 export async function getTags(): Promise<{ categories: Category[]; types: TypeTag[] }> {
   const tags = await call<RefletTag[]>("/api/v1/admin/tags", { admin: true, cache: 300 });
+  const types = tags.filter((tag) => typeSlugs.includes(tag.slug ?? ""));
+  await publishTypes(types);
   return {
     categories: tags.filter((tag) => !typeSlugs.includes(tag.slug ?? "")).map(({ id, name, color }) => ({ id, name, color })),
-    types: tags.filter((tag) => typeSlugs.includes(tag.slug ?? "")).map((tag) => ({ id: tag.id, slug: tag.slug as IdeaType })),
+    types: types.map((tag) => ({ id: tag.id, slug: tag.slug as IdeaType })),
   };
 }
 
