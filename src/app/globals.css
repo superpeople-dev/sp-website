@@ -1544,6 +1544,8 @@ button.votes__down:disabled { cursor: default; }
   overflow-y: hidden;
   box-shadow: inset 0 -1px 0 var(--line-soft);
   scrollbar-width: none;
+  /* Its width doesn't come from its tabs: without this, a phone's panel grew as wide as all the tabs. */
+  contain: inline-size;
 }
 .admin-tabs::-webkit-scrollbar { display: none; }
 .admin-tabs button { flex: none; }
@@ -1670,7 +1672,8 @@ button.votes__down:disabled { cursor: default; }
 .tok--op { color: #ff8a80; }
 .tok--path { color: #7fd6e8; }
 .tok--key { padding: 0 2px; border-radius: 2px; background: rgba(240, 183, 25, 0.14); color: var(--gold); }
-.apisteps__agent code { max-height: 132px; overflow-y: auto; }
+/* The agent's text keeps its lines (the list of tools); it scrolls past a few. */
+.apisteps__agent code { max-height: 180px; overflow-y: auto; white-space: pre-wrap; }
 .apisteps__keyonly { justify-self: start; padding: 0; border: 0; background: none; color: var(--muted); font: 600 13px var(--body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .apisteps__keyonly:hover,
 .apisteps__keyonly:focus-visible { outline: none; color: var(--paper); }

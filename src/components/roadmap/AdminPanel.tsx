@@ -682,15 +682,28 @@ function ActivityLog() {
 
 type ApiKey = { id: string; name: string; createdAt: number; lastUsedAt: number | null };
 
-// What an admin pastes to their agent after saving a key (step 3 of the API tab). English: agents
-// read the English docs it points to (sp-docs/CLAUDE.md section 10, sp-docs/docs/ROADMAP-API.md).
-const agentPrompt =
-  "Save this to your permanent memory (for Claude Code: my user memory, ~/.claude/CLAUDE.md), so it applies to every SUPER PEOPLE repo: " +
-  "at the end of each task, once its pull request is open, record what it did on the superpeople.dev roadmap. " +
-  "Follow sp-docs/CLAUDE.md section 10 and sp-docs/docs/ROADMAP-API.md (sp-docs is next to the other repos): " +
-  "use `node sp-docs/tools/roadmap.mjs` to find the matching item and mark it done with the PR link, or add a new completed task if it's not there. " +
-  "Only use the documented /api/dev endpoints. Never print, commit or ask for the API key. If no key is set up, skip it and tell me. " +
-  "Now check that my key works: `node sp-docs/tools/roadmap.mjs whoami`.";
+// What an admin pastes to their agent after saving a key (step 3 of the API tab), whatever the agent:
+// it saves the rule where its own tool keeps instructions for every project. English: agents read the
+// English docs it points to (sp-docs/CLAUDE.md section 10, sp-docs/docs/ROADMAP-API.md).
+const agentPrompt = [
+  "Save the rule below in your permanent, global instructions, the ones your tool reads in every project, so it applies to every SUPER PEOPLE repo:",
+  "- Claude Code: `~/.claude/CLAUDE.md`",
+  "- Codex: `~/.codex/AGENTS.md`",
+  "- OpenCode: `~/.config/opencode/AGENTS.md`",
+  "- Gemini CLI: `~/.gemini/GEMINI.md`",
+  "- Cursor: a User Rule (Settings, Rules)",
+  "- Windsurf: its global rules",
+  "- GitHub Copilot: my personal custom instructions",
+  "- Aider: a conventions file listed under `read:` in `~/.aider.conf.yml`",
+  "If your tool isn't listed or you're not sure where, ask me.",
+  "",
+  "The rule: at the end of each task, once its pull request is open, record what it did on the superpeople.dev roadmap. " +
+    "Follow sp-docs/CLAUDE.md section 10 and sp-docs/docs/ROADMAP-API.md. sp-docs sits next to the other repos (from inside a repo: ../sp-docs). " +
+    "Use `node sp-docs/tools/roadmap.mjs` to find the matching item and mark it done with the PR link, or add a new completed task if it's not there. " +
+    "Only use the documented /api/dev endpoints. Never print, commit or ask for the API key. If no key is set up, skip it and tell me.",
+  "",
+  "Now check that my key works: `node sp-docs/tools/roadmap.mjs whoami`.",
+].join("\n");
 
 type System = "windows" | "unix";
 
