@@ -326,10 +326,23 @@ function AdminBody({
         <StaffDialog
           member={editing}
           onClose={() => setEditing(null)}
-          onSaved={async () => {
+          onSaved={(change) => {
             setEditing(null);
             onChange();
-            await load();
+            // Shown at once; the reload after it (the review queue from Reflet takes a moment) brings
+            // what only the server knows, like a new admin's Discord picture.
+            setData((current) => {
+              if (!current) return current;
+              if ("removed" in change) return { ...current, staff: current.staff.filter((entry) => entry.id !== change.removed) };
+              const known = current.staff.some((entry) => entry.id === change.saved.id);
+              return {
+                ...current,
+                staff: known
+                  ? current.staff.map((entry) => (entry.id === change.saved.id ? { ...entry, ...change.saved } : entry))
+                  : [...current.staff, change.saved],
+              };
+            });
+            void load();
           }}
         />
       )}
@@ -406,7 +419,8 @@ function StaffDialog({
 }: {
   member: StaffMember | "new" | null;
   onClose: () => void;
-  onSaved: () => Promise<void>;
+  // What changed, once the server has it: an admin saved (added or their permissions), or removed.
+  onSaved: (change: { saved: StaffMember } | { removed: string }) => void;
 }) {
   const { t } = useI18n();
   const a = t.admin;
@@ -437,7 +451,15 @@ function StaffDialog({
     const response = await post("/api/admin/staff", { action: "save", id: id.trim(), name: name.trim(), permissions: picked });
     setBusy(false);
     if (!response?.ok) return window.alert(b.actionFailed);
-    await onSaved();
+    onSaved({
+      saved: {
+        ...current,
+        id: id.trim(),
+        name: name.trim() || current?.name || id.trim(),
+        owner: false,
+        permissions: allPermissions.filter((permission) => picked.includes(permission)),
+      },
+    });
   };
 
   const remove = async () => {
@@ -455,7 +477,7 @@ function StaffDialog({
     const response = await post("/api/admin/staff", { action: "remove", id: current.id, name: current.name });
     setBusy(false);
     if (!response?.ok) return window.alert(b.actionFailed);
-    await onSaved();
+    onSaved({ removed: current.id });
   };
 
   return (
