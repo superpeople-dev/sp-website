@@ -47,10 +47,12 @@ export type Presign = {
   /** Seconds the link works for. */
   expires: number;
   now: Date;
+  /** More query parameters, signed too (a listing's prefix...). */
+  params?: Record<string, string>;
 };
 
 // A GET link signed with AWS Signature Version 4 in the query string ("presigned URL").
-export function presignGet({ host, path, accessKey, secretKey, region, expires, now }: Presign) {
+export function presignGet({ host, path, accessKey, secretKey, region, expires, now, params = {} }: Presign) {
   const amzDate = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const day = amzDate.slice(0, 8);
   const scope = `${day}/${region}/s3/aws4_request`;
@@ -60,6 +62,7 @@ export function presignGet({ host, path, accessKey, secretKey, region, expires, 
     ["X-Amz-Date", amzDate],
     ["X-Amz-Expires", String(expires)],
     ["X-Amz-SignedHeaders", "host"],
+    ...Object.entries(params),
   ]
     .map(([key, value]) => `${encode(key)}=${encode(value)}`)
     .sort()
@@ -70,6 +73,24 @@ export function presignGet({ host, path, accessKey, secretKey, region, expires, 
   const key = hmac(hmac(hmac(hmac(`AWS4${secretKey}`, day), region), "s3"), "aws4_request");
   const signature = createHmac("sha256", key).update(toSign).digest("hex");
   return `https://${host}${canonicalPath}?${query}&X-Amz-Signature=${signature}`;
+}
+
+// For the admin check: the buckets this key sees, or the first files it can list in the game's
+// folder. Which of these Storj refuses tells a missing permission from a wrong bucket or passphrase.
+export function storageProbe(kind: "buckets" | "list") {
+  if (!accessKey || !secretKey) throw new Error("Storj signing is not configured");
+  const url = new URL(endpoint);
+  const base = url.pathname.replace(/\/$/, "");
+  return presignGet({
+    host: url.host,
+    path: kind === "buckets" ? `${base}/` : `${base}/${bucket}`,
+    accessKey,
+    secretKey,
+    region,
+    expires: 60,
+    now: new Date(),
+    params: kind === "list" ? { "list-type": "2", prefix, "max-keys": "3" } : {},
+  });
 }
 
 // A link to one of the game's files (its path in the list, lib/game-files.json).
