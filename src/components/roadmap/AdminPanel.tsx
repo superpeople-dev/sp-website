@@ -699,7 +699,8 @@ const agentPrompt = [
   "",
   "The rule: at the end of each task, once its pull request is open, record what it did on the superpeople.dev roadmap. " +
     "Follow sp-docs/CLAUDE.md section 10 and sp-docs/docs/ROADMAP-API.md. sp-docs sits next to the other repos (from inside a repo: ../sp-docs). " +
-    "Use `node sp-docs/tools/roadmap.mjs` to find the matching item and mark it done with the PR link, or add a new completed task if it's not there. " +
+    "Use `node sp-docs/tools/roadmap.mjs` to find the matching item and mark it done, or add a new completed task if it's not there. " +
+    "Never add a pull request link to the roadmap unless I ask for it. " +
     "Only use the documented /api/dev endpoints. Never print, commit or ask for the API key. If no key is set up, skip it and tell me.",
   "",
   "Now check that my key works: `node sp-docs/tools/roadmap.mjs whoami`.",
@@ -735,7 +736,7 @@ const withCode = (text: string) =>
 
 // The admin's own API keys for the developer API (lib/apikeys.ts), set up in three steps: name a key,
 // save it on the PC where the agents run (a command with the key in it: the key is shown only then),
-// and paste a text to the agent so it records every pull request on the roadmap. Below, their keys,
+// and paste a text to the agent so it records its work on the roadmap. Below, their keys,
 // each can be revoked.
 function ApiKeys() {
   const { locale, t } = useI18n();
