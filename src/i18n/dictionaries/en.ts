@@ -160,7 +160,7 @@ export const en: Dictionary = {
       },
       {
         q: "How do I get started?",
-        a: "Get the launcher, which can download the compatible game files from archive.org and set them up for you. You don't need an existing copy of the game installed. In fact, if you do have the previous Steam version installed and updated, it won't work with this project.\n\nYou can download the launcher from GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nOnce you have the launcher, press “Connect with Discord” and sign in with your Discord account. If you had a launcher key, your account and progress come with it.\n\nWhen required, the launcher temporarily adds entries to your Windows hosts file so the game connects to the community server instead of the original Super People services. These changes are restored when the game exits.",
+        a: "Get the launcher, which can download the compatible game files from archive.org and set them up for you. You don't need an existing copy of the game installed. In fact, if you do have the previous Steam version installed and updated, it won't work with this project.\n\nYou can download the launcher from GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nThe first time you open the launcher, you'll be asked to log in with Discord. Make sure you're using launcher version 0.4.0 or higher for this. If you had a launcher key, your account and progress come with it.\n\nWhen required, the launcher temporarily adds entries to your Windows hosts file so the game connects to the community server instead of the original Super People services. These changes are restored when the game exits.",
       },
       {
         q: "Do I need to own the game or have Steam?",
@@ -185,6 +185,10 @@ export const en: Dictionary = {
       {
         q: "When is the next multiplayer playtest?",
         a: "Playtests don't currently run to a fixed schedule. When a multiplayer session is planned, we'll announce it on Discord, so keep an eye on the playtest announcements for upcoming dates and times.",
+      },
+      {
+        q: "Why is my ping so high?",
+        a: "Currently there is only one server running, in Europe. Once playtesting is over (probably in a few weeks), there will be servers in North America, South America and Asia, as long as the player base allows it.",
       },
       {
         q: "Are you adding new maps, vehicles, battle passes or other new features?",

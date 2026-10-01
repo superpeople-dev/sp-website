@@ -160,7 +160,7 @@ export const fr: Dictionary = {
       },
       {
         q: "Comment commencer ?",
-        a: "Commencez par récupérer le launcher : il peut télécharger les fichiers du jeu compatibles depuis archive.org et les installer pour vous. Pas besoin d'avoir déjà une copie du jeu installée. D'ailleurs, si vous avez installé et mis à jour l'ancienne version Steam, elle ne fonctionnera pas avec ce projet.\n\nVous pouvez télécharger le launcher sur GitHub :\nhttps://github.com/superpeople-dev/sp-launcher\n\nUne fois le launcher récupéré, cliquez sur « Connect with Discord » et connectez-vous avec votre compte Discord. Si vous aviez une clé du launcher, votre compte et votre progression vous suivent.\n\nSi nécessaire, le launcher ajoute temporairement des entrées à votre fichier hosts Windows pour que le jeu se connecte au serveur communautaire plutôt qu'aux services d'origine de Super People. Ces modifications sont annulées à la fermeture du jeu.",
+        a: "Commencez par récupérer le launcher : il peut télécharger les fichiers du jeu compatibles depuis archive.org et les installer pour vous. Pas besoin d'avoir déjà une copie du jeu installée. D'ailleurs, si vous avez installé et mis à jour l'ancienne version Steam, elle ne fonctionnera pas avec ce projet.\n\nVous pouvez télécharger le launcher sur GitHub :\nhttps://github.com/superpeople-dev/sp-launcher\n\nLa première fois que vous ouvrez le launcher, il vous demande de vous connecter avec Discord. Il vous faut pour cela la version 0.4.0 du launcher ou plus récente. Si vous aviez une clé du launcher, votre compte et votre progression vous suivent.\n\nSi nécessaire, le launcher ajoute temporairement des entrées à votre fichier hosts Windows pour que le jeu se connecte au serveur communautaire plutôt qu'aux services d'origine de Super People. Ces modifications sont annulées à la fermeture du jeu.",
       },
       {
         q: "Faut-il posséder le jeu ou avoir Steam ?",
@@ -185,6 +185,10 @@ export const fr: Dictionary = {
       {
         q: "Quand aura lieu le prochain playtest multijoueur ?",
         a: "Pour l'instant, les playtests n'ont pas de calendrier fixe. Quand une session multijoueur est prévue, nous l'annonçons sur le Discord. Gardez donc un œil sur les annonces de playtest pour connaître les prochaines dates et heures.",
+      },
+      {
+        q: "Pourquoi mon ping est-il si élevé ?",
+        a: "Pour l'instant, un seul serveur tourne, en Europe. Une fois les playtests terminés (sans doute dans quelques semaines), il y aura des serveurs en Amérique du Nord, en Amérique du Sud et en Asie, si le nombre de joueurs le permet.",
       },
       {
         q: "Allez-vous ajouter de nouvelles cartes, de nouveaux véhicules, des passes de combat ou d'autres nouveautés ?",

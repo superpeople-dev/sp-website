@@ -160,7 +160,7 @@ export const pt: Dictionary = {
       },
       {
         q: "Por onde eu começo?",
-        a: "Pegue o launcher: ele pode baixar os arquivos compatíveis do jogo no archive.org e configurar tudo para você. Você não precisa ter uma cópia do jogo já instalada. Na verdade, se você tiver a versão anterior da Steam instalada e atualizada, ela não vai funcionar com este projeto.\n\nVocê pode baixar o launcher no GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nCom o launcher em mãos, clique em “Connect with Discord” e entre com sua conta do Discord. Se você tinha uma chave do launcher, sua conta e seu progresso continuam com você.\n\nQuando necessário, o launcher adiciona temporariamente entradas ao arquivo hosts do Windows para que o jogo se conecte ao servidor da comunidade em vez dos serviços originais de Super People. Essas alterações são desfeitas quando você fecha o jogo.",
+        a: "Pegue o launcher: ele pode baixar os arquivos compatíveis do jogo no archive.org e configurar tudo para você. Você não precisa ter uma cópia do jogo já instalada. Na verdade, se você tiver a versão anterior da Steam instalada e atualizada, ela não vai funcionar com este projeto.\n\nVocê pode baixar o launcher no GitHub:\nhttps://github.com/superpeople-dev/sp-launcher\n\nNa primeira vez que você abrir o launcher, ele vai pedir para você entrar com o Discord. Para isso, use a versão 0.4.0 do launcher ou mais recente. Se você tinha uma chave do launcher, sua conta e seu progresso continuam com você.\n\nQuando necessário, o launcher adiciona temporariamente entradas ao arquivo hosts do Windows para que o jogo se conecte ao servidor da comunidade em vez dos serviços originais de Super People. Essas alterações são desfeitas quando você fecha o jogo.",
       },
       {
         q: "Preciso ter o jogo ou a Steam?",
@@ -185,6 +185,10 @@ export const pt: Dictionary = {
       {
         q: "Quando é o próximo playtest multijogador?",
         a: "Por enquanto, os playtests não seguem um calendário fixo. Quando uma sessão multijogador for marcada, vamos anunciar no Discord, então fique de olho nos anúncios de playtest para saber as próximas datas e horários.",
+      },
+      {
+        q: "Por que meu ping está tão alto?",
+        a: "No momento, só há um servidor rodando, na Europa. Quando os playtests terminarem (provavelmente em algumas semanas), haverá servidores na América do Norte, na América do Sul e na Ásia, se a quantidade de jogadores permitir.",
       },
       {
         q: "Vocês vão adicionar novos mapas, veículos, passes de batalha ou outras funções novas?",
