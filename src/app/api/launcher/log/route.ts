@@ -47,6 +47,15 @@ function hardwareOf(value: unknown): Hardware | undefined {
   };
 }
 
+// The launcher's race between the storage and the backup: two speeds in bytes per second.
+function speedsOf(value: unknown) {
+  if (!value || typeof value !== "object") return undefined;
+  const speeds = value as Record<string, unknown>;
+  const storage = count(speeds.storage, 1e12);
+  const backup = count(speeds.backup, 1e12);
+  return storage !== undefined && backup !== undefined ? { storage, backup } : undefined;
+}
+
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) return new Response(null, { status: 403 });
   const user = await readSession(request);
@@ -66,6 +75,7 @@ export async function POST(request: NextRequest) {
     version: typeof body.version === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(body.version) ? body.version : undefined,
     reason: typeof body.reason === "string" && body.reason.trim() ? body.reason.trim().slice(0, 300) : undefined,
     source: body.source === "backup" ? "backup" : body.source === "storage" ? "storage" : undefined,
+    speeds: action === "download.finished" || action === "verify.repaired" ? speedsOf(body.speeds) : undefined,
     hardware: extras ? hardwareOf(body.hardware) : undefined,
     location: extras ? locationOf(request) : undefined,
     // As Vercel saw the connection (lib/downloads.ts clientIp); only an address's own characters.

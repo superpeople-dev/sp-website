@@ -227,6 +227,9 @@ export type LauncherDetails = {
   reason?: string;
   // Where the files came from: the team's storage, or the backup copy.
   source?: "storage" | "backup";
+  // The launcher's race between the two before a big download (bytes per second; the backup at
+  // 1e12 when its archive was already downloaded).
+  speeds?: { storage: number; backup: number };
   // A download limit's end (Unix ms).
   until?: number;
   // The player's PC, when the game starts (sp-launcher hardware.rs).
@@ -298,6 +301,10 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
     add("Blocked until", details.until ? stamp(details.until) : undefined);
   }
   if (details.source && action !== "limit" && action !== "uninstalled") add("From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
+  if (details.speeds) {
+    const speed = (bytes: number) => (bytes >= 1e12 ? "already downloaded" : `${(bytes / 1e6).toFixed(1)} MB/s`);
+    add("Speed test", `Storage ${speed(details.speeds.storage)}, backup ${speed(details.speeds.backup)}`);
+  }
   add("Launcher", details.version ? `v${details.version}` : undefined);
   add("Location", details.location ? place(details.location) : undefined);
   // Behind a spoiler: shown on a click, not to whoever glances at the channel.
