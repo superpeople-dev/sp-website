@@ -1,5 +1,4 @@
 import { Redis } from "@upstash/redis";
-import type { NextRequest } from "next/server";
 import list from "./game-files.json";
 
 // The game's files, which the launcher downloads one by one (app/api/launcher/game). Made by
@@ -45,12 +44,6 @@ const linkKey = (userId: string, sha256: string) => `sp:dl:link:${process.env.VE
 type Stored = { account: string; name: string; ip: string; bytes: number; at: number; until: number };
 // What admins see: whose download was stopped, not from which IP.
 export type Block = Omit<Stored, "ip">;
-
-// The player's IP as Vercel saw it (its own headers, which a client cannot set).
-export function clientIp(request: NextRequest) {
-  const forwarded = request.headers.get("x-vercel-forwarded-for") || request.headers.get("x-forwarded-for") || "";
-  return forwarded.split(",")[0].trim() || request.headers.get("x-real-ip") || "unknown";
-}
 
 function client() {
   if (!redis) throw new Error("Store is not configured");

@@ -1,7 +1,8 @@
 import { after, type NextRequest } from "next/server";
 import { launcherActions, logLauncher, type Hardware, type LauncherAction, type LauncherDetails } from "@/lib/discord";
 import { choiceOf } from "@/lib/consentstore";
-import { clientIp, countThisHour, limitsReady } from "@/lib/downloads";
+import { clientIp, clientLocation } from "@/lib/clientip";
+import { countThisHour, limitsReady } from "@/lib/downloads";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // What a signed-in player did with the game in the launcher (download, verify, uninstall, starting
@@ -15,15 +16,6 @@ const count = (value: unknown, max: number) =>
 // One line of text from the player's PC (a processor or graphics card name), plain and short.
 const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
-
-// Where the player is: the country and region Vercel finds for their connection (its own headers,
-// which a client cannot set). Never the city.
-function locationOf(request: NextRequest) {
-  const country = request.headers.get("x-vercel-ip-country")?.toUpperCase();
-  if (!country || !/^[A-Z]{2}$/.test(country)) return undefined;
-  const region = request.headers.get("x-vercel-ip-country-region")?.toUpperCase();
-  return { country, region: region && /^[A-Z0-9]{1,3}$/.test(region) ? region : undefined };
-}
 
 // The PC the game started on (sp-launcher hardware.rs): only these fields, each checked.
 function hardwareOf(value: unknown): Hardware | undefined {
@@ -77,8 +69,8 @@ export async function POST(request: NextRequest) {
     source: body.source === "backup" ? "backup" : body.source === "storage" ? "storage" : undefined,
     speeds: ["download.started", "download.finished", "verify.repaired"].includes(action) ? speedsOf(body.speeds) : undefined,
     hardware: extras ? hardwareOf(body.hardware) : undefined,
-    location: extras ? locationOf(request) : undefined,
-    // As Vercel saw the connection (lib/downloads.ts clientIp); only an address's own characters.
+    // The player's own, not the Cloudflare server in front of the site (lib/clientip.ts).
+    location: extras ? clientLocation(request) : undefined,
     ip: extras ? [clientIp(request)].find((ip) => /^[0-9a-fA-F:.]{3,45}$/.test(ip)) : undefined,
   };
   after(() => logLauncher(action, user, details));

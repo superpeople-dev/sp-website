@@ -2,13 +2,13 @@ import { after, type NextRequest } from "next/server";
 import {
   LINK_SECONDS,
   blockOf,
-  clientIp,
   gameFile,
   keepLink,
   limitsReady,
   reusedLink,
   spend,
 } from "@/lib/downloads";
+import { clientIp } from "@/lib/clientip";
 import { logLauncher } from "@/lib/discord";
 import { gameFileLink, signingReady } from "@/lib/s3";
 import { readSession, sameOrigin } from "@/lib/session";
