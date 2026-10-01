@@ -10,8 +10,9 @@ import { siteUrl } from "./seo";
 // idea or task is posted to both: the community sees it went, the staff channel keeps the record.
 // Two log channels for the staff: DISCORD_AUTH_LOG_WEBHOOK_URL (#discord-auth-logs) hears every
 // Discord sign-in and sign-out, on the website and in the launcher; DISCORD_LAUNCHER_LOG_WEBHOOK_URL
-// (#launcher-logs) what players do with the game in the launcher (download, verify, uninstall) and
-// the download limits. Without them those are not posted. Never an IP.
+// (#launcher-logs) what players do with the game in the launcher (download, verify, uninstall,
+// starting the game) and the download limits. Without them those are not posted. A player's IP is
+// only on "Game launched", behind a spoiler.
 
 type Channel = "community" | "moderation" | "auth" | "launcher";
 type Embed = {
@@ -232,6 +233,8 @@ export type LauncherDetails = {
   hardware?: Hardware;
   // Where the player is, as Vercel places their connection: ISO country, and its region's code.
   location?: { country: string; region?: string };
+  // The player's IP, for the team to match accounts and stop abuse.
+  ip?: string;
 };
 
 // "🇧🇷 Brazil (SP)": the flag, the country's English name, the region's code when there is one.
@@ -297,6 +300,8 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
   if (details.source && action !== "limit" && action !== "uninstalled") add("From", details.source === "backup" ? "Backup (archive.org)" : "Storage (Storj)");
   add("Launcher", details.version ? `v${details.version}` : undefined);
   add("Location", details.location ? place(details.location) : undefined);
+  // Behind a spoiler: shown on a click, not to whoever glances at the channel.
+  add("IP", details.ip ? `||\`${details.ip}\`||` : undefined);
   add("When", now(), false);
   if (details.hardware) add("Hardware", verbatim(hardwareText(details.hardware) || "unknown"), false);
   if (details.reason) add("Reason", verbatim(details.reason), false);

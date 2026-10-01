@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { fill, localeInfo, type Locale } from "@/i18n/config";
 import type { LegalDoc } from "@/i18n/types";
 import { contactEmail, legalUpdated } from "@/lib/site";
@@ -15,7 +16,20 @@ function withEmail(text: string) {
   );
 }
 
-export function LegalPage({ title, updated, doc, locale }: { title: string; updated: string; doc: LegalDoc; locale: Locale }) {
+// children: shown under the introduction (the privacy policy's data choice).
+export function LegalPage({
+  title,
+  updated,
+  doc,
+  locale,
+  children,
+}: {
+  title: string;
+  updated: string;
+  doc: LegalDoc;
+  locale: Locale;
+  children?: ReactNode;
+}) {
   const date = new Intl.DateTimeFormat(localeInfo[locale].intl, {
     day: "numeric",
     month: "long",
@@ -33,6 +47,7 @@ export function LegalPage({ title, updated, doc, locale }: { title: string; upda
       <section className="flush">
         <div className="wrap legal">
           <p className="legal__intro">{doc.intro}</p>
+          {children}
           {doc.sections.map((section) => (
             <div key={section.title} className="legal__section">
               <h2>{section.title}</h2>

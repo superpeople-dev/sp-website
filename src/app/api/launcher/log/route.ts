@@ -1,6 +1,7 @@
 import { after, type NextRequest } from "next/server";
 import { launcherActions, logLauncher, type Hardware, type LauncherAction, type LauncherDetails } from "@/lib/discord";
-import { countThisHour, limitsReady } from "@/lib/downloads";
+import { choiceOf } from "@/lib/consentstore";
+import { clientIp, countThisHour, limitsReady } from "@/lib/downloads";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // What a signed-in player did with the game in the launcher (download, verify, uninstall, starting
@@ -16,7 +17,7 @@ const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
 
 // Where the player is: the country and region Vercel finds for their connection (its own headers,
-// which a client cannot set). Never the IP, never the city.
+// which a client cannot set). Never the city.
 function locationOf(request: NextRequest) {
   const country = request.headers.get("x-vercel-ip-country")?.toUpperCase();
   if (!country || !/^[A-Z]{2}$/.test(country)) return undefined;
@@ -56,6 +57,8 @@ export async function POST(request: NextRequest) {
   if (limitsReady && (await countThisHour(`launcher-log:${user.id}`).catch(() => 0)) > PER_HOUR) {
     return Response.json({ error: "limit" }, { status: 429 });
   }
+  // Declined in the data pop-up (lib/consent.ts): no hardware, location or IP for this account.
+  const extras = action === "game.launched" && (await choiceOf(user.id)) !== "declined";
   const details: LauncherDetails = {
     files: count(body.files, 100_000),
     bytes: count(body.bytes, 1e12),
@@ -63,8 +66,10 @@ export async function POST(request: NextRequest) {
     version: typeof body.version === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(body.version) ? body.version : undefined,
     reason: typeof body.reason === "string" && body.reason.trim() ? body.reason.trim().slice(0, 300) : undefined,
     source: body.source === "backup" ? "backup" : body.source === "storage" ? "storage" : undefined,
-    hardware: action === "game.launched" ? hardwareOf(body.hardware) : undefined,
-    location: action === "game.launched" ? locationOf(request) : undefined,
+    hardware: extras ? hardwareOf(body.hardware) : undefined,
+    location: extras ? locationOf(request) : undefined,
+    // As Vercel saw the connection (lib/downloads.ts clientIp); only an address's own characters.
+    ip: extras ? [clientIp(request)].find((ip) => /^[0-9a-fA-F:.]{3,45}$/.test(ip)) : undefined,
   };
   after(() => logLauncher(action, user, details));
   return new Response(null, { status: 204 });

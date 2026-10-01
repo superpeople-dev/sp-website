@@ -10,6 +10,7 @@ import {
   Sofia_Sans_Condensed,
 } from "next/font/google";
 import { notFound } from "next/navigation";
+import { Consent } from "@/components/Consent";
 import { MotionProvider } from "@/components/motion";
 import { ScrollReset } from "@/components/ScrollReset";
 import { isLocale, localeInfo, locales } from "@/i18n/config";
@@ -68,6 +69,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <I18nProvider locale={lang} t={getDictionary(lang)}>
           <MotionProvider>{children}</MotionProvider>
           <ScrollReset />
+          <Consent />
         </I18nProvider>
       </body>
     </html>

@@ -378,6 +378,20 @@ export type Dictionary = {
     termsDoc: LegalDoc;
     privacyDoc: LegalDoc;
   };
+  // The data pop-up (components/Consent.tsx) and the privacy policy's choice.
+  consent: {
+    title: string;
+    body: string;
+    points: string[];
+    declineNote: string;
+    more: string;
+    accept: string;
+    decline: string;
+    change: string;
+    statusAccepted: string;
+    statusDeclined: string;
+    statusNone: string;
+  };
   band: { title: string; lead: string };
   footer: { disclaimer: string };
   seo: {

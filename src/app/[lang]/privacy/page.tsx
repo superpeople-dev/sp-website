@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ConsentStatus } from "@/components/Consent";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { LegalPage } from "@/components/LegalPage";
@@ -26,7 +27,9 @@ export default async function PrivacyPage({ params }: PageProps<"/[lang]/privacy
       <JsonLd data={pageStructuredData(lang, "/privacy")} />
       <Nav downloadUrl={release.downloadUrl} page="/privacy" />
       <main>
-        <LegalPage title={t.legal.privacy} updated={t.legal.updated} doc={t.legal.privacyDoc} locale={lang} />
+        <LegalPage title={t.legal.privacy} updated={t.legal.updated} doc={t.legal.privacyDoc} locale={lang}>
+          <ConsentStatus />
+        </LegalPage>
       </main>
       <Footer t={t} locale={lang} />
     </>

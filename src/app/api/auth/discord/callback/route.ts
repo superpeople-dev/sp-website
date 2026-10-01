@@ -1,5 +1,7 @@
 import { after, NextResponse, type NextRequest } from "next/server";
 import { allPermissions, shownName } from "@/lib/board";
+import { consentCookie, parseChoice } from "@/lib/consent";
+import { saveChoice } from "@/lib/consentstore";
 import { logAuth } from "@/lib/discord";
 import { clearTrapMark, lockOut, trapMark } from "@/lib/honeypot";
 import { connectedPath, isChallenge } from "@/lib/launcher";
@@ -113,6 +115,9 @@ export async function GET(request: NextRequest) {
     return response;
   }
   await remember(user).catch(() => null);
+  // The data choice made on this device before signing in now belongs to the account too.
+  const choice = parseChoice(request.cookies.get(consentCookie)?.value);
+  if (choice) await saveChoice(user.id, choice).catch(() => null);
   if (launcher) {
     const handoff = crypto.randomUUID();
     const saved = await saveLauncherLogin(handoff, { token: await sealSession(user), challenge })
