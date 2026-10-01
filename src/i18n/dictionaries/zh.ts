@@ -143,6 +143,10 @@ export const zh: Dictionary = {
   },
   faq: {
     title: "常见问题",
+    short: "常见问题",
+    lead: "关于重新游玩 SUPER PEOPLE 的一切：启动器、服务器、你的账号，以及如何帮忙。",
+    seoTitle: "常见问题",
+    seoDescription: "关于 SUPER PEOPLE 复兴项目的解答：如何下载和游玩、启动器、服务器、你的账号、测试以及如何帮助项目。",
     items: [
       {
         q: "免费吗？",

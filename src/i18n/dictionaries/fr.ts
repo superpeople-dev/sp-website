@@ -145,6 +145,10 @@ export const fr: Dictionary = {
   },
   faq: {
     title: "Questions fréquentes",
+    short: "FAQ",
+    lead: "Tout pour rejouer à SUPER PEOPLE : le launcher, les serveurs, votre compte et comment aider.",
+    seoTitle: "Foire aux questions",
+    seoDescription: "Réponses sur le revival de SUPER PEOPLE : télécharger et jouer, le launcher, les serveurs, votre compte, les playtests et comment aider le projet.",
     items: [
       {
         q: "C'est gratuit ?",

@@ -145,6 +145,10 @@ export const ja: Dictionary = {
   },
   faq: {
     title: "よくある質問",
+    short: "よくある質問",
+    lead: "SUPER PEOPLE をもう一度遊ぶためのすべて：ランチャー、サーバー、アカウント、そして協力する方法。",
+    seoTitle: "よくある質問",
+    seoDescription: "SUPER PEOPLE リバイバルについての回答：ダウンロードと遊び方、ランチャー、サーバー、アカウント、プレイテスト、プロジェクトへの協力方法。",
     items: [
       {
         q: "無料ですか？",

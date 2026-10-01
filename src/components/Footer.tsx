@@ -13,6 +13,7 @@ export function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
         <Image src={logo} alt="" style={{ height: 22, width: "auto" }} />
         <p>{t.footer.disclaimer}</p>
         <nav className="footer__links" aria-label={t.nav.sections}>
+          <Link href={localeHref(locale, "/faq")}>{t.faq.short}</Link>
           <Link href={localeHref(locale, "/terms")}>{t.legal.terms}</Link>
           <Link href={localeHref(locale, "/privacy")}>{t.legal.privacy}</Link>
           <a className="footer__discord" href={site.discord} target="_blank" rel="noopener">

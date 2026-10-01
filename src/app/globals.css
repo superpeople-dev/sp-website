@@ -2502,6 +2502,15 @@ button.votes__down:disabled { cursor: default; }
   transition: color 0.2s;
 }
 .faq__q:hover { color: var(--signal-hi); }
+/* The FAQ page (FaqList): the same questions as <details>, the answers in the page. */
+.faq--page { margin-top: 0; }
+.faq--page summary { list-style: none; }
+.faq--page summary::-webkit-details-marker { display: none; }
+.faq--page summary:focus-visible { outline: none; color: var(--signal-hi); }
+.faq--page h2 { margin: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; }
+.faq--page .faq__icon { transition: transform 0.25s; }
+.faq--page details[open] .faq__icon { transform: rotate(45deg); }
+.faq--page details { scroll-margin-top: 16px; }
 .faq__icon { flex: none; font: 400 32px/1 var(--display); color: var(--signal); }
 .faq__a { overflow: hidden; }
 .faq__text { max-width: 900px; padding-bottom: 22px; color: var(--paper-dim); }

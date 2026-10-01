@@ -145,6 +145,10 @@ export const en: Dictionary = {
   },
   faq: {
     title: "Common questions",
+    short: "FAQ",
+    lead: "Everything about playing SUPER PEOPLE again: the launcher, the servers, your account, and how to help.",
+    seoTitle: "Frequently Asked Questions",
+    seoDescription: "Answers about the SUPER PEOPLE revival: how to download and play, the launcher, the servers, your account, playtests and how to help the project.",
     items: [
       {
         q: "Is it free?",

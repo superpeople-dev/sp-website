@@ -95,7 +95,7 @@ export type Dictionary = {
     shareText: string;
     github: string;
   };
-  faq: { title: string; items: { q: string; a: string }[] };
+  faq: { title: string; short: string; lead: string; seoTitle: string; seoDescription: string; items: { q: string; a: string }[] };
   ideas: {
     title: string;
     lead: string;

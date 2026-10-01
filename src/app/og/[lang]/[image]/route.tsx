@@ -16,6 +16,7 @@ const pages: Record<string, Page> = {
   "bugs-and-ideas": { art: "powers", title: (d) => d.ideas.title, line: (d) => d.nav.ideasHint },
   roadmap: { art: "vehicle", title: (d) => d.plan.title, line: (d) => d.nav.roadmapHint },
   completed: { art: "tower", title: (d) => d.completed.title, line: (d) => d.nav.completedHint },
+  faq: { art: "jetpack", title: (d) => d.faq.title },
   terms: { art: "fight", title: (d) => d.legal.terms },
   privacy: { art: "jetpack", title: (d) => d.legal.privacy },
 };

@@ -45,6 +45,8 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
       return { title: d.plan.seoTitle, description: d.plan.seoDescription };
     case "/completed":
       return { title: d.completed.seoTitle, description: d.completed.seoDescription };
+    case "/faq":
+      return { title: d.faq.seoTitle, description: d.faq.seoDescription };
     case "/terms":
       return { title: d.legal.terms, description: d.legal.termsDescription };
     case "/privacy":
@@ -64,6 +66,8 @@ function pageName(locale: Locale, page: Exclude<PagePath, "">) {
       return d.nav.roadmap;
     case "/completed":
       return d.nav.completed;
+    case "/faq":
+      return d.faq.short;
     case "/terms":
       return d.legal.terms;
     case "/privacy":
@@ -178,7 +182,7 @@ export function pageStructuredData(locale: Locale, page: Exclude<PagePath, "">, 
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": board && !item ? "CollectionPage" : "WebPage",
+        "@type": board && !item ? "CollectionPage" : page === "/faq" ? "FAQPage" : "WebPage",
         "@id": `${url}#webpage`,
         url,
         name: item ? item.title : sub.title,
@@ -189,6 +193,7 @@ export function pageStructuredData(locale: Locale, page: Exclude<PagePath, "">, 
         breadcrumb: { "@id": `${url}#breadcrumb` },
         primaryImageOfPage: image,
         ...(post && { mainEntity: { "@id": post["@id"] } }),
+        ...(page === "/faq" && { mainEntity: faqQuestions(locale) }),
       },
       {
         "@type": "BreadcrumbList",
@@ -273,19 +278,15 @@ export function structuredData(release: Release, locale: Locale) {
         about: game,
         sameAs: [repoUrl],
       },
-      {
-        "@type": "FAQPage",
-        "@id": `${url}#faq`,
-        inLanguage: lang,
-        mainEntity: t.faq.items.filter((_, i) => !seoHiddenFaq.includes(i)).map(({ q, a }) => ({
-          "@type": "Question",
-          name: q,
-          acceptedAnswer: { "@type": "Answer", text: plain(a) },
-        })),
-      },
     ],
   };
 }
+
+// The questions and answers, marked up on the FAQ page (one page per FAQ, as search engines want it).
+const faqQuestions = (locale: Locale) =>
+  dictionaries[locale].faq.items
+    .filter((_, i) => !seoHiddenFaq.includes(i))
+    .map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: plain(a) } }));
 
 export function llmsTxt() {
   const t = dictionaries.en;
@@ -314,6 +315,7 @@ export function llmsTxt() {
 - [Roadmap](${siteUrl}/roadmap)
 - [Bug reports and feature requests](${siteUrl}/bugs-and-ideas)
 - [Completed work and release notes](${siteUrl}/completed)
+- [Frequently asked questions](${siteUrl}/faq)
 - [Launcher source code on GitHub](${repoUrl})
 - [Discord community](${site.discord})
 - Contact: ${contactEmail}
