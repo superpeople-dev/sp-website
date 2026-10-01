@@ -246,6 +246,19 @@ export const markCreated = (itemId: string) =>
 export const justCreated = (itemId: string) =>
   attempt("created check", false, async (client) => (await client.exists(createdKey(itemId))) === 1);
 
+// The terms each player accepted in the launcher (lib/launcher.ts), by Discord id: the version and when.
+// undefined when the store cannot say, which the game pass treats as "don't stop the player".
+export type TermsAcceptance = { version: string; at: number };
+const launcherTermsKey = "sp:launcher-terms";
+export const termsAcceptanceOf = (id: string) =>
+  attempt("terms lookup", undefined as TermsAcceptance | null | undefined, async (client) =>
+    (await client.hget<TermsAcceptance>(launcherTermsKey, id)) ?? null,
+  );
+export async function acceptTerms(id: string, acceptance: TermsAcceptance) {
+  if (!redis) throw new Error("Store is not configured");
+  await redis.hset(launcherTermsKey, { [id]: acceptance });
+}
+
 // Launcher sign-in (app/api/auth/launcher): the Discord callback leaves the sealed session here under a
 // one-time code, for two minutes, until the launcher trades the code (and its PKCE verifier) for it.
 export type LauncherLogin = { token: string; challenge: string };

@@ -1,8 +1,12 @@
 import { createHash, createPrivateKey, randomUUID, sign } from "node:crypto";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
+import { localeHref } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
 import { shownName, type BoardItem } from "./board";
 import { kinds, typeAndPlatforms } from "./kinds";
+import { siteUrl } from "./seo";
 import type { SessionUser } from "./session";
+import { legalUpdated } from "./site";
 import type { Profile } from "./store";
 
 // The SUPER PEOPLE launcher (github.com/superpeople-dev/sp-launcher) signs players in through this
@@ -42,14 +46,47 @@ const passKey = process.env.LAUNCHER_PASS_KEY;
 export const passReady = Boolean(passKey);
 const passLifetime = 120_000;
 
-export type GamePass = { d: string; u: string; n: string; exp: number; j: string };
+// a: the hash of the player's Discord avatar ("" for Discord's default one). The backend keeps it and
+// shows the picture as the player's profile picture in the game's lobby.
+export type GamePass = { d: string; u: string; n: string; a: string; exp: number; j: string };
+
+// The session keeps the avatar as its CDN address (app/api/auth/discord/callback).
+const avatarHash = (avatar: string) => avatar.match(/\/avatars\/\d+\/((?:a_)?[0-9a-f]{32})\.png/)?.[1] ?? "";
 
 export function gamePass(user: SessionUser): string {
   if (!passKey) throw new Error("LAUNCHER_PASS_KEY is not set");
   const key = createPrivateKey({ key: Buffer.from(passKey, "base64"), format: "der", type: "pkcs8" });
-  const pass: GamePass = { d: user.id, u: user.username, n: user.name, exp: Date.now() + passLifetime, j: randomUUID() };
+  const pass: GamePass = {
+    d: user.id,
+    u: user.username,
+    n: user.name,
+    a: avatarHash(user.avatar),
+    exp: Date.now() + passLifetime,
+    j: randomUUID(),
+  };
   const body = Buffer.from(JSON.stringify(pass)).toString("base64url");
   return `${body}.${sign(null, Buffer.from(body), key).toString("base64url")}`;
+}
+
+// ------------------------------------------------------------------ terms ---
+// Play in the launcher needs the player to accept the Terms of Service and the Privacy Policy, in the
+// launcher, once per Discord account and again whenever the legal pages change: their date is the
+// version. The launcher shows the English text (app/api/launcher/terms) and records the acceptance
+// here. With LAUNCHER_TERMS_REQUIRED=1 the site also refuses game passes without it, which stops
+// launchers older than the terms screen too, so it stays off until players have the new launcher.
+
+export const termsVersion = legalUpdated;
+export const termsRequired = process.env.LAUNCHER_TERMS_REQUIRED === "1";
+
+export function launcherTerms() {
+  const { legal } = getDictionary("en");
+  return {
+    version: termsVersion,
+    docs: [
+      { title: legal.terms, url: `${siteUrl}${localeHref("en", "/terms")}`, ...legal.termsDoc },
+      { title: legal.privacy, url: `${siteUrl}${localeHref("en", "/privacy")}`, ...legal.privacyDoc },
+    ],
+  };
 }
 
 // ------------------------------------------------------------------ items ---
