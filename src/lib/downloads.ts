@@ -38,7 +38,8 @@ export const limitsReady = redis !== null;
 
 const blocksKey = "sp:dl:blocks";
 const usedKey = (who: string, hour: number) => `sp:dl:used:${who}:${hour}`;
-const linkKey = (userId: string, sha256: string) => `sp:dl:link:${userId}:${sha256}`;
+// Per deployment: a link signed before a fix (a key changed in Vercel) is not handed out again.
+const linkKey = (userId: string, sha256: string) => `sp:dl:link:${process.env.VERCEL_DEPLOYMENT_ID ?? "local"}:${userId}:${sha256}`;
 
 // Kept under both the account and the IP, so either one stops the next link.
 type Stored = { account: string; name: string; ip: string; bytes: number; at: number; until: number };
