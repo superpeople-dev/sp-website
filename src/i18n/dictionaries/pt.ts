@@ -171,6 +171,10 @@ export const pt: Dictionary = {
         a: "Na primeira vez que você clica em Play, o launcher adiciona uma entrada bem identificada ao arquivo hosts do Windows. Ela manda os antigos endereços dos servidores do jogo para o nosso backend. Você vai ver um único aviso do UAC e pode remover a entrada nas Configurações quando quiser. O launcher em si roda como usuário comum.",
       },
       {
+        q: "O Windows diz que o Controle Inteligente de Aplicativos bloqueou o launcher. O que eu faço?",
+        a: "O Controle Inteligente de Aplicativos bloqueia aplicativos cujo fornecedor o Windows não consegue verificar. O launcher e os arquivos que ele adiciona ao jogo não têm assinatura de código, por isso são bloqueados. Para instalar e jogar, desative-o:\n\n- Abra a **Segurança do Windows** (procure no menu Iniciar)\n- Vá em **Controle de aplicativos e do navegador** e depois em **Configurações do Controle Inteligente de Aplicativos**\n- Escolha **Desativado**\n\nDepois, execute de novo o instalador do launcher. Se o Windows mostrar \"O Windows protegeu o computador\", clique em **Mais informações** e depois em **Executar assim mesmo**.",
+      },
+      {
         q: "É seguro?",
         a: "Todo o código do launcher é público no GitHub, então qualquer pessoa pode ler ou compilar por conta própria. Sua chave fica salva criptografada com o Windows DPAPI e nunca vai para os logs. As atualizações são assinadas criptograficamente.",
       },

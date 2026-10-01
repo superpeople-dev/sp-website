@@ -171,6 +171,10 @@ export const en: Dictionary = {
         a: "The first time you press Play, the launcher adds one clearly marked entry to your Windows hosts file. This sends the game's old server addresses to our backend. You'll see one UAC prompt, and you can remove the entry from Settings at any time. The launcher itself runs as a normal user.",
       },
       {
+        q: "Windows says Smart App Control blocked the launcher. What do I do?",
+        a: "Smart App Control blocks apps whose publisher Windows can't verify. The launcher and the files it adds to the game don't have a code signature, so it blocks them. To install and play, turn it off:\n\n- Open **Windows Security** (search for it in the Start menu)\n- Go to **App & browser control**, then **Smart App Control settings**\n- Choose **Off**\n\nThen run the launcher setup again. If Windows shows \"Windows protected your PC\", click **More info**, then **Run anyway**.",
+      },
+      {
         q: "Is it safe?",
         a: "All of the launcher's code is public on GitHub, so anyone can read it or build it themselves. Your key is stored encrypted with Windows DPAPI and never logged. Updates are cryptographically signed.",
       },

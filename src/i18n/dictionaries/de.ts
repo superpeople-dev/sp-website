@@ -171,6 +171,10 @@ export const de: Dictionary = {
         a: "Beim ersten Klick auf Play fügt der Launcher einen klar gekennzeichneten Eintrag in deine Windows-hosts-Datei ein. Er leitet die alten Serveradressen des Spiels zu unserem Backend um. Du siehst einmalig eine UAC-Abfrage und kannst den Eintrag jederzeit in den Einstellungen entfernen. Der Launcher selbst läuft als normaler Benutzer.",
       },
       {
+        q: "Windows meldet, dass die intelligente App-Steuerung den Launcher blockiert hat. Was tun?",
+        a: "Die intelligente App-Steuerung blockiert Apps, deren Herausgeber Windows nicht überprüfen kann. Der Launcher und die Dateien, die er dem Spiel hinzufügt, haben keine Codesignatur, deshalb werden sie blockiert. Zum Installieren und Spielen schaltest du sie aus:\n\n- Öffne **Windows-Sicherheit** (im Startmenü danach suchen)\n- Gehe zu **App- & Browsersteuerung**, dann zu **Einstellungen für intelligente App-Steuerung**\n- Wähle **Aus**\n\nStarte danach das Setup des Launchers erneut. Zeigt Windows „Der Computer wurde durch Windows geschützt“, klicke auf **Weitere Informationen** und dann auf **Trotzdem ausführen**.",
+      },
+      {
         q: "Ist das sicher?",
         a: "Der gesamte Code des Launchers ist öffentlich auf GitHub, jeder kann ihn lesen oder selbst kompilieren. Dein Schlüssel wird mit Windows DPAPI verschlüsselt gespeichert und nie protokolliert. Updates sind kryptografisch signiert.",
       },
