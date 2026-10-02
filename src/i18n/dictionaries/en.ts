@@ -238,6 +238,7 @@ export const en: Dictionary = {
     submitting: "Posting…",
     posted: "Thanks! Your idea is on the board.",
     pending: "Thanks! Your idea will show up once it's approved.",
+    published: "Posted. Everyone can see it now.",
     error: "Something went wrong. Please try again.",
     typeLabel: "Type",
     platformLabel: "Platform",

@@ -1,13 +1,14 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import { pendingCount } from "@/lib/authorship";
+import { can } from "@/lib/board";
 import { readsAsEnglish } from "@/lib/english";
 import { logEvent } from "@/lib/events";
-import { createIdea, failure, getAnyIdea, getTags, refletTag, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
+import { createIdea, failure, getAnyIdea, getTags, refletTag, setPublication, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { isOffensive, offensiveName } from "@/lib/moderation";
 import { ideaLimits, ideaTypes } from "@/lib/site";
-import { isBanned, profileOf, rememberAuthor } from "@/lib/store";
+import { isBanned, markCreated, profileOf, rememberAuthor } from "@/lib/store";
 
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) return Response.json({ error: "forbidden" }, { status: 403 });
@@ -39,9 +40,16 @@ export async function POST(request: NextRequest) {
     const platformId = platform?.id;
     if (!platformId && body.platform !== "other" && categories.length) return Response.json({ error: "invalid" }, { status: 400 });
     const token = await userToken(user);
-    const { feedbackId } = await createIdea(title, description, token, tagId);
+    const { feedbackId, isApproved } = await createIdea(title, description, token, tagId);
+    // An admin who approves ideas skips the review: their post goes straight onto Bugs & Ideas, published
+    // in Reflet as an admin's task is (lib/tasks.ts createTask). Reflet's webhook announces it as new,
+    // not as approved. Should Reflet refuse to publish it, it waits for review like anyone's.
+    const direct = user.admin && can(user, "review");
+    if (direct) await markCreated(feedbackId);
+    const published = direct && (isApproved !== false || (await setPublication(feedbackId, "approved").then(() => true, () => false)));
+    const status = published ? "open" : "under_review";
     await Promise.all([
-      setStatus(feedbackId, "under_review"),
+      setStatus(feedbackId, status),
       rememberAuthor(feedbackId, profileOf(user)),
       platformId ? updateTags(feedbackId, [platformId], []).catch(() => null) : null,
     ]);
@@ -53,12 +61,13 @@ export async function POST(request: NextRequest) {
       .catch(() => null);
     await logEvent(user, {
       type: "idea.posted",
-      item: { id: feedbackId, title, status: "under_review" },
+      item: { id: feedbackId, title, status },
       kind,
       platform: platform?.name ?? "Other",
       text: description || undefined,
     });
     revalidateTag(refletTag, { expire: 0 });
+    if (published) return Response.json({ pending: false, feedbackId, item: { ...(await getAnyIdea(feedbackId)), status } });
     return Response.json({ pending: true, feedbackId });
   } catch (error) {
     return failure("new idea", error);

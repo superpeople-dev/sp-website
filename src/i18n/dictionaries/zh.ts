@@ -236,6 +236,7 @@ export const zh: Dictionary = {
     submitting: "提交中…",
     posted: "谢谢！你的想法已添加到看板。",
     pending: "谢谢！你的想法审核通过后就会显示。",
+    published: "已发布，所有人现在都能看到。",
     error: "出了点问题，请重试。",
     typeLabel: "类型",
     platformLabel: "平台",

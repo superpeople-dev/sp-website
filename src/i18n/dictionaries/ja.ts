@@ -238,6 +238,7 @@ export const ja: Dictionary = {
     submitting: "投稿中…",
     posted: "ありがとうございます！アイデアがボードに追加されました。",
     pending: "ありがとうございます！承認後にアイデアが表示されます。",
+    published: "投稿しました。すでに全員に表示されています。",
     error: "エラーが発生しました。もう一度お試しください。",
     typeLabel: "種類",
     platformLabel: "プラットフォーム",

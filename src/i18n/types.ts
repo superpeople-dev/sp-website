@@ -118,6 +118,7 @@ export type Dictionary = {
     submitting: string;
     posted: string;
     pending: string;
+    published: string;
     error: string;
     typeLabel: string;
     platformLabel: string;

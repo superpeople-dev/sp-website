@@ -238,6 +238,7 @@ export const ko: Dictionary = {
     submitting: "올리는 중…",
     posted: "감사합니다! 아이디어가 보드에 올라갔습니다.",
     pending: "감사합니다! 승인되면 아이디어가 표시됩니다.",
+    published: "게시했습니다. 이제 모두에게 보입니다.",
     error: "문제가 발생했습니다. 다시 시도해 주세요.",
     typeLabel: "유형",
     platformLabel: "플랫폼",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FeedbackItem } from "reflet-sdk";
 import { fill, localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -43,8 +43,10 @@ export function IdeasBoard({
   const r = t.ideas;
   const [items, setItems] = useState<BoardItem[]>(initial);
   const filters = useBoardFilters(categories, types);
-  // After posting: the idea waits for review ("partial": some files didn't upload).
-  const [sent, setSent] = useState<"pending" | "partial" | null>(null);
+  // After posting: the idea waits for review, or is up already when an admin who approves ideas posted
+  // it ("partial": some files didn't upload). published: that admin's post, added to the list.
+  const [sent, setSent] = useState<"pending" | "published" | "partial" | null>(null);
+  const published = useRef<BoardItem | null>(null);
   const [mine, setMine] = useState(pendingMine);
   const [composing, setComposing] = useState(false);
   const atLimit = !viewer?.admin && mine >= ideaLimits.pending;
@@ -91,12 +93,16 @@ export function IdeasBoard({
       return { error: error === "offensive" || error === "name" || error === "english" ? error : "error" };
     }
     if (!response.ok) return { error: "error" };
-    const { feedbackId } = (await response.json()) as { feedbackId: string };
+    const { feedbackId, item } = (await response.json()) as { feedbackId: string; item?: BoardItem };
+    published.current = item ?? null;
     return { feedbackId };
   };
 
   const posted = (_: string, failedUploads: number) => {
-    setSent(failedUploads ? "partial" : "pending");
+    const item = published.current;
+    published.current = null;
+    if (item) setItems((list) => [item, ...list.filter((other) => other.id !== item.id)]);
+    setSent(failedUploads ? "partial" : item ? "published" : "pending");
     setComposing(false);
     if (!viewer?.admin) setMine((count) => count + 1);
   };
@@ -212,7 +218,7 @@ export function IdeasBoard({
         {sent && (
           <p className={`ideas__sent${sent === "partial" ? " is-error" : ""}`} role="status">
             <Icon name={sent === "partial" ? "attach" : "check"} />
-            {sent === "partial" ? r.mediaFailed : r.pending}
+            {sent === "partial" ? r.mediaFailed : sent === "published" ? r.published : r.pending}
           </p>
         )}
 

@@ -238,6 +238,7 @@ export const fr: Dictionary = {
     submitting: "Publication…",
     posted: "Merci ! Votre idée est sur le tableau.",
     pending: "Merci ! Votre idée apparaîtra une fois approuvée.",
+    published: "Publié. Tout le monde peut le voir maintenant.",
     error: "Une erreur est survenue. Veuillez réessayer.",
     typeLabel: "Type",
     platformLabel: "Plateforme",

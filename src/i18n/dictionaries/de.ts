@@ -238,6 +238,7 @@ export const de: Dictionary = {
     submitting: "Wird gepostet…",
     posted: "Danke! Deine Idee ist jetzt auf dem Board.",
     pending: "Danke! Deine Idee erscheint, sobald sie freigegeben ist.",
+    published: "Veröffentlicht. Jetzt sehen es alle.",
     error: "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
     typeLabel: "Art",
     platformLabel: "Plattform",
