@@ -11,7 +11,8 @@ It explains the project, links the launcher download and the Discord, and hosts 
 - [Motion](https://motion.dev) for animations
 - Launcher releases come from the GitHub API
 - Ideas, comments, the roadmap and release notes come from [Reflet](https://reflet.app); players sign in with Discord
-- Commenter profiles and the ban list live in [Upstash Redis](https://upstash.com)
+- The site's own records (commenter profiles, bans, admins, downvotes, notifications, download limits) live in
+  Postgres on [Neon](https://neon.com) ([`src/lib/db.ts`](src/lib/db.ts), tables in [`db/migrations`](db/migrations))
 
 ## Getting started
 
@@ -93,10 +94,10 @@ its own. `/download` always redirects to the newest installer.
 - Clicking a card opens its details and comments. Signed-in players comment with their Discord name
   and avatar.
 - Posts, votes and comments are stored in Reflet. Reflet doesn't keep avatars or know about bans, so
-  a small Redis store ([`src/lib/store.ts`](src/lib/store.ts)) keeps the Discord profile of each post
-  and comment author, and the ban list. Without Redis, comments still work but show no avatars, and
-  banning is turned off.
-- Reflet and Redis are only called from the server ([`src/lib/`](src/lib/) and
+  our own Postgres database ([`src/lib/store.ts`](src/lib/store.ts)) keeps the Discord profile of each
+  post and comment author, and the ban list. Without a database, comments still work but show no
+  avatars, and banning is turned off.
+- Reflet and the database are only called from the server ([`src/lib/`](src/lib/) and
   [`src/app/api/`](src/app/api/)), so the keys never reach the browser.
 
 ### Admins
@@ -138,7 +139,8 @@ It skips anything already there, so it is safe to run again after adding bugs to
 | `DISCORD_GUILD_ID`, `DISCORD_ADMIN_ROLE_IDS` | Optional: role-based admins |
 | `DISCORD_MODERATOR_ROLE_IDS` | Optional: Discord roles that may `/tempban` from the bot and lift those bans, but not ban until lifted. Default: the Moderator and Developer roles |
 | `ADMIN_DISCORD_IDS` | Optional: extra admins by Discord user ID, comma-separated |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Optional: comment avatars and bans. Connecting Upstash from the Vercel Marketplace adds them (as `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which also work) |
+| `DATABASE_URL` | Postgres (Neon's pooled address): comment avatars, bans, admins, downvotes, notifications, API keys, download limits. `neon env pull` writes it, with `DATABASE_URL_UNPOOLED` |
+| `DATABASE_URL_UNPOOLED` | The direct address, for `bun run db:migrate` (schema changes, `db/migrations/*.sql`, each applied once) |
 | `DISCORD_WEBHOOK_URL`, `REFLET_WEBHOOK_SECRET` | Optional: Discord announcements |
 | `GITHUB_TOKEN` | Optional: only if the GitHub API rate-limits the server |
 | `NEXT_PUBLIC_SITE_URL` | Optional: replaces `https://superpeople.dev` in canonical links and the sitemap |

@@ -1,4 +1,4 @@
-import { Redis } from "@upstash/redis";
+import { addHourly, dbReady, getExpiring, query, setExpiring } from "./db";
 import list from "./game-files.json";
 
 // The game's files, which the launcher downloads one by one (app/api/launcher/game). Made by
@@ -30,96 +30,100 @@ const BLOCK_MS = 24 * HOUR;
 export const LINK_SECONDS = 15 * 60;
 const LINK_REUSE_SECONDS = LINK_SECONDS - 60;
 
-const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-const redis = url && token ? new Redis({ url, token }) : null;
-export const limitsReady = redis !== null;
+// In Postgres (lib/db.ts): the bytes per account and IP and hour in `hourly`, the blocks in
+// `download_blocks`, the links handed out in `expiring`.
+export const limitsReady = dbReady;
 
-const blocksKey = "sp:dl:blocks";
-const usedKey = (who: string, hour: number) => `sp:dl:used:${who}:${hour}`;
+const usedKey = (who: string) => `dl:${who}`;
 // Per deployment: a link signed before a fix (a key changed in Vercel) is not handed out again.
-const linkKey = (userId: string, sha256: string) => `sp:dl:link:${process.env.VERCEL_DEPLOYMENT_ID ?? "local"}:${userId}:${sha256}`;
+const linkKey = (userId: string, sha256: string) => `dl-link:${process.env.VERCEL_DEPLOYMENT_ID ?? "local"}:${userId}:${sha256}`;
 
 // Kept under both the account and the IP, so either one stops the next link.
 type Stored = { account: string; name: string; ip: string; bytes: number; at: number; until: number };
 // What admins see: whose download was stopped, not from which IP.
 export type Block = Omit<Stored, "ip">;
 
-function client() {
-  if (!redis) throw new Error("Store is not configured");
-  return redis;
+function required() {
+  if (!dbReady) throw new Error("Store is not configured");
 }
 
-// Bytes counted for `who` over the last hour: this hour's count plus the part of the previous
-// hour's that still falls inside the window.
-async function usedLastHour(who: string, now: number) {
+// Bytes counted for each of `whos` over the last hour: this hour's count plus the part of the
+// previous hour's that still falls inside the window.
+async function usedLastHour(whos: string[], now: number) {
   const hour = Math.floor(now / HOUR);
-  const [current, previous] = await client().mget<(number | null)[]>(usedKey(who, hour), usedKey(who, hour - 1));
+  const rows = await query<{ key: string; hour: number; amount: number }>(
+    "select key, hour, amount from hourly where key = any($1) and hour = any($2)",
+    [whos.map(usedKey), [hour, hour - 1]],
+  );
   const left = 1 - (now % HOUR) / HOUR;
-  return (current ?? 0) + (previous ?? 0) * left;
-}
-
-async function count(who: string, bytes: number, now: number) {
-  const key = usedKey(who, Math.floor(now / HOUR));
-  await client().multi().incrby(key, bytes).expire(key, 3 * 3600).exec();
+  const used = new Map(whos.map((who) => [who, 0]));
+  for (const row of rows) {
+    const who = row.key.slice("dl:".length);
+    used.set(who, (used.get(who) ?? 0) + (row.hour === hour ? row.amount : row.amount * left));
+  }
+  return used;
 }
 
 // The block that stops this account or IP, if one still runs.
 export async function blockOf(accountId: string, ip: string, now = Date.now()) {
-  const found = await client().hmget<Record<string, Stored>>(blocksKey, `account:${accountId}`, `ip:${ip}`);
-  return Object.values(found ?? {}).find((block) => block && block.until > now) ?? null;
+  required();
+  const [row] = await query<{ data: Stored }>("select data from download_blocks where key = any($1) and until > $2 limit 1", [
+    [`account:${accountId}`, `ip:${ip}`],
+    now,
+  ]);
+  return row?.data ?? null;
 }
 
-export const reusedLink = (userId: string, sha256: string) => client().get<string>(linkKey(userId, sha256));
-export const keepLink = (userId: string, sha256: string, link: string) =>
-  client().set(linkKey(userId, sha256), link, { ex: LINK_REUSE_SECONDS });
+export const reusedLink = (userId: string, sha256: string) => getExpiring<string>(linkKey(userId, sha256));
+export const keepLink = (userId: string, sha256: string, link: string) => setExpiring(linkKey(userId, sha256), link, LINK_REUSE_SECONDS);
 
 // Counts a link for this account and IP. Returns the block it caused when it goes past the limit
 // (the link is then not handed out).
 export async function spend(account: { id: string; name: string }, ip: string, bytes: number, now = Date.now()) {
+  required();
   const whos = [`account:${account.id}`, `ip:${ip}`];
+  const usedBy = await usedLastHour(whos, now);
   for (const who of whos) {
-    const used = await usedLastHour(who, now);
+    const used = usedBy.get(who) ?? 0;
     if (used + bytes > HOURLY_LIMIT) {
       const block: Stored = { account: account.id, name: account.name, ip, bytes: Math.round(used), at: now, until: now + BLOCK_MS };
-      await client().hset(blocksKey, Object.fromEntries(whos.map((key) => [key, block])));
+      await query(
+        `insert into download_blocks (key, data, until) select key, $2, $3 from unnest($1::text[]) as key
+         on conflict (key) do update set data = excluded.data, until = excluded.until`,
+        [whos, block, block.until],
+      );
       console.warn(`[downloads] blocked account ${account.id}: ${Math.round(used / 1e9)} GB in the last hour (${who.split(":")[0]})`);
       return block;
     }
   }
-  await Promise.all(whos.map((who) => count(who, bytes, now)));
+  const hour = Math.floor(now / HOUR);
+  await Promise.all(whos.map((who) => addHourly(usedKey(who), hour, bytes)));
   return null;
 }
 
 // For the admin panel: blocks still running, newest first, once each.
 export async function listBlocks(now = Date.now()): Promise<Block[]> {
-  const entries = Object.entries((await client().hgetall<Record<string, Stored>>(blocksKey)) ?? {});
-  const expired = entries.filter(([, block]) => block.until <= now).map(([key]) => key);
-  if (expired.length) await client().hdel(blocksKey, ...expired);
-  const running = new Map<string, Block>();
-  for (const [key, block] of entries) {
-    if (block.until > now && key.startsWith("account:")) {
-      running.set(block.account, { account: block.account, name: block.name, bytes: block.bytes, at: block.at, until: block.until });
-    }
-  }
-  return [...running.values()].sort((a, b) => b.at - a.at);
+  required();
+  await query("delete from download_blocks where until <= $1", [now]);
+  const rows = await query<{ data: Stored }>("select data from download_blocks where key like 'account:%'");
+  return rows
+    .map(({ data: block }) => ({ account: block.account, name: block.name, bytes: block.bytes, at: block.at, until: block.until }))
+    .sort((a, b) => b.at - a.at);
 }
 
 // Lifts an account's block, and the one on the IP it downloaded from.
 // How many times `key` was counted this hour, this time included (the launcher's reports to
 // #launcher-logs are capped with it).
 export async function countThisHour(key: string, now = Date.now()) {
-  const counter = `sp:count:${key}:${Math.floor(now / HOUR)}`;
-  const [count] = await client().multi().incr(counter).expire(counter, 2 * 3600).exec<[number, number]>();
-  return count;
+  required();
+  return addHourly(`count:${key}`, Math.floor(now / HOUR), 1);
 }
 
 export async function unblock(accountId: string) {
-  const block = await client().hget<Stored>(blocksKey, `account:${accountId}`);
-  const keys = [`account:${accountId}`];
-  if (block) {
-    const onIp = await client().hget<Stored>(blocksKey, `ip:${block.ip}`);
-    if (onIp?.account === accountId) keys.push(`ip:${block.ip}`);
-  }
-  await client().hdel(blocksKey, ...keys);
+  required();
+  await query(
+    `delete from download_blocks where key = $1
+       or (key = 'ip:' || (select data->>'ip' from download_blocks where key = $1) and data->>'account' = $2)`,
+    [`account:${accountId}`, accountId],
+  );
 }
