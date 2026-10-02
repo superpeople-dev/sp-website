@@ -22,12 +22,15 @@ import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { AddTask } from "./AddTask";
+import { BoardBar, useBoardFilters } from "./BoardBar";
 import { useAdmin } from "./admin";
 import { useVote } from "./useVote";
 import { WorkCard } from "./WorkCard";
 import { useItemUrl } from "./useItemUrl";
 
+// Completed shows the newest few, or while filtering, the first matches (all of them: /completed).
 const recentDone = 3;
+const foundDone = 10;
 
 type CardProps = Omit<Parameters<typeof WorkCard>[0], "drag" | "overlay">;
 
@@ -64,6 +67,10 @@ export function PlanBoard({
   const p = t.plan;
   const [items, setItems] = useState<BoardItem[]>(initial);
   const admin = useAdmin(setItems);
+  // Type, platform, Top / New and search, as on Bugs & Ideas: To do and In progress in that order,
+  // Completed newest first.
+  const filters = useBoardFilters(categories, types);
+  const { matches, order, filtering } = filters;
   // Opened on arrival when this is an item's page (/roadmap/<id>/<slug>).
   const [opened, setOpened] = useState<Opened | null>(openId ? { id: openId, mode: "view" } : null);
   const [dragging, setDragging] = useState<string | null>(null);
@@ -90,15 +97,14 @@ export function PlanBoard({
   const add = (item: FeedbackItem) => setItems((list) => [...list.filter((entry) => entry.id !== item.id), item]);
 
   const columns = useMemo(() => {
-    const of = (status: FeedbackStatus) => items.filter((item) => item.status === status);
-    const byVotes = (a: FeedbackItem, b: FeedbackItem) => b.voteCount - a.voteCount;
+    const of = (status: FeedbackStatus) => items.filter((item) => item.status === status && matches(item));
     const done = of("completed").sort((a, b) => doneAt(b) - doneAt(a));
     return [
-      { key: "planned" as const, icon: "todo" as const, title: p.todo, items: of("planned").sort(byVotes), total: undefined },
-      { key: "in_progress" as const, icon: "wrench" as const, title: p.doing, items: of("in_progress").sort(byVotes), total: undefined },
-      { key: "completed" as const, icon: "done" as const, title: p.done, items: done.slice(0, recentDone), total: done.length },
+      { key: "planned" as const, icon: "todo" as const, title: p.todo, items: of("planned").sort(order), total: undefined },
+      { key: "in_progress" as const, icon: "wrench" as const, title: p.doing, items: of("in_progress").sort(order), total: undefined },
+      { key: "completed" as const, icon: "done" as const, title: p.done, items: done.slice(0, filtering ? foundDone : recentDone), total: done.length },
     ];
-  }, [items, p]);
+  }, [items, p, matches, order, filtering]);
 
   const open = (id: string, mode: Opened["mode"]) => {
     if (!justDropped.current) setOpened({ id, mode });
@@ -145,7 +151,7 @@ export function PlanBoard({
                 })}
               </ul>
             ) : (
-              <p className="plan__empty">{p.empty}</p>
+              <p className="plan__empty">{filtering ? t.ideas.noMatch : p.empty}</p>
             )}
             {canDrag && <AddTask status={column.key} categories={categories} types={types} onAdded={add} />}
             {column.key === "completed" && (column.total ?? 0) > 0 && (
@@ -167,6 +173,9 @@ export function PlanBoard({
 
   return (
     <section className="flush">
+      <div className="wrap">
+        <BoardBar filters={filters} categories={categories} types={types} />
+      </div>
       {canDrag ? (
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
           {board}

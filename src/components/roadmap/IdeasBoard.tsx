@@ -7,12 +7,12 @@ import { useI18n } from "@/i18n/context";
 import type { IdeaType } from "@/i18n/types";
 import { can, categoryOf, typeOf, type BoardItem, type Category, type TypeTag, type Viewer } from "@/lib/board";
 import { ideaLimits, ideaTypes } from "@/lib/site";
-import { Dropdown, type DropdownOption } from "../Dropdown";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 import { AdminActions, useAdmin } from "./admin";
 import { CategoryTag } from "./CategoryTag";
-import { IdeaForm, platformChoices, typeChoices, type Created, type IdeaFields } from "./IdeaForm";
+import { BoardBar, byDate, useBoardFilters } from "./BoardBar";
+import { IdeaForm, type Created, type IdeaFields } from "./IdeaForm";
 import { ItemDialog, type Opened } from "./ItemDialog";
 import { ItemMenu } from "./ItemMenu";
 import { useVote } from "./useVote";
@@ -20,17 +20,7 @@ import { VoteControl } from "./VoteControl";
 import { signIn, suggestEvent } from "./viewer";
 import { useItemUrl } from "./useItemUrl";
 
-type Sort = "top" | "new";
-type TypeFilter = IdeaType | "all";
-// A category id, "other" (none) or "all".
-type PlatformFilter = string;
-
-const byVotes = (a: FeedbackItem, b: FeedbackItem) =>
-  Number(b.isPinned) - Number(a.isPinned) || b.voteCount - a.voteCount || b.createdAt - a.createdAt;
-const byDate = (a: FeedbackItem, b: FeedbackItem) => b.createdAt - a.createdAt;
 const iconOf = (slug: IdeaType) => ideaTypes.find((type) => type.slug === slug)?.icon ?? "sparkle";
-// Lower case and without accents, so "equipe" finds "Équipe".
-const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 export function IdeasBoard({
   initial,
@@ -52,10 +42,7 @@ export function IdeasBoard({
   const { locale, t } = useI18n();
   const r = t.ideas;
   const [items, setItems] = useState<BoardItem[]>(initial);
-  const [sort, setSort] = useState<Sort>("top");
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
-  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
-  const [query, setQuery] = useState("");
+  const filters = useBoardFilters(categories, types);
   // After posting: the idea waits for review ("partial": some files didn't upload).
   const [sent, setSent] = useState<"pending" | "partial" | null>(null);
   const [mine, setMine] = useState(pendingMine);
@@ -72,25 +59,9 @@ export function IdeasBoard({
   const closeForm = useCallback(() => setComposing(false), []);
   const setMode = useCallback((mode: Opened["mode"]) => setOpened((o) => o && { ...o, mode }), []);
   const next = localeHref(locale, "/bugs-and-ideas");
-  const available = typeChoices(types, r);
-  const platforms = platformChoices(categories, r);
-  const typeFilters: DropdownOption<TypeFilter>[] = [{ key: "all", label: r.filterAll, icon: "tag" }, ...available];
-  const platformFilters: DropdownOption<PlatformFilter>[] = [{ key: "all", label: r.filterAll, icon: "layers" }, ...platforms];
-  const typeShown = typeFilters.find((option) => option.key === typeFilter) ?? typeFilters[0];
-  const platformShown = platformFilters.find((option) => option.key === platformFilter) ?? platformFilters[0];
-
   const open = useMemo(() => items.filter((item) => item.status === "open"), [items]);
-  const visible = useMemo(() => {
-    const words = plain(query).split(/\s+/).filter(Boolean);
-    return open
-      .filter(
-        (item) =>
-          (typeFilter === "all" || typeOf(item, types) === typeFilter) &&
-          (platformFilter === "all" || (categoryOf(item, categories)?.id ?? "other") === platformFilter) &&
-          words.every((word) => plain(`${item.title} ${item.description}`).includes(word)),
-      )
-      .sort(sort === "top" ? byVotes : byDate);
-  }, [open, sort, typeFilter, platformFilter, query, types, categories]);
+  const { matches, order } = filters;
+  const visible = useMemo(() => open.filter(matches).sort(order), [open, matches, order]);
   const review = useMemo(() => items.filter((item) => item.status === "under_review").sort(byDate), [items]);
 
   const patch = useCallback(
@@ -236,61 +207,7 @@ export function IdeasBoard({
           </Reveal>
         )}
 
-        {/* Desktop: the type and platform filters, the sort, then the search on the right, on one row.
-            Phone: the two filters on one row, the sort and the search under them. */}
-        <Reveal className="ideas__bar" y={16}>
-          {(available.length > 1 || platforms.length > 1) && (
-            <div className="ideas__filters">
-              {available.length > 1 && (
-                <Dropdown
-                  label={r.typeLabel}
-                  buttonLabel={`${r.typeLabel}: ${typeShown.label}`}
-                  options={typeFilters}
-                  value={typeFilter}
-                  onChange={setTypeFilter}
-                  className="ideas__filter"
-                  buttonClass={`ideas__filter-btn${typeFilter === "all" ? "" : " is-active"}`}
-                >
-                  <Icon name={typeShown.icon ?? "tag"} />
-                  <span>{typeFilter === "all" ? r.typeLabel : typeShown.label}</span>
-                  <Icon name="chevron" className="ideas__chevron" />
-                </Dropdown>
-              )}
-              {platforms.length > 1 && (
-                <Dropdown
-                  label={r.platformLabel}
-                  buttonLabel={`${r.platformLabel}: ${platformShown.label}`}
-                  options={platformFilters}
-                  value={platformFilter}
-                  onChange={setPlatformFilter}
-                  className="ideas__filter"
-                  buttonClass={`ideas__filter-btn${platformFilter === "all" ? "" : " is-active"}`}
-                >
-                  <Icon name={platformShown.icon ?? "layers"} />
-                  <span>{platformFilter === "all" ? r.platformLabel : platformShown.label}</span>
-                  <Icon name="chevron" className="ideas__chevron" />
-                </Dropdown>
-              )}
-            </div>
-          )}
-          <div className="ideas__sort" role="group">
-            {(["top", "new"] as const).map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={sort === key ? "is-active" : undefined}
-                aria-pressed={sort === key}
-                onClick={() => setSort(key)}
-              >
-                {key === "top" ? r.sortTop : r.sortNew}
-              </button>
-            ))}
-          </div>
-          <label className="ideas__search">
-            <Icon name="search" />
-            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={r.search} aria-label={r.search} />
-          </label>
-        </Reveal>
+        <BoardBar filters={filters} categories={categories} types={types} />
 
         {sent && (
           <p className={`ideas__sent${sent === "partial" ? " is-error" : ""}`} role="status">
