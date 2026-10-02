@@ -11,7 +11,7 @@ import { siteUrl } from "./seo";
 // Two log channels for the staff: DISCORD_AUTH_LOG_WEBHOOK_URL (#discord-auth-logs) hears every
 // Discord sign-in and sign-out, on the website and in the launcher; DISCORD_LAUNCHER_LOG_WEBHOOK_URL
 // (#launcher-logs) what players do with the game in the launcher (download, verify, uninstall,
-// starting the game) and the download limits. Without them those are not posted. A player's IP is
+// starting the game), the launcher updating itself and the download limits. Without them those are not posted. A player's IP is
 // only on "Game launched", behind a spoiler. DISCORD_INGAME_REPORT_WEBHOOK_URL (#in-game-report)
 // gets the reports made with the game's own Report button, sent on by the launcher.
 
@@ -220,6 +220,7 @@ export const launcherActions = [
   "verify.repaired",
   "uninstalled",
   "game.launched",
+  "launcher.updated",
 ] as const;
 export type LauncherAction = (typeof launcherActions)[number] | "limit";
 export type LauncherDetails = {
@@ -227,6 +228,8 @@ export type LauncherDetails = {
   bytes?: number;
   seconds?: number;
   version?: string;
+  // For "launcher.updated": the version the launcher had before (`version` is the new one).
+  from?: string;
   reason?: string;
   // Where the files come from: the team's storage, or the backup copy (for "download.switched", the
   // one that took over).
@@ -292,6 +295,7 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
       "verify.repaired": ["Files repaired", colors.gold],
       uninstalled: ["Game uninstalled", colors.grey],
       "game.launched": ["Game launched", colors.blue],
+      "launcher.updated": ["Launcher updated", colors.green],
       limit: ["Download limit reached", colors.red],
     } as const
   )[action];
@@ -314,7 +318,8 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
     const speed = (bytes: number) => (bytes >= 1e12 ? "already downloaded" : `${(bytes / 1e6).toFixed(1)} MB/s`);
     add("Speed test", `Storage ${speed(details.speeds.storage)}, backup ${speed(details.speeds.backup)}`);
   }
-  add("Launcher", details.version ? `v${details.version}` : undefined);
+  if (action === "launcher.updated") add("Updated", details.from && details.version ? `v${details.from} to v${details.version}` : undefined);
+  else add("Launcher", details.version ? `v${details.version}` : undefined);
   add("Location", details.location ? place(details.location) : undefined);
   // Behind a spoiler: shown on a click, not to whoever glances at the channel.
   // Both when the player has both (IPv4 first), else the one there is.

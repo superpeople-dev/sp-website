@@ -7,7 +7,7 @@ import { isIpv4, recentIpv4 } from "@/lib/ipv4";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // What a signed-in player did with the game in the launcher (download, verify, uninstall, starting
-// the game and the PC it runs on), for #launcher-logs. Only known actions, plain numbers and short
+// the game and the PC it runs on) and the launcher updating itself, for #launcher-logs. Only known actions, plain numbers and short
 // lines of text are taken, and the text is shown as is. At most 30 a player per hour: a launcher
 // cannot flood the channel.
 const PER_HOUR = 30;
@@ -15,6 +15,8 @@ const PER_HOUR = 30;
 const count = (value: unknown, max: number) =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.min(Math.round(value), max) : undefined;
 // One line of text from the player's PC (a processor or graphics card name), plain and short.
+// A launcher version, "0.9.2".
+const version = (value: unknown) => (typeof value === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(value) ? value : undefined);
 const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
 
@@ -69,7 +71,8 @@ export async function POST(request: NextRequest) {
     files: count(body.files, 100_000),
     bytes: count(body.bytes, 1e12),
     seconds: count(body.seconds, 1e7),
-    version: typeof body.version === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(body.version) ? body.version : undefined,
+    version: version(body.version),
+    from: action === "launcher.updated" ? version(body.from) : undefined,
     reason: typeof body.reason === "string" && body.reason.trim() ? body.reason.trim().slice(0, 300) : undefined,
     source: body.source === "backup" ? "backup" : body.source === "storage" ? "storage" : undefined,
     speeds: ["download.started", "download.finished", "verify.repaired"].includes(action) ? speedsOf(body.speeds) : undefined,
