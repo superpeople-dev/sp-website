@@ -5,9 +5,10 @@ import { devError, devJson, devUser } from "@/lib/devapi";
 import { logEvent } from "@/lib/events";
 import { addComment, failure, getAnyIdea, refletTag, RefletRequestError, userToken } from "@/lib/reflet";
 import { ideaLimits } from "@/lib/site";
-import { commentsOff } from "@/lib/store";
+import { commentsOff, profileOf, rememberAuthor } from "@/lib/store";
 
-// A comment as the key's admin: where an agent says what was done.
+// A comment as the key's admin: where an agent says what was done. Their Discord profile is kept with
+// it, as for a comment made on the site, so it shows with their picture.
 export async function POST(request: NextRequest, { params }: RouteContext<"/api/dev/items/[id]/comments">) {
   const { user, error } = await devUser(request);
   if (error) return error;
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest, { params }: RouteContext<"/api/
     if (!item) return devError("not_found", 404, "No item with this id.");
     if (!can(user, "comments") && (await commentsOff(id))) return devError("forbidden", 403, "Comments are turned off on this item.");
     const commentId = await addComment(id, text, await userToken(user));
+    await rememberAuthor(commentId, profileOf(user));
     await logEvent(user, { type: "comment.posted", item: { id, title: item.title, status: item.status }, text, via: user.via });
     revalidateTag(refletTag, { expire: 0 });
     return devJson({ ok: true, id: commentId }, 201);
