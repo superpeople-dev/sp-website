@@ -342,6 +342,11 @@ export type GameReport = {
   reason?: number;
   programs: number[];
   replay?: string;
+  // The replay of the match (sp-launcher replays.rs): its link, size and recording's name, or why it has none.
+  replayUrl?: string;
+  replayBytes?: number;
+  replayMatch?: string;
+  replayNote?: "missing" | "too_big" | "failed";
   version?: string;
   reporter: ReportedPlayer & { hitBone?: string; damage?: number; damageType?: string };
   suspect: ReportedPlayer & { distance?: number; hits?: number; headshots?: number };
@@ -362,6 +367,11 @@ const reportPrograms: Record<number, string> = {
   4: "actions impossible in the game",
 };
 const reportFrom: Record<number, string> = { 1: "Report", 2: "Replay", 3: "Death cam", 4: "Spectating" };
+const replayNotes: Record<NonNullable<GameReport["replayNote"]>, string> = {
+  missing: "None: their PC had no recording of that match",
+  too_big: "None: too big to send",
+  failed: "None: it could not be sent",
+};
 
 // #in-game-report: a player pressed Report in the game. The reporter is the launcher's signed-in
 // Discord account, the reported player's the one the backend has for their game account (none when
@@ -401,7 +411,17 @@ export async function logGameReport(who: Player, report: GameReport, reported?: 
     reporter.damageType ? code(reporter.damageType) : undefined,
   ].filter(Boolean);
   add("Reporter's last hit", death.length ? death.join(", ") : undefined);
-  add("Replay on their PC", report.replay ? code(report.replay) : undefined, false);
+  // The game's recording of the match, as a zip behind the admin panel's Discord sign-in. Before
+  // launchers sent it, a report only named a .7z the game never makes now: nothing to show.
+  const size = report.replayBytes ? ` (${(report.replayBytes / 1048576).toFixed(1)} MB)` : "";
+  add(
+    "Replay",
+    report.replayUrl
+      ? `[Download the replay](${report.replayUrl})${size}${report.replayMatch ? ` ${code(report.replayMatch)}` : ""}\n` +
+          "Unzip it into `%LOCALAPPDATA%\\BravoHotelGame\\Saved\\Demos` and open it from the game's Replay menu."
+      : report.replayNote && replayNotes[report.replayNote],
+    false,
+  );
   add("Launcher", report.version ? `v${report.version}` : undefined);
   add("When", now(), false);
   await post("reports", {

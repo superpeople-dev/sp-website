@@ -21,6 +21,10 @@ const decimal = (value: unknown, max: number) =>
 const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
 const fieldsOf = (value: unknown) => (value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {});
+// The replay of the match, which the launcher uploaded to the game backend (sp-launcher replays.rs,
+// sp-backend lib/replays.js): only a link of the admin panel's own, behind its Discord sign-in.
+const REPLAY_URL = /^https:\/\/admin\.superpeople\.dev\/replay\/[0-9a-f]{32}$/;
+const REPLAY_NOTES = ["missing", "too_big", "failed"] as const;
 
 function playerOf(value: unknown) {
   const player = fieldsOf(value);
@@ -46,6 +50,10 @@ export async function POST(request: NextRequest) {
       ? [...new Set(body.programs.map((program) => count(program, 99)).filter((program): program is number => program !== undefined))].slice(0, 8)
       : [],
     replay: line(body.replay, 120),
+    replayUrl: typeof body.replay_url === "string" && REPLAY_URL.test(body.replay_url) ? body.replay_url : undefined,
+    replayBytes: count(body.replay_bytes, 2 ** 31),
+    replayMatch: line(body.replay_match, 80),
+    replayNote: REPLAY_NOTES.find((note) => note === body.replay_note),
     version: typeof body.version === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(body.version) ? body.version : undefined,
     reporter: {
       ...playerOf(reporter),
