@@ -11,7 +11,7 @@ import { can } from "@/lib/board";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { pendingCount } from "@/lib/authorship";
-import { getTags, listIdeas, listPending, safely, userToken } from "@/lib/reflet";
+import { getTags, listByStatus, listPending, safely, userToken } from "@/lib/reflet";
 import { pageMetadata, pageStructuredData } from "@/lib/seo";
 import { itemSegments, settleItem, sharedPage } from "@/lib/share";
 import { forBoard } from "@/lib/votes";
@@ -34,14 +34,16 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
   const session = await currentSession();
   const [release, ideas, tags, pending, banned, mine] = await Promise.all([
     getLatestRelease(),
-    safely(async () => listIdeas(session ? await userToken(session) : undefined)),
+    // The open ideas themselves (by status, every page): the 100 most voted items of any status no
+    // longer include them once the roadmap has more than 100 items.
+    safely(async () => listByStatus("open", 10, session ? await userToken(session) : undefined)),
     safely(getTags),
     session && can(session, "review") ? safely(listPending) : null,
     session ? isBanned(session.id) : false,
     session && !session.admin ? pendingCount(session).catch(() => 0) : 0,
   ]);
   const viewer = viewerOf(session, { banned, moderation: storeReady });
-  const board = ideas && (await forBoard([...ideas.items.filter((entry) => entry.status === "open"), ...(pending ?? [])], session?.id));
+  const board = ideas && (await forBoard([...ideas, ...(pending ?? [])], session?.id));
   if (board) await settleItem(lang, "/bugs-and-ideas", wanted, (id) => board.find((entry) => entry.id === id));
   // The item's page describes the item itself to search engines.
   const shared = wanted ? await sharedPage(wanted.id) : null;

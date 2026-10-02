@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import type { FeedbackItem } from "reflet-sdk";
 import { can } from "@/lib/board";
 import { launcherItem, typeName } from "@/lib/launcher";
-import { failure, getTags, listByStatus, listIdeas, listPending, userToken } from "@/lib/reflet";
+import { failure, getTags, listByStatus, listPending, userToken } from "@/lib/reflet";
 import { readSession } from "@/lib/session";
 import { authorsOf } from "@/lib/store";
 import { forBoard } from "@/lib/votes";
@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
     const load: Record<Board, () => Promise<FeedbackItem[]>> = {
       ideas: async () => {
         const [ideas, pending] = await Promise.all([
-          listIdeas(token),
+          listByStatus("open", 10, token),
           user && can(user, "review") ? listPending().catch(() => []) : [],
         ]);
-        return [...ideas.items.filter((item) => item.status === "open"), ...pending];
+        return [...ideas, ...pending];
       },
       roadmap: async () => (await Promise.all([listByStatus("planned", 10, token), listByStatus("in_progress", 10, token)])).flat(),
       completed: () => listByStatus("completed", 10, token),

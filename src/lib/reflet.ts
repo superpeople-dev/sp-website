@@ -70,9 +70,6 @@ async function call<T>(path: string, { method = "GET", body, token, admin, cache
 
 export const getChangelog = () => call<ChangelogEntry[]>("/api/v1/feedback/changelog?limit=30", { cache: 60 });
 
-export const listIdeas = (token?: string) =>
-  call<FeedbackListResponse>("/api/v1/feedback/list?sortBy=votes&limit=100", { token, cache: token ? undefined : 60 });
-
 export async function listByStatus(status: FeedbackStatus, pages = 10, token?: string) {
   const items: FeedbackItem[] = [];
   for (let page = 0; page < pages; page++) {
