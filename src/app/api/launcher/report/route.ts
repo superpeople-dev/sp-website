@@ -2,13 +2,15 @@ import { createHash } from "node:crypto";
 import { after, type NextRequest } from "next/server";
 import { logGameReport, type GameReport } from "@/lib/discord";
 import { countThisHour, limitsReady } from "@/lib/downloads";
+import { discordOfAccount } from "@/lib/launcher";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // A report made with the game's own Report button (death cam, spectating), for #in-game-report.
 // The client fixes DLL writes it on the player's PC (sp-native player_reports.cpp) and the launcher
 // sends it here as the signed-in account (sp-launcher reports.rs): who reported is that account,
 // never a name in the report. Only known fields, plain numbers and short lines of text are taken,
-// at most 10 reports a player per hour, and the same report sent twice is posted once.
+// at most 10 reports a player per hour, and the same report sent twice is posted once. The post
+// names the reported player's Discord account when the game backend knows it.
 const PER_HOUR = 10;
 
 const count = (value: unknown, max: number) =>
@@ -69,6 +71,6 @@ export async function POST(request: NextRequest) {
     const same = createHash("sha256").update(`${user.id}\n${JSON.stringify({ ...report, version: undefined })}`).digest("hex");
     if ((await countThisHour(`game-report-sent:${same}`).catch(() => 1)) > 1) return new Response(null, { status: 204 });
   }
-  after(() => logGameReport(user, report));
+  after(async () => logGameReport(user, report, await discordOfAccount(report.suspect.id)));
   return new Response(null, { status: 204 });
 }

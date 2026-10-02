@@ -364,18 +364,26 @@ const reportPrograms: Record<number, string> = {
 const reportFrom: Record<number, string> = { 1: "Report", 2: "Replay", 3: "Death cam", 4: "Spectating" };
 
 // #in-game-report: a player pressed Report in the game. The reporter is the launcher's signed-in
-// Discord account; the names and ids of both players are what their game said.
-export async function logGameReport(who: Player, report: GameReport) {
+// Discord account, the reported player's the one the backend has for their game account (none when
+// it has none); the names and ids of both players are what their game said.
+export async function logGameReport(who: Player, report: GameReport, reported?: { id: string; name: string } | null) {
   // Game text in code style: no formatting, links or mentions from a player name.
   const code = (text: string) => `\`${text.replaceAll("`", "'")}\``;
   const inGame = (player: ReportedPlayer) =>
     [player.name ? code(player.name) : undefined, player.id ? `ID ${code(player.id)}` : undefined].filter(Boolean).join("\n");
+  // Client fixes before v35 read the reason before the game had put the player's choice in, so
+  // theirs is never one of the four.
   const reason =
-    report.reason !== undefined ? (reportReasons[report.reason] ?? `Unknown (${report.reason})`) : "Not given";
+    report.reason === undefined ? "Not given" : (reportReasons[report.reason] ?? "Not known (older game fix)");
   const programs = report.programs.map((program) => reportPrograms[program] ?? `program ${program}`);
   const fields: { name: string; value: string; inline?: boolean }[] = [];
   const add = (name: string, value: string | undefined, inline = true) => value && fields.push({ name, value, inline });
-  add("Reported player", inGame(report.suspect) || "unknown");
+  add(
+    "Reported player",
+    [reported ? `${person(reported)}${reported.name ? ` (${reported.name})` : ""}` : undefined, inGame(report.suspect)]
+      .filter(Boolean)
+      .join("\n") || "unknown",
+  );
   add(
     "Reported by",
     [`${person(who)} (${who.name})`, inGame(report.reporter)].filter(Boolean).join("\n"),

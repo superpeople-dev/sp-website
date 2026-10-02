@@ -5,6 +5,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { shownName, type BoardItem } from "./board";
 import { kinds, typeAndPlatforms } from "./kinds";
 import { siteUrl } from "./seo";
+import { statusUrl } from "./servers";
 import type { SessionUser } from "./session";
 import { legalUpdated } from "./site";
 import type { Profile } from "./store";
@@ -53,9 +54,15 @@ export type GamePass = { d: string; u: string; n: string; a: string; exp: number
 // The session keeps the avatar as its CDN address (app/api/auth/discord/callback).
 const avatarHash = (avatar: string) => avatar.match(/\/avatars\/\d+\/((?:a_)?[0-9a-f]{32})\.png/)?.[1] ?? "";
 
-export function gamePass(user: SessionUser): string {
+// base64url(JSON) "." base64url(Ed25519 signature), as sp-backend lib/discordpass.js opens it.
+function signed(data: object): string {
   if (!passKey) throw new Error("LAUNCHER_PASS_KEY is not set");
   const key = createPrivateKey({ key: Buffer.from(passKey, "base64"), format: "der", type: "pkcs8" });
+  const body = Buffer.from(JSON.stringify(data)).toString("base64url");
+  return `${body}.${sign(null, Buffer.from(body), key).toString("base64url")}`;
+}
+
+export function gamePass(user: SessionUser): string {
   const pass: GamePass = {
     d: user.id,
     u: user.username,
@@ -64,8 +71,40 @@ export function gamePass(user: SessionUser): string {
     exp: Date.now() + passLifetime,
     j: randomUUID(),
   };
-  const body = Buffer.from(JSON.stringify(pass)).toString("base64url");
-  return `${body}.${sign(null, Buffer.from(body), key).toString("base64url")}`;
+  return signed(pass);
+}
+
+// The same key signs the site's own questions to the backend, each for one purpose (p), with the
+// pass's two minutes and one-time id (discordpass.js verifyRequest). A pass has no p, so neither
+// passes for the other.
+export const siteRequest = (purpose: string, fields: Record<string, string | number>) =>
+  signed({ ...fields, p: purpose, exp: Date.now() + passLifetime, j: randomUUID() });
+
+// The backend's launcher routes, on the host the server list comes from (the launcher's own address).
+export const launcherApi = () => `${new URL(statusUrl).origin}/launcher/api`;
+
+export type DiscordAccount = { id: string; name: string };
+
+// Whose Discord account a game account is (sp-backend POST /launcher/api/site/player), for the
+// reported player in #in-game-report: null for an account no Discord player has, or when the
+// backend cannot be asked.
+export async function discordOfAccount(accountId: string | undefined): Promise<DiscordAccount | null> {
+  if (!passKey || !accountId || !/^[0-9a-f]{8,64}$/i.test(accountId)) return null;
+  try {
+    const res = await fetch(`${launcherApi()}/site/player`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ request: siteRequest("player", { u: accountId }) }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { discord_id?: unknown; discord_name?: unknown };
+    const id = String(data.discord_id ?? "");
+    return /^\d{5,25}$/.test(id) ? { id, name: typeof data.discord_name === "string" ? data.discord_name : "" } : null;
+  } catch {
+    return null;
+  }
 }
 
 // ------------------------------------------------------------------ terms ---
