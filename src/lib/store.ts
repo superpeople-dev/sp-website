@@ -44,12 +44,19 @@ const inForce = (entry: Ban | null) => (entry && !(entry.until && entry.until <=
 export const banOf = (id: string) => attempt("ban lookup", null as Ban | null, async (client) => inForce(await client.hget<Ban>(bansKey, id)));
 export const isBanned = async (id: string) => (await banOf(id)) !== null;
 
-export const listBans = () =>
-  attempt("ban list", [] as Ban[], async (client) =>
-    Object.values((await client.hgetall<Record<string, Ban>>(bansKey)) ?? {})
-      .filter((entry) => inForce(entry))
-      .sort((a, b) => b.at - a.at),
-  );
+const bansInForce = async (client: Redis) =>
+  Object.values((await client.hgetall<Record<string, Ban>>(bansKey)) ?? {})
+    .filter((entry) => inForce(entry))
+    .sort((a, b) => b.at - a.at);
+
+export const listBans = () => attempt("ban list", [] as Ban[], bansInForce);
+
+// The same, but a store that fails throws instead of answering "nobody": the Discord bot lifts its
+// Discord bans for bans that are gone (app/api/bot/bans GET), so an outage must not read as none.
+export async function listBansStrict() {
+  if (!redis) throw new Error("Store is not configured");
+  return bansInForce(redis);
+}
 
 export async function ban(entry: Ban) {
   if (!redis) throw new Error("Store is not configured");

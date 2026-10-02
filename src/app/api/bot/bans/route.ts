@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { banUser, unbanUser, type BanTarget } from "@/lib/bans";
 import { accessOf, hasAdminRole, hasModeratorRole } from "@/lib/staff";
-import { banOf, isBanned, storeReady } from "@/lib/store";
+import { banOf, isBanned, listBansStrict, storeReady } from "@/lib/store";
 
 // The Discord bot's /ban, /tempban and /unban (sp-bot, src/commands). The bot sends BOT_API_SECRET and
 // who ran the command: their Discord id and the roles the bot saw on them. The site decides whether
@@ -18,6 +18,11 @@ import { banOf, isBanned, storeReady } from "@/lib/store";
 //     401 unauthorized, 400 invalid / reason / protected, 503 disabled / store,
 //     403 forbidden (neither an admin with "bans" nor a moderator), admin_only (a moderator asking
 //     for a ban until lifted, or to lift one, or to lift a ban the site does not have)
+//
+// GET -> { ok: true, bans: [{ id, name, username, at, until?, reason, by, lockout? }] }
+//  The bans in force, newest first: the bot (src/banmirror.js) bans on the Discord server whoever
+//  was banned here in the admin panel, and lifts that when the ban is lifted. lockout: a honeypot's
+//  ban (lib/honeypot.ts), which the bot leaves alone. 401 unauthorized, 503 disabled / store.
 
 const secret = process.env.BOT_API_SECRET ?? "";
 const digest = (value: string) => createHash("sha256").update(value).digest();
@@ -36,6 +41,28 @@ const personOf = (value: Record<string, unknown> | undefined): BanTarget => {
   const id = text(value?.id, 32);
   return { id, name: text(value?.name, 100) || id, username: text(value?.username, 100), avatar: text(value?.avatar, 300) };
 };
+
+export async function GET(request: NextRequest) {
+  if (!secret) return Response.json({ error: "disabled" }, { status: 503 });
+  if (!authorized(request)) return Response.json({ error: "unauthorized" }, { status: 401 });
+  if (!storeReady) return Response.json({ error: "store" }, { status: 503 });
+  const list = await listBansStrict().catch((error: unknown) => {
+    console.error(`[store] bot ban list failed: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
+  });
+  if (!list) return Response.json({ error: "store" }, { status: 502 });
+  const bans = list.map((entry) => ({
+    id: entry.id,
+    name: entry.name,
+    username: entry.username,
+    at: entry.at,
+    ...(entry.until ? { until: entry.until } : {}),
+    reason: entry.reason ?? "",
+    by: entry.by,
+    ...(entry.lockout ? { lockout: true } : {}),
+  }));
+  return Response.json({ ok: true, bans }, { headers: { "cache-control": "no-store" } });
+}
 
 export async function POST(request: NextRequest) {
   if (!secret) return Response.json({ error: "disabled" }, { status: 503 });
