@@ -61,8 +61,9 @@ export async function POST(request: NextRequest) {
   if (limitsReady && (await countThisHour(`launcher-log:${user.id}`).catch(() => 0)) > PER_HOUR) {
     return Response.json({ error: "limit" }, { status: 429 });
   }
-  // Declined in the data pop-up (lib/consent.ts): no hardware, location or IP for this account.
-  const extras = action === "game.launched" && (await choiceOf(user.id)) !== "declined";
+  // The game's start and the launcher's own update show where from and on what PC. Declined in the
+  // data pop-up (lib/consent.ts): no hardware, location or IP for this account.
+  const extras = (action === "game.launched" || action === "launcher.updated") && (await choiceOf(user.id)) !== "declined";
   // As the site saw the connection (lib/clientip.ts); only an address's own characters. When it is
   // IPv6, also the IPv4 one the launcher checked in with just before (app/api/launcher/ipv4).
   const ip = extras ? [clientIp(request)].find((address) => /^[0-9a-fA-F:.]{3,45}$/.test(address)) : undefined;
