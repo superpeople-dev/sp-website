@@ -4,7 +4,6 @@ import {
   DndContext,
   DragOverlay,
   MouseSensor,
-  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
@@ -13,7 +12,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import Link from "next/link";
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
@@ -33,6 +32,16 @@ const recentDone = 3;
 const foundDone = 10;
 
 type CardProps = Omit<Parameters<typeof WorkCard>[0], "drag" | "overlay">;
+
+// Dragging needs a mouse. On a touch screen (a phone, a tablet) a held finger scrolls the page instead
+// of picking a card up, and each card's ⋯ menu at its top right moves, edits or deletes it.
+const mouseQuery = "(hover: hover) and (pointer: fine)";
+const onPointerChange = (change: () => void) => {
+  const query = window.matchMedia(mouseQuery);
+  query.addEventListener("change", change);
+  return () => query.removeEventListener("change", change);
+};
+const hasMouse = () => window.matchMedia(mouseQuery).matches;
 
 function DropZone({ id, children }: { id: FeedbackStatus; children: ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
@@ -87,11 +96,12 @@ export function PlanBoard({
       setItems((list) => list.map((item) => (item.id === id ? { ...item, ...change } : item))),
     [],
   );
-  const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 6 } }),
-  );
-  const canDrag = can(viewer, "manage");
+  const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 6 } }));
+  // manager: the ⋯ menu on every card and Add task; canDrag: dragging too, with a mouse. The server
+  // renders as with a mouse; a touch screen switches as soon as the page runs.
+  const manager = can(viewer, "manage");
+  const mouse = useSyncExternalStore(onPointerChange, hasMouse, () => true);
+  const canDrag = manager && mouse;
   const next = localeHref(locale, "/roadmap");
   const { vote, prompt: signInPrompt } = useVote({ patch, viewer, authReady, next });
   const add = (item: FeedbackItem) => setItems((list) => [...list.filter((entry) => entry.id !== item.id), item]);
@@ -140,7 +150,7 @@ export function PlanBoard({
                   const props: CardProps = {
                     item,
                     categories,
-                    admin: canDrag ? admin : null,
+                    admin: manager ? admin : null,
                     onOpen: (mode) => open(item.id, mode),
                     onVote: authReady ? (direction) => void vote(item, direction) : undefined,
                     // Not while a vote is sending (useVote ignores those clicks): the arrows would lose their hover
@@ -153,7 +163,7 @@ export function PlanBoard({
             ) : (
               <p className="plan__empty">{filtering ? t.ideas.noMatch : p.empty}</p>
             )}
-            {canDrag && <AddTask status={column.key} categories={categories} types={types} onAdded={add} />}
+            {manager && <AddTask status={column.key} categories={categories} types={types} onAdded={add} />}
             {column.key === "completed" && (column.total ?? 0) > 0 && (
               <Link className="plan__more" href={localeHref(locale, "/completed")}>
                 {p.seeAll}
