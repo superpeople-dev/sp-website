@@ -38,6 +38,8 @@ const sha256 = (text: string) => createHash("sha256").update(text).digest("hex")
 const hmac = (key: Buffer | string, text: string) => createHmac("sha256", key).update(text).digest();
 
 export type Presign = {
+  /** GET (a download link) unless said: PUT lets a browser upload one file, DELETE removes it. */
+  method?: "GET" | "PUT" | "DELETE";
   host: string;
   /** The object's path as requested, starting with "/". */
   path: string;
@@ -51,8 +53,9 @@ export type Presign = {
   params?: Record<string, string>;
 };
 
-// A GET link signed with AWS Signature Version 4 in the query string ("presigned URL").
-export function presignGet({ host, path, accessKey, secretKey, region, expires, now, params = {} }: Presign) {
+// A link signed with AWS Signature Version 4 in the query string ("presigned URL"); a GET one unless
+// `method` says otherwise. Works with any S3-compatible store (Storj, Neon Object Storage).
+export function presign({ method = "GET", host, path, accessKey, secretKey, region, expires, now, params = {} }: Presign) {
   const amzDate = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const day = amzDate.slice(0, 8);
   const scope = `${day}/${region}/s3/aws4_request`;
@@ -68,7 +71,7 @@ export function presignGet({ host, path, accessKey, secretKey, region, expires, 
     .sort()
     .join("&");
   const canonicalPath = encode(path, true);
-  const request = ["GET", canonicalPath, query, `host:${host}`, "", "host", "UNSIGNED-PAYLOAD"].join("\n");
+  const request = [method, canonicalPath, query, `host:${host}`, "", "host", "UNSIGNED-PAYLOAD"].join("\n");
   const toSign = ["AWS4-HMAC-SHA256", amzDate, scope, sha256(request)].join("\n");
   const key = hmac(hmac(hmac(hmac(`AWS4${secretKey}`, day), region), "s3"), "aws4_request");
   const signature = createHmac("sha256", key).update(toSign).digest("hex");
@@ -81,7 +84,7 @@ export function storageProbe(kind: "buckets" | "list") {
   if (!accessKey || !secretKey) throw new Error("Storj signing is not configured");
   const url = new URL(endpoint);
   const base = url.pathname.replace(/\/$/, "");
-  return presignGet({
+  return presign({
     host: url.host,
     path: kind === "buckets" ? `${base}/` : `${base}/${bucket}`,
     accessKey,
@@ -97,7 +100,7 @@ export function storageProbe(kind: "buckets" | "list") {
 export function gameFileLink(path: string, expires: number) {
   if (!accessKey || !secretKey) throw new Error("Storj signing is not configured");
   const url = new URL(endpoint);
-  return presignGet({
+  return presign({
     host: url.host,
     path: `${url.pathname.replace(/\/$/, "")}/${bucket}/${prefix}${path}`,
     accessKey,

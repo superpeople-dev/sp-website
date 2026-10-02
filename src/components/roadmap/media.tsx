@@ -29,8 +29,8 @@ export function pickFiles(list: FileList, room: number, r: Dictionary["ideas"]) 
   return { picked, error };
 }
 
-// One file onto an item (app/api/roadmap/media): an upload address, the file itself, then saving it on
-// the item.
+// One file onto an item (app/api/roadmap/media): an upload address and the file's key, the file itself
+// (straight to our object storage, lib/objects.ts), then saving it on the item.
 export async function uploadMedia(feedbackId: string, file: File) {
   const post = (body: object) =>
     fetch("/api/roadmap/media", {
@@ -40,10 +40,9 @@ export async function uploadMedia(feedbackId: string, file: File) {
     });
   const target = await post({ action: "url" });
   if (!target.ok) throw new Error(String(target.status));
-  const { uploadUrl } = (await target.json()) as { uploadUrl: string };
-  const stored = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": file.type }, body: file });
+  const { uploadUrl, storageId } = (await target.json()) as { uploadUrl: string; storageId: string };
+  const stored = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
   if (!stored.ok) throw new Error(String(stored.status));
-  const { storageId } = (await stored.json()) as { storageId: string };
   const saved = await post({ action: "save", storageId, mimeType: file.type, size: file.size, filename: file.name });
   if (!saved.ok) throw new Error(String(saved.status));
 }

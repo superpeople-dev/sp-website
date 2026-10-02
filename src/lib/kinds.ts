@@ -2,7 +2,7 @@ import type { FeedbackTag } from "reflet-sdk";
 import type { IdeaType } from "@/i18n/types";
 import { ideaTypes } from "./site";
 
-// What an item is, from its type tag, in the Discord posts (app/api/webhooks/reflet, lib/discord.ts):
+// What an item is, from its type tag, in the Discord posts (lib/announce.ts, lib/discord.ts):
 // how a post names it (as a post, and as a roadmap task), what its completion is called, who posted
 // it, and its colour on the site.
 export type Kind = { type: string; name: string; task: string; done: string; by: string; color: number };

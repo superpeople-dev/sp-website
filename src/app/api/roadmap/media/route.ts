@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { ownsIdea } from "@/lib/authorship";
-import { failure, listMedia, mediaUploadUrl, saveMedia } from "@/lib/reflet";
+import { failure, isMediaKey, listMedia, mediaUploadUrl, saveMedia } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
 import { mediaLimits } from "@/lib/site";
 import { isBanned } from "@/lib/store";
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       if ((await listMedia(feedbackId)).length >= mediaLimits.files) {
         return Response.json({ error: "limit" }, { status: 429 });
       }
-      return Response.json({ uploadUrl: await mediaUploadUrl() });
+      return Response.json(await mediaUploadUrl(feedbackId));
     }
 
     if (body.action === "save") {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       const size = typeof body.size === "number" ? body.size : -1;
       const filename = typeof body.filename === "string" ? body.filename.trim().slice(0, 120) : "";
       const max = mimeType.startsWith("video/") ? mediaLimits.video : mediaLimits.image;
-      if (!/^[\w-]+$/.test(storageId) || !mediaLimits.types.includes(mimeType) || size < 0 || size > max) {
+      if (!isMediaKey(feedbackId, storageId) || !mediaLimits.types.includes(mimeType) || size < 0 || size > max) {
         return Response.json({ error: "invalid" }, { status: 400 });
       }
       await saveMedia(feedbackId, storageId, mimeType, size, filename || "attachment");

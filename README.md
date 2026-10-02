@@ -10,7 +10,8 @@ It explains the project, links the launcher download and the Discord, and hosts 
 - Next.js 16 (App Router), React 19 and TypeScript
 - [Motion](https://motion.dev) for animations
 - Launcher releases come from the GitHub API
-- Ideas, comments, the roadmap and release notes come from [Reflet](https://reflet.app); players sign in with Discord
+- Ideas, votes, comments and the roadmap are the site's own, in Postgres on [Neon](https://neon.com), with images
+  and videos in Neon's object storage; players sign in with Discord
 - The site's own records (commenter profiles, bans, admins, downvotes, notifications, download limits) live in
   Postgres on [Neon](https://neon.com) ([`src/lib/db.ts`](src/lib/db.ts), tables in [`db/migrations`](db/migrations))
 
@@ -27,7 +28,7 @@ bun dev
 ```
 
 Open http://localhost:3000. The home and legal pages work without any environment variables. The
-Bugs & Ideas, Roadmap and Completed pages need the Reflet and Discord variables listed below; without them
+Bugs & Ideas, Roadmap and Completed pages need the database and Discord variables listed below; without them
 they show a "not available" message.
 
 Before opening a pull request, check that these pass:
@@ -43,11 +44,11 @@ bun run build
 ```
 src/
   app/[lang]/     pages for each language: home, bugs-and-ideas, roadmap, completed, terms, privacy
-  app/api/        Discord sign-in, votes, new ideas, admin actions and the Reflet webhook
+  app/api/        Discord sign-in, votes, new ideas and admin actions
   components/     UI components; roadmap/ holds the community pages
   i18n/           language config, shared types and one dictionary per language
-  lib/            GitHub, Reflet, sessions, SEO and data shared by every language (site.ts)
-scripts/          importing the known bug list into Reflet
+  lib/            GitHub, the boards (reflet.ts), sessions, SEO and data shared by every language (site.ts)
+db/migrations/    the database's tables, applied in order by `bun run db:migrate`
 public/og/        share images, one per language
 ```
 
@@ -78,26 +79,27 @@ its own. `/download` always redirects to the newest installer.
 
 ## Community pages
 
-| Page | Shows | Reflet status |
+| Page | Shows | Status |
 | --- | --- | --- |
 | `/bugs-and-ideas` | Approved ideas and bug reports. Signed-in players post and vote. | Open |
 | `/bugs-and-ideas`, admins only | New posts waiting for review | Under review |
 | `/roadmap` | To do, working on and recently completed | Planned, In progress, Completed |
 | `/completed` | Everything completed, grouped by area, and the release notes | Completed |
 
-- The kind of post (Bug, Feature, Improvement, Question) comes from Reflet's default tags. Every other
-  tag is treated as an area (Game, Launcher, Servers, Website...).
+- The kind of post (Bug, Feature, Improvement, Question) is a tag with that slug (`tags` table). Every other
+  tag is an area (Game, Launcher, Servers, Website...).
 - New posts start as "Under review" and stay hidden until an admin approves them.
 - A player can have at most 3 posts waiting for review. Each approval or rejection frees a slot.
 - Posts can include up to 4 images or videos (10 MB per image, 100 MB per video). The browser uploads
-  them straight to Reflet's file storage, and they show in the post's details.
+  them straight to the `media` bucket in Neon's object storage ([`src/lib/objects.ts`](src/lib/objects.ts)) with a
+  short-lived upload link, and they show in the post's details.
 - Clicking a card opens its details and comments. Signed-in players comment with their Discord name
   and avatar.
-- Posts, votes and comments are stored in Reflet. Reflet doesn't keep avatars or know about bans, so
-  our own Postgres database ([`src/lib/store.ts`](src/lib/store.ts)) keeps the Discord profile of each
-  post and comment author, and the ban list. Without a database, comments still work but show no
-  avatars, and banning is turned off.
-- Reflet and the database are only called from the server ([`src/lib/`](src/lib/) and
+- Posts, votes and comments are in our Postgres database ([`src/lib/reflet.ts`](src/lib/reflet.ts), tables in
+  [`db/migrations`](db/migrations)), with the Discord profile of each post and comment author and the ban list
+  ([`src/lib/store.ts`](src/lib/store.ts)). Until 02.10.2026 they were in Reflet; what was there was imported,
+  with the same ids, and the module keeps Reflet's function names and shapes.
+- The database and the storage are only reached from the server ([`src/lib/`](src/lib/) and
   [`src/app/api/`](src/app/api/)), so the keys never reach the browser.
 
 ### Admins
@@ -117,34 +119,25 @@ server or role and choose Copy ID.
 
 ### Discord announcements
 
-When a post is approved, or moves to the roadmap, into progress or to completed, Reflet calls
-`/api/webhooks/reflet`. The site checks the signature, refreshes its pages and posts a message to a
-Discord channel. To set it up, create a webhook on the Discord channel, then add a webhook in Reflet
-(Project → API keys → Webhooks) that points to `https://superpeople.dev/api/webhooks/reflet`.
-
-### Known bugs
-
-[`scripts/known-bugs.json`](scripts/known-bugs.json) lists bugs reported on Discord.
-`bun run seed:bugs` adds the ones that aren't in Reflet yet, using the Reflet keys from `.env.local`.
-It skips anything already there, so it is safe to run again after adding bugs to the file.
+When a post is approved, or moves to the roadmap, into progress or to completed, the site posts a message
+to the Discord channel of `DISCORD_WEBHOOK_URL` ([`src/lib/announce.ts`](src/lib/announce.ts)), naming who
+did it.
 
 ## Environment variables
 
 | Name | Used for |
 | --- | --- |
-| `NEXT_PUBLIC_REFLET_PUBLIC_KEY` | Reading the community pages from Reflet |
-| `REFLET_SECRET_KEY` | Signing players' identity and admin actions (server only) |
 | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Discord sign-in |
 | `AUTH_SECRET` | Signing the sign-in cookie, any long random string |
 | `DISCORD_GUILD_ID`, `DISCORD_ADMIN_ROLE_IDS` | Optional: role-based admins |
 | `DISCORD_MODERATOR_ROLE_IDS` | Optional: Discord roles that may `/tempban` from the bot and lift those bans, but not ban until lifted. Default: the Moderator and Developer roles |
 | `ADMIN_DISCORD_IDS` | Optional: extra admins by Discord user ID, comma-separated |
-| `DATABASE_URL` | Postgres (Neon's pooled address): comment avatars, bans, admins, downvotes, notifications, API keys, download limits. `neon env pull` writes it, with `DATABASE_URL_UNPOOLED` |
+| `DATABASE_URL` | Postgres (Neon's pooled address): posts, votes, comments, bans, admins, notifications, API keys, download limits. `neon env pull` writes it, with `DATABASE_URL_UNPOOLED` |
 | `DATABASE_URL_UNPOOLED` | The direct address, for `bun run db:migrate` (schema changes, `db/migrations/*.sql`, each applied once) |
-| `DISCORD_WEBHOOK_URL`, `REFLET_WEBHOOK_SECRET` | Optional: Discord announcements |
+| `NEON_S3_ENDPOINT`, `NEON_S3_REGION`, `NEON_S3_ACCESS_KEY_ID`, `NEON_S3_SECRET_ACCESS_KEY` | The branch's object storage, for images and videos on posts. Locally `neon env pull` writes them as `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, which work too (Vercel keeps the `AWS_` names for itself) |
+| `DISCORD_WEBHOOK_URL` | Optional: Discord announcements |
 | `GITHUB_TOKEN` | Optional: only if the GitHub API rate-limits the server |
 | `NEXT_PUBLIC_SITE_URL` | Optional: replaces `https://superpeople.dev` in canonical links and the sitemap |
-| `REFLET_API_URL` | Optional: a self-hosted Reflet backend |
 
 The Discord application needs these OAuth2 redirects: `http://localhost:3000/api/auth/discord/callback`
 for local work and `https://superpeople.dev/api/auth/discord/callback` in production.

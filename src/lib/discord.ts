@@ -2,11 +2,11 @@ import { boardOf, itemPath, type ActivityEvent } from "./board";
 import { capital, kinds } from "./kinds";
 import { siteUrl } from "./seo";
 
-// Discord posts for what happens on the site, in the style of the Reflet webhook's "New idea".
+// Discord posts for what happens on the site, in the style of the "New idea" post (lib/announce.ts).
 // Community events (votes, comments) go to DISCORD_WEBHOOK_URL, the channel with the new ideas.
 // Moderation (bans, deletions with the deleted text, edits, admin changes, ideas to review) goes to
 // DISCORD_MOD_WEBHOOK_URL, meant for a private staff channel; without it those are not posted.
-// Approvals and moves are already posted by the Reflet webhook (app/api/webhooks/reflet). A deleted
+// Approvals and moves are posted by lib/announce.ts (lib/reflet.ts setStatus). A deleted
 // idea or task is posted to both: the community sees it went, the staff channel keeps the record.
 // Two log channels for the staff: DISCORD_AUTH_LOG_WEBHOOK_URL (#discord-auth-logs) hears every
 // Discord sign-in and sign-out, on the website and in the launcher; DISCORD_LAUNCHER_LOG_WEBHOOK_URL

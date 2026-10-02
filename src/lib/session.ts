@@ -29,13 +29,7 @@ const maxAge = 60 * 60 * 24 * 30;
 const secure = process.env.NODE_ENV === "production";
 const encoder = new TextEncoder();
 
-export const authReady = Boolean(
-  process.env.AUTH_SECRET &&
-    process.env.DISCORD_CLIENT_ID &&
-    process.env.DISCORD_CLIENT_SECRET &&
-    process.env.REFLET_SECRET_KEY &&
-    process.env.NEXT_PUBLIC_REFLET_PUBLIC_KEY,
-);
+export const authReady = Boolean(process.env.AUTH_SECRET && process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET);
 
 export const sessionCookieOptions = { httpOnly: true, secure, sameSite: "lax" as const, path: "/", maxAge };
 export const oauthCookieOptions = { httpOnly: true, secure, sameSite: "lax" as const, path: "/api/auth", maxAge: 600 };
