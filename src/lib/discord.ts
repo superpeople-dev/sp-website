@@ -12,9 +12,10 @@ import { siteUrl } from "./seo";
 // Discord sign-in and sign-out, on the website and in the launcher; DISCORD_LAUNCHER_LOG_WEBHOOK_URL
 // (#launcher-logs) what players do with the game in the launcher (download, verify, uninstall,
 // starting the game) and the download limits. Without them those are not posted. A player's IP is
-// only on "Game launched", behind a spoiler.
+// only on "Game launched", behind a spoiler. DISCORD_INGAME_REPORT_WEBHOOK_URL (#in-game-report)
+// gets the reports made with the game's own Report button, sent on by the launcher.
 
-type Channel = "community" | "moderation" | "auth" | "launcher";
+type Channel = "community" | "moderation" | "auth" | "launcher" | "reports";
 type Embed = {
   label: string;
   color: number;
@@ -33,6 +34,7 @@ const hooks: Record<Channel, string | undefined> = {
   moderation: process.env.DISCORD_MOD_WEBHOOK_URL,
   auth: process.env.DISCORD_AUTH_LOG_WEBHOOK_URL,
   launcher: process.env.DISCORD_LAUNCHER_LOG_WEBHOOK_URL,
+  reports: process.env.DISCORD_INGAME_REPORT_WEBHOOK_URL,
 };
 
 // Name and picture of every post, whichever webhook it goes through. Without avatar_url Discord shows
@@ -325,4 +327,75 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
   if (details.hardware) add("Hardware", verbatim(hardwareText(details.hardware) || "unknown"), false);
   if (details.reason) add("Reason", verbatim(details.reason), false);
   await post("launcher", { label, color, thumbnail: who.avatar, fields });
+}
+
+// A player in a report made with the game's Report button, as the game filled it in (sp-native
+// client-fixes player_reports.cpp). Everything here comes from the player's PC and is shown as text.
+export type ReportedPlayer = { id?: string; name?: string; weapon?: string; weaponId?: number };
+export type GameReport = {
+  type?: number;
+  reason?: number;
+  programs: number[];
+  replay?: string;
+  version?: string;
+  reporter: ReportedPlayer & { hitBone?: string; damage?: number; damageType?: string };
+  suspect: ReportedPlayer & { distance?: number; hits?: number; headshots?: number };
+};
+
+// The game's own words for its choices (TBL-String 5199-5206), its EReportIndex 1-4, the
+// cheat-program boxes 1-4 (UW-ReportUserProgram's SetProgramIndex) and its EReportType 1-4.
+const reportReasons: Record<number, string> = {
+  1: "Inappropriate username",
+  2: "Using unauthorized programs",
+  3: "Disrupting normal gameplay",
+  4: "Other reasons",
+};
+const reportPrograms: Record<number, string> = {
+  1: "aimbot",
+  2: "knows other players' locations",
+  3: "no recoil",
+  4: "actions impossible in the game",
+};
+const reportFrom: Record<number, string> = { 1: "Report", 2: "Replay", 3: "Death cam", 4: "Spectating" };
+
+// #in-game-report: a player pressed Report in the game. The reporter is the launcher's signed-in
+// Discord account; the names and ids of both players are what their game said.
+export async function logGameReport(who: Player, report: GameReport) {
+  // Game text in code style: no formatting, links or mentions from a player name.
+  const code = (text: string) => `\`${text.replaceAll("`", "'")}\``;
+  const inGame = (player: ReportedPlayer) =>
+    [player.name ? code(player.name) : undefined, player.id ? `ID ${code(player.id)}` : undefined].filter(Boolean).join("\n");
+  const reason =
+    report.reason !== undefined ? (reportReasons[report.reason] ?? `Unknown (${report.reason})`) : "Not given";
+  const programs = report.programs.map((program) => reportPrograms[program] ?? `program ${program}`);
+  const fields: { name: string; value: string; inline?: boolean }[] = [];
+  const add = (name: string, value: string | undefined, inline = true) => value && fields.push({ name, value, inline });
+  add("Reported player", inGame(report.suspect) || "unknown");
+  add(
+    "Reported by",
+    [`${person(who)} (${who.name})`, inGame(report.reporter)].filter(Boolean).join("\n"),
+  );
+  add("Reason", programs.length ? `${reason}: ${programs.join(", ")}` : reason, false);
+  add("Made from", report.type !== undefined ? reportFrom[report.type] : undefined);
+  const { suspect, reporter } = report;
+  add("Their weapon", suspect.weapon ? code(suspect.weapon) : suspect.weaponId ? `item ${suspect.weaponId}` : undefined);
+  // The game's own counts and distance (its suspect data): it does not say what they cover or the unit.
+  add("Hits", suspect.hits ? `${suspect.hits}${suspect.headshots ? ` (${suspect.headshots} headshots)` : ""}` : undefined);
+  add("Distance", suspect.distance ? `${suspect.distance}` : undefined);
+  const death = [
+    reporter.hitBone ? `hit in ${code(reporter.hitBone)}` : undefined,
+    reporter.damage ? `${reporter.damage} damage` : undefined,
+    reporter.damageType ? code(reporter.damageType) : undefined,
+  ].filter(Boolean);
+  add("Reporter's last hit", death.length ? death.join(", ") : undefined);
+  add("Replay on their PC", report.replay ? code(report.replay) : undefined, false);
+  add("Launcher", report.version ? `v${report.version}` : undefined);
+  add("When", now(), false);
+  await post("reports", {
+    label: "Player report",
+    color: colors.red,
+    title: `${suspect.name || suspect.id || "A player"} reported: ${reason}`,
+    thumbnail: who.avatar,
+    fields,
+  });
 }
