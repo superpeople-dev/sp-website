@@ -512,6 +512,7 @@ export const fr: Dictionary = {
     bansTitle: "Joueurs bannis",
     bansEmpty: "Personne n'est banni.",
     unban: "Débannir",
+    unbanElsewhere: "Les bannissements se lèvent dans le panneau d'administration :",
     bannedOn: "Banni le {date} par {name}",
     downloadBlocks: "Limites de téléchargement",
     downloadBlocked: "{amount} téléchargés en une heure - bloqué jusqu'au {date}",

@@ -510,6 +510,7 @@ export const zh: Dictionary = {
     bansTitle: "已封禁的玩家",
     bansEmpty: "目前没有被封禁的玩家。",
     unban: "解除封禁",
+    unbanElsewhere: "解除封禁请前往管理面板：",
     bannedOn: "{date} 由 {name} 封禁",
     downloadBlocks: "下载限制",
     downloadBlocked: "一小时内下载了 {amount} - 限制至 {date}",

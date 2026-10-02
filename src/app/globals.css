@@ -2379,6 +2379,8 @@ button.votes__down:disabled { cursor: default; }
 .bans__who b { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 600; overflow-wrap: anywhere; }
 .bans__who > span { color: var(--muted); font-size: 13px; }
 /* "Download limits", under the bans in the same tab. */
+.bans__note { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.bans__note a { color: var(--paper); }
 .bans__heading { margin: 22px 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 
 .skel {

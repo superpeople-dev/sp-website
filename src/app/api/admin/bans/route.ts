@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { banUser, unbanUser } from "@/lib/bans";
+import { banUser } from "@/lib/bans";
 import { can } from "@/lib/board";
 import { readSession, sameOrigin } from "@/lib/session";
 import { listBans, storeReady } from "@/lib/store";
@@ -23,8 +23,10 @@ export async function POST(request: NextRequest) {
   const name = text(body.user?.name, 100) || id;
 
   try {
+    // For now bans are lifted in the game's admin panel (admin.superpeople.dev) or with the bot's /unban,
+    // which lift the game side too; an unban here would only lift the website's half.
     if (body.action === "unban") {
-      await unbanUser(user, { id, name });
+      return Response.json({ error: "moved" }, { status: 410 });
     } else if (body.action === "ban") {
       const target = { id, name, username: text(body.user?.username, 100), avatar: text(body.user?.avatar, 300) };
       const result = await banUser(user, target, text(body.reason, 300));

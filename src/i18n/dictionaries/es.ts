@@ -512,6 +512,7 @@ export const es: Dictionary = {
     bansTitle: "Jugadores bloqueados",
     bansEmpty: "No hay nadie bloqueado.",
     unban: "Desbloquear",
+    unbanElsewhere: "Los baneos se quitan en el panel de administración:",
     bannedOn: "Bloqueado el {date} por {name}",
     downloadBlocks: "Límites de descarga",
     downloadBlocked: "Descargó {amount} en una hora - bloqueado hasta el {date}",

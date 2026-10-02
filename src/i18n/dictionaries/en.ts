@@ -512,6 +512,7 @@ export const en: Dictionary = {
     bansTitle: "Banned players",
     bansEmpty: "Nobody is banned.",
     unban: "Unban",
+    unbanElsewhere: "Unbanning is done in the admin panel:",
     bannedOn: "Banned {date} by {name}",
     downloadBlocks: "Download limits",
     downloadBlocked: "Downloaded {amount} in an hour - blocked until {date}",

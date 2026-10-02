@@ -512,6 +512,7 @@ export const ru: Dictionary = {
     bansTitle: "Заблокированные игроки",
     bansEmpty: "Заблокированных нет.",
     unban: "Разблокировать",
+    unbanElsewhere: "Снять бан можно в админ-панели:",
     bannedOn: "Заблокирован {date} - {name}",
     downloadBlocks: "Лимиты загрузки",
     downloadBlocked: "Скачал {amount} за час - заблокирован до {date}",

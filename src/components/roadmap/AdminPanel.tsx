@@ -160,14 +160,6 @@ function AdminBody({
     onChange();
   };
 
-  const unban = async (ban: Ban) => {
-    setBusy(ban.id);
-    const response = await post("/api/admin/bans", { action: "unban", user: { id: ban.id, name: ban.name } });
-    setBusy(null);
-    if (!response?.ok) return window.alert(b.actionFailed);
-    drop("bans", ban.id);
-  };
-
   const unblock = async (block: Block) => {
     setBusy(block.account);
     const response = await post("/api/admin/downloads", { action: "unblock", account: block.account });
@@ -257,26 +249,33 @@ function AdminBody({
       </>
     ) : null;
 
+  // No Unban here for now: bans are lifted in the game's admin panel (or with the bot's /unban), which
+  // also lifts the game side; the website's unban would only lift its own half.
   const bans = () =>
     data?.bans?.length ? (
-      <ul className="bans">
-        {data.bans.map((ban) => (
-          <li key={ban.id} className="bans__row">
-            <Avatar src={ban.avatar} size={36} />
-            <div className="bans__who">
-              <b>
-                {shownName(ban.name, ban.username)}
-                {ban.username && <span className="who__user">@{ban.username}</span>}
-              </b>
-              <span>{fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}</span>
-              {ban.reason && <q className="bans__reason">{ban.reason}</q>}
-            </div>
-            <button type="button" className="btn btn--sm" disabled={busy === ban.id} onClick={() => void unban(ban)}>
-              {b.unban}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <>
+        <p className="bans__note">
+          {b.unbanElsewhere}{" "}
+          <a href="https://admin.superpeople.dev/players" target="_blank" rel="noopener">
+            admin.superpeople.dev
+          </a>
+        </p>
+        <ul className="bans">
+          {data.bans.map((ban) => (
+            <li key={ban.id} className="bans__row">
+              <Avatar src={ban.avatar} size={36} />
+              <div className="bans__who">
+                <b>
+                  {shownName(ban.name, ban.username)}
+                  {ban.username && <span className="who__user">@{ban.username}</span>}
+                </b>
+                <span>{fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}</span>
+                {ban.reason && <q className="bans__reason">{ban.reason}</q>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </>
     ) : (
       <p className="thread__empty">{b.bansEmpty}</p>
     );

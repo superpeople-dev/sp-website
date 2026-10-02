@@ -512,6 +512,7 @@ export const ko: Dictionary = {
     bansTitle: "차단된 플레이어",
     bansEmpty: "차단된 플레이어가 없습니다.",
     unban: "차단 해제",
+    unbanElsewhere: "차단 해제는 관리자 패널에서 합니다:",
     bannedOn: "{date} - {name} 님이 차단",
     downloadBlocks: "다운로드 제한",
     downloadBlocked: "1시간 동안 {amount} 다운로드 - {date}까지 차단",

@@ -512,6 +512,7 @@ export const de: Dictionary = {
     bansTitle: "Gesperrte Spieler",
     bansEmpty: "Niemand ist gesperrt.",
     unban: "Entsperren",
+    unbanElsewhere: "Entbannen geht im Admin-Panel:",
     bannedOn: "Gesperrt am {date} von {name}",
     downloadBlocks: "Download-Limits",
     downloadBlocked: "{amount} in einer Stunde heruntergeladen - gesperrt bis {date}",

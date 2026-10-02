@@ -343,6 +343,7 @@ export type Dictionary = {
     bansTitle: string;
     bansEmpty: string;
     unban: string;
+    unbanElsewhere: string;
     bannedOn: string;
     // Admin panel, Bans tab: players stopped from downloading the game (lib/downloads.ts).
     downloadBlocks: string;
