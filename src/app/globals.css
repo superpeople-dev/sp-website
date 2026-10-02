@@ -323,8 +323,6 @@ h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacin
   .nav__download { display: none; }
 }
 @media (max-width: 480px) {
-  .gh__label { display: none; }
-  .gh { padding: 0 11px; }
   .nav__actions { gap: 8px; }
 }
 
@@ -2586,7 +2584,8 @@ button.votes__down:disabled { cursor: default; }
 }
 
 .footer { padding: 48px 0; color: var(--muted); font-size: 14px; }
-/* Desktop: logo and links on one row, the disclaimer under them. Phone: everything stacked,
+/* Desktop: logo and links on one row, the disclaimer under them. At and below 1140px (where the
+   site menu turns into ☰; five links in Russian need ~830px next to the logo): everything stacked,
    the links as a list. */
 .footer .wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "logo links" "text text"; align-items: center; gap: 18px 32px; }
 .footer img { grid-area: logo; opacity: 0.7; }
@@ -2594,13 +2593,13 @@ button.votes__down:disabled { cursor: default; }
 .footer a { color: var(--paper-dim); }
 .footer__links { grid-area: links; justify-self: end; display: flex; gap: 22px; }
 .footer__links a { text-decoration: none; white-space: nowrap; }
-@media (max-width: 700px) {
+@media (max-width: 1140px) {
   .footer .wrap { grid-template-columns: minmax(0, 1fr); grid-template-areas: "logo" "text" "links"; }
   .footer__links { justify-self: start; flex-direction: column; gap: 12px; }
 }
 .footer__links a:hover { color: var(--paper); text-decoration: underline; }
-.footer__discord { display: inline-flex; align-items: center; gap: 7px; }
-.footer__discord svg { width: 16px; height: 16px; flex: none; color: #fff; }
+.footer__social { display: inline-flex; align-items: center; gap: 7px; }
+.footer__social svg { width: 16px; height: 16px; flex: none; color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -2666,28 +2665,11 @@ button.votes__down:disabled { cursor: default; }
 .notfound h1 { margin: 0; font: 800 clamp(32px, 5vw, 48px)/1 var(--display); text-transform: uppercase; }
 .notfound p { margin: 0 0 12px; color: var(--paper-dim); }
 /* Leaderboard (components/leaderboard/Leaderboard.tsx). Desktop: the modes and the view side by side,
-   the list in four columns. Phone (700px and under): the modes on a row of their own with the view
-   under them, the tier under the player's name. Nothing wraps; long names end in an ellipsis. */
+   the search on the right, the list in four columns. Phone (700px and under): the modes on a row of
+   their own, the view and the search under them, the tier under the player's name. Nothing wraps;
+   long names end in an ellipsis. */
 .leaders { display: grid; gap: 20px; }
 .leaders__bar { display: flex; align-items: center; gap: 12px; }
-.seg { display: inline-flex; flex: none; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
-.seg button {
-  height: 32px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--paper-dim);
-  font: 700 12px var(--display);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s;
-}
-.seg button:hover { color: var(--paper); }
-.seg button.is-active { background: var(--signal); color: #fff; }
-.seg button:focus-visible { outline: 2px solid var(--signal-hi); outline-offset: 2px; }
 .leaders__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .leaders__table { width: 100%; border-collapse: separate; border-spacing: 0 6px; table-layout: fixed; }
 .leaders__table th {
@@ -2717,18 +2699,8 @@ td.leaders__rp { color: var(--paper); font: 700 17px var(--display); font-varian
 .leaders__name bdi { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .leaders__flag { flex: none; width: 21px; height: 14px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); }
 .leaders__tier-under { display: none; }
-.tier {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 9px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font: 700 11px var(--display);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
+/* A tier: a coloured label, like a card's type on the boards. */
+.tier { font: 700 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
 .tier--iron { color: #9a958f; }
 .tier--bronze { color: #c98a5a; }
 .tier--silver { color: #c9d0d8; }
@@ -2738,23 +2710,24 @@ td.leaders__rp { color: var(--paper); font: 700 17px var(--display); font-varian
 .tier--master { color: #b88cff; }
 .tier--grandMaster { color: #ff7a8a; }
 .tier--legendary { color: #ff9d3d; }
-.tier--superSoldier { background: rgba(239, 68, 56, 0.12); color: var(--signal-hi); }
+.tier--superSoldier { color: var(--signal-hi); }
 @media (max-width: 700px) {
-  .leaders__bar { flex-direction: column; align-items: stretch; gap: 10px; }
-  .seg--modes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .seg--modes button { min-width: 0; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; }
-  .leaders__bar .seg:not(.seg--modes) { align-self: flex-start; }
+  /* The view gets two fifths of its row, the search the rest. */
+  .leaders__bar { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 10px; }
+  .leaders__views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .leaders__modes { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .leaders__bar .ideas__sort button { min-width: 0; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; }
   .leaders__table .leaders__tier { display: none; }
-  .leaders__tier-under { display: block; margin-top: 5px; }
+  .leaders__tier-under { display: block; margin-top: 4px; }
   .leaders__table th { padding: 0 10px 2px; }
   .leaders__table td { height: auto; padding: 10px; }
   .leaders__table .leaders__rank { width: 46px; }
   .leaders__table .leaders__rp { width: 78px; }
   td.leaders__rank { font-size: 16px; }
   td.leaders__rp { font-size: 15px; }
-  .tier { height: 20px; padding: 0 7px; font-size: 10px; }
+  .tier { font-size: 11px; }
 }
 /* The narrowest phones: the longest mode names (Escuadrón, スクワッド) still fit in a quarter. */
 @media (max-width: 400px) {
-  .seg--modes button { padding: 0 3px; font-size: 11px; letter-spacing: 0.04em; }
+  .leaders__bar .leaders__modes button { padding: 0 3px; font-size: 11px; letter-spacing: 0.04em; }
 }

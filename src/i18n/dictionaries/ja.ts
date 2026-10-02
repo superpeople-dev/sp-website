@@ -554,6 +554,8 @@ export const ja: Dictionary = {
     pointsTitle: "ランクポイント",
     empty: "今シーズン、このモードでランクポイントを持つプレイヤーはまだいません。",
     unavailable: "現在ランキングを読み込めません。1分ほどしてからもう一度お試しください。",
+    search: "プレイヤーを検索",
+    noMatch: "このリストに「{name}」というプレイヤーはいません。",
     tiers: { superSoldier: "スーパーソルジャー", legendary: "レジェンダリー", grandMaster: "グランドマスター", master: "マスター", diamond: "ダイヤモンド", platinum: "プラチナ", gold: "ゴールド", silver: "シルバー", bronze: "ブロンズ", iron: "アイアン" },
   },
   legal: {

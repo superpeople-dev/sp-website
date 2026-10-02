@@ -386,6 +386,8 @@ export type Dictionary = {
     pointsTitle: string;
     empty: string;
     unavailable: string;
+    search: string;
+    noMatch: string;
     tiers: Record<"superSoldier" | "legendary" | "grandMaster" | "master" | "diamond" | "platinum" | "gold" | "silver" | "bronze" | "iron", string>;
   };
   legal: {

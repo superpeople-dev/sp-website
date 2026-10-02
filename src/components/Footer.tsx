@@ -3,7 +3,7 @@ import Link from "next/link";
 import logo from "@/assets/sp-logo.png";
 import { localeHref, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/types";
-import { site } from "@/lib/site";
+import { repoUrl, site } from "@/lib/site";
 import { Icon } from "./Icon";
 
 export function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
@@ -16,9 +16,13 @@ export function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
           <Link href={localeHref(locale, "/faq")}>{t.faq.short}</Link>
           <Link href={localeHref(locale, "/terms")}>{t.legal.terms}</Link>
           <Link href={localeHref(locale, "/privacy")}>{t.legal.privacy}</Link>
-          <a className="footer__discord" href={site.discord} target="_blank" rel="noopener">
+          <a className="footer__social" href={site.discord} target="_blank" rel="noopener">
             <Icon name="discord" />
             Discord
+          </a>
+          <a className="footer__social" href={repoUrl} target="_blank" rel="noopener" aria-label={t.nav.githubLabel}>
+            <Icon name="github" />
+            GitHub
           </a>
         </nav>
       </div>

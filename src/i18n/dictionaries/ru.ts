@@ -554,6 +554,8 @@ export const ru: Dictionary = {
     pointsTitle: "Рейтинговые очки",
     empty: "В этом сезоне в этом режиме ещё ни у кого нет рейтинговых очков.",
     unavailable: "Рейтинг сейчас не загружается. Попробуйте через минуту.",
+    search: "Поиск игрока",
+    noMatch: "В этом списке нет игрока «{name}».",
     tiers: { superSoldier: "Суперсолдат", legendary: "Легенда", grandMaster: "Гроссмейстер", master: "Мастер", diamond: "Алмаз", platinum: "Платина", gold: "Золото", silver: "Серебро", bronze: "Бронза", iron: "Железо" },
   },
   legal: {

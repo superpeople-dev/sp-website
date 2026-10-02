@@ -554,6 +554,8 @@ export const en: Dictionary = {
     pointsTitle: "Ranked points",
     empty: "Nobody has ranked points in this mode yet this season.",
     unavailable: "The leaderboard can't be loaded right now. Try again in a minute.",
+    search: "Search players",
+    noMatch: "Nobody called “{name}” in this list.",
     tiers: { superSoldier: "Super Soldier", legendary: "Legendary", grandMaster: "Grand Master", master: "Master", diamond: "Diamond", platinum: "Platinum", gold: "Gold", silver: "Silver", bronze: "Bronze", iron: "Iron" },
   },
   legal: {

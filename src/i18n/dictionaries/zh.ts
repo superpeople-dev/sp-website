@@ -552,6 +552,8 @@ export const zh: Dictionary = {
     pointsTitle: "排位积分",
     empty: "本赛季这个模式还没有人获得排位积分。",
     unavailable: "暂时无法加载排行榜，请一分钟后再试。",
+    search: "搜索玩家",
+    noMatch: "此榜单中没有名为“{name}”的玩家。",
     tiers: { superSoldier: "超级士兵", legendary: "传奇", grandMaster: "宗师", master: "大师", diamond: "钻石", platinum: "铂金", gold: "黄金", silver: "白银", bronze: "青铜", iron: "黑铁" },
   },
   legal: {

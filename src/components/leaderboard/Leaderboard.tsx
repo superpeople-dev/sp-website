@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { localeInfo } from "@/i18n/config";
+import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import {
   leaderModes,
@@ -14,17 +14,26 @@ import {
   type LeaderMode,
   type LeaderView,
 } from "@/lib/leaderboard";
+import { Icon } from "../Icon";
 import { Reveal } from "../motion";
 
+// Names match with or without accents and capitals ("lea" finds "Léa").
+const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
 // The season leaderboard (app/[lang]/leaderboard): a mode and a view picked above the list, kept in the
-// link (?mode=squad-fpp) without reloading the page. Desktop: one bar, the list in four columns.
-// Phone: the modes on a row of their own, the tier under the name.
+// link (?mode=squad-fpp) without reloading the page, and a search by name that stays when the list
+// changes (where does a player stand in each mode?). Players found keep their rank. Desktop: one bar,
+// the search on the right, the list in four columns. Phone: the modes on a row of their own, the view
+// and the search under them, the tier under the name.
 export function Leaderboard({ board, initialKey }: { board: Board; initialKey: LeaderKey }) {
   const { locale, t } = useI18n();
   const l = t.leaderboard;
   const [key, setKey] = useState(initialKey);
+  const [query, setQuery] = useState("");
   const [mode, view] = key.split("_") as [LeaderMode, LeaderView];
-  const rows = board.lists[key];
+  const list = board.lists[key];
+  const wanted = plain(query.trim());
+  const rows = wanted ? list.filter((row) => plain(row.name).includes(wanted)) : list;
   const intl = localeInfo[locale].intl;
   const number = useMemo(() => new Intl.NumberFormat(intl), [intl]);
   const regions = useMemo(() => new Intl.DisplayNames([intl], { type: "region" }), [intl]);
@@ -48,20 +57,25 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
     <section className="flush">
       <div className="wrap leaders">
         <Reveal className="leaders__bar" y={16}>
-          <div className="seg seg--modes" role="group" aria-label={l.mode}>
+          <div className="ideas__sort leaders__modes" role="group" aria-label={l.mode}>
             {leaderModes.map((m) => (
               <button key={m} type="button" className={m === mode ? "is-active" : undefined} aria-pressed={m === mode} onClick={() => pick(`${m}_${view}`)}>
                 {t.servers.modes[m]}
               </button>
             ))}
           </div>
-          <div className="seg" role="group" aria-label={l.view}>
+          <div className="ideas__sort leaders__views" role="group" aria-label={l.view}>
             {leaderViews.map((v) => (
               <button key={v} type="button" className={v === view ? "is-active" : undefined} aria-pressed={v === view} onClick={() => pick(`${mode}_${v}`)}>
                 {t.servers.views[v]}
               </button>
             ))}
           </div>
+          {/* The ideas board's sort switches and search box, as on Bugs & Ideas. */}
+          <label className="ideas__search">
+            <Icon name="search" />
+            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={l.search} aria-label={l.search} />
+          </label>
         </Reveal>
 
         <Reveal delay={0.08} y={16}>
@@ -119,7 +133,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
               </tbody>
             </table>
           ) : (
-            <p className="servers__empty">{l.empty}</p>
+            <p className="servers__empty">{list.length ? fill(l.noMatch, { name: query.trim() }) : l.empty}</p>
           )}
         </Reveal>
       </div>

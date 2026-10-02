@@ -554,6 +554,8 @@ export const fr: Dictionary = {
     pointsTitle: "Points de classement",
     empty: "Personne n'a encore de points de classement dans ce mode cette saison.",
     unavailable: "Le classement ne peut pas être chargé pour le moment. Réessayez dans une minute.",
+    search: "Rechercher un joueur",
+    noMatch: "Personne nommé « {name} » dans cette liste.",
     tiers: { superSoldier: "Super Soldat", legendary: "Légendaire", grandMaster: "Grand Maître", master: "Maître", diamond: "Diamant", platinum: "Platine", gold: "Or", silver: "Argent", bronze: "Bronze", iron: "Fer" },
   },
   legal: {

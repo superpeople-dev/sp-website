@@ -554,6 +554,8 @@ export const ko: Dictionary = {
     pointsTitle: "랭크 포인트",
     empty: "이번 시즌 이 모드에는 아직 랭크 포인트를 얻은 플레이어가 없습니다.",
     unavailable: "지금은 리더보드를 불러올 수 없습니다. 1분 뒤에 다시 시도해 주세요.",
+    search: "플레이어 검색",
+    noMatch: "이 목록에 ‘{name}’ 플레이어가 없습니다.",
     tiers: { superSoldier: "슈퍼 솔저", legendary: "레전더리", grandMaster: "그랜드 마스터", master: "마스터", diamond: "다이아몬드", platinum: "플래티넘", gold: "골드", silver: "실버", bronze: "브론즈", iron: "아이언" },
   },
   legal: {

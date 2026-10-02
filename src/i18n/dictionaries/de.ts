@@ -554,6 +554,8 @@ export const de: Dictionary = {
     pointsTitle: "Ranglistenpunkte",
     empty: "In diesem Modus hat diese Season noch niemand Ranglistenpunkte.",
     unavailable: "Die Bestenliste kann gerade nicht geladen werden. Versuch es in einer Minute noch einmal.",
+    search: "Spieler suchen",
+    noMatch: "Niemand namens „{name}“ in dieser Liste.",
     tiers: { superSoldier: "Supersoldat", legendary: "Legendär", grandMaster: "Großmeister", master: "Meister", diamond: "Diamant", platinum: "Platin", gold: "Gold", silver: "Silber", bronze: "Bronze", iron: "Eisen" },
   },
   legal: {

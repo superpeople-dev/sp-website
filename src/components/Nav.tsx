@@ -8,7 +8,6 @@ import logo from "@/assets/sp-logo.png";
 import { localeHref, type PagePath } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import { scrollToTop } from "@/lib/scroll";
-import { repoUrl } from "@/lib/site";
 import { Icon } from "./Icon";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MobileMenu, menuPageOf, menuPages as pages } from "./MobileMenu";
@@ -74,10 +73,6 @@ export function Nav({ downloadUrl, page = "" }: { downloadUrl: string; page?: Pa
 
         <div className="nav__actions">
           <LanguageSwitcher />
-          <a className="btn btn--sm gh" href={repoUrl} target="_blank" rel="noopener" aria-label={t.nav.githubLabel}>
-            <Icon name="github" />
-            <span className="gh__label">GitHub</span>
-          </a>
           <a className="btn btn--primary btn--sm nav__download" href={downloadUrl} aria-label={t.hero.download}>
             <Icon name="download" />
             {t.nav.download}

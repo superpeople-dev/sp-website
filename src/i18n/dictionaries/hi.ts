@@ -554,6 +554,8 @@ export const hi: Dictionary = {
     pointsTitle: "रैंक पॉइंट्स",
     empty: "इस सीज़न इस मोड में अभी किसी के पास रैंक पॉइंट्स नहीं हैं।",
     unavailable: "लीडरबोर्ड अभी लोड नहीं हो पा रहा। एक मिनट बाद फिर कोशिश करें।",
+    search: "खिलाड़ी खोजें",
+    noMatch: "इस सूची में “{name}” नाम का कोई खिलाड़ी नहीं है।",
     tiers: { superSoldier: "सुपर सोल्जर", legendary: "लेजेंडरी", grandMaster: "ग्रैंड मास्टर", master: "मास्टर", diamond: "डायमंड", platinum: "प्लैटिनम", gold: "गोल्ड", silver: "सिल्वर", bronze: "ब्रॉन्ज़", iron: "आयरन" },
   },
   legal: {
