@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import { pendingCount } from "@/lib/authorship";
+import { readsAsEnglish } from "@/lib/english";
 import { logEvent } from "@/lib/events";
 import { createIdea, failure, getAnyIdea, getTags, refletTag, setStatus, updateTags, userToken, voteIdea } from "@/lib/reflet";
 import { readSession, sameOrigin } from "@/lib/session";
@@ -27,6 +28,8 @@ export async function POST(request: NextRequest) {
   const kind = ideaTypes.find((type) => type.slug === body.type)?.slug;
   if (!kind || typeof body.platform !== "string" || !body.platform) return Response.json({ error: "invalid" }, { status: 400 });
   if (isOffensive(title) || isOffensive(description)) return Response.json({ error: "offensive" }, { status: 422 });
+  // In English, the one language the whole team reads (lib/english.ts).
+  if (!readsAsEnglish(`${title}\n${description}`)) return Response.json({ error: "english" }, { status: 422 });
   try {
     const { types, categories } = await getTags().catch(() => ({ types: [], categories: [] }));
     const tagId = types.find((type) => type.slug === kind)?.id;

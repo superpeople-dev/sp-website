@@ -247,6 +247,7 @@ export const fr: Dictionary = {
     filterAll: "Tout",
     search: "Rechercher",
     noMatch: "Rien ne correspond à votre recherche ou à vos filtres.",
+    englishOnly: "Merci de l'écrire en anglais, pour que toute l'équipe puisse le lire.",
     confirmTitle: "Publier cette idée ?",
     confirmBody: "Un admin la vérifiera avant qu'elle apparaisse sur le tableau.",
     confirmYes: "Oui, publier",

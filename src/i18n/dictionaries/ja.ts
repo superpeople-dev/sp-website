@@ -247,6 +247,7 @@ export const ja: Dictionary = {
     filterAll: "すべて",
     search: "検索",
     noMatch: "検索やフィルターに一致するものはありません。",
+    englishOnly: "チーム全員が読めるよう、英語で書いてください。",
     confirmTitle: "このアイデアを投稿しますか？",
     confirmBody: "ボードに表示される前に管理者が確認します。",
     confirmYes: "投稿する",

@@ -5,6 +5,7 @@ import { fill } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { Dictionary, IdeaType } from "@/i18n/types";
 import type { Category, TypeTag } from "@/lib/board";
+import { readsAsEnglish } from "@/lib/english";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon, type IconName } from "../Icon";
@@ -38,7 +39,7 @@ export const platformChoices = (categories: Category[], r: Dictionary["ideas"]):
 export type IdeaFields = { title: string; description: string; type: IdeaType; platform: string };
 // What create gives back: the new item's id, why it was refused, or null when the caller took over
 // (sent the player to sign in, or shows its own notice).
-export type Created = { feedbackId: string } | { error: "error" | "offensive" | "name" } | null;
+export type Created = { feedbackId: string } | { error: "error" | "offensive" | "name" | "english" } | null;
 
 // A new post, in a dialog: its type and platform (both required, nothing chosen by default), title,
 // details and images. Bugs & Ideas posts a player's idea with it; the roadmap's "Add task" creates a
@@ -55,6 +56,7 @@ export function IdeaForm({
   confirm,
   closeText,
   limit,
+  english = false,
   create,
   onCreated,
 }: {
@@ -72,10 +74,13 @@ export function IdeaForm({
   closeText: { title: string; body: string };
   // Why the poster can't post right now: shown on top, and the fields are disabled.
   limit?: string | null;
+  // In English only (Bugs & Ideas): said on top on the other languages' pages, and checked before
+  // asking to confirm (the server refuses it too).
+  english?: boolean;
   create: (fields: IdeaFields) => Promise<Created>;
   onCreated: (feedbackId: string, failedUploads: number) => void;
 }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const r = t.ideas;
   const [kind, setKind] = useState<IdeaType | null>(null);
   const [platform, setPlatform] = useState<string | null>(null);
@@ -85,7 +90,7 @@ export function IdeaForm({
   const [files, setFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
-  const [state, setState] = useState<"idle" | "sending" | "error" | "offensive" | "name">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "error" | "offensive" | "name" | "english">("idle");
   const [ask, dialog] = useConfirm();
   const headingId = useId();
   const kinds = typeChoices(types, r);
@@ -120,6 +125,7 @@ export function IdeaForm({
     // The type and the platform are required: the first one left empty opens its list.
     if (kinds.length > 1 && !kind) return setPicking("type");
     if (platforms.length > 1 && !platform) return setPicking("platform");
+    if (english && !readsAsEnglish(`${title}\n${details}`)) return setState("english");
     if (confirm && !(await ask({ title: confirm.title, body: confirm.body, confirm: confirm.yes, cancel: t.board.cancel, icon: "send" }))) {
       return;
     }
@@ -148,8 +154,8 @@ export function IdeaForm({
     onCreated(result.feedbackId, failed);
   };
 
-  const errors = { error: r.error, offensive: t.board.offensiveText, name: t.board.nameBlocked };
-  const error = state === "error" || state === "offensive" || state === "name" ? errors[state] : null;
+  const errors = { error: r.error, offensive: t.board.offensiveText, name: t.board.nameBlocked, english: r.englishOnly };
+  const error = state === "error" || state === "offensive" || state === "name" || state === "english" ? errors[state] : null;
 
   return (
     <>
@@ -179,6 +185,7 @@ export function IdeaForm({
                 {error}
               </p>
             )}
+            {english && locale !== "en" && state !== "english" && <p className="idea-form__note">{r.englishOnly}</p>}
             {limit && (
               <p className="idea-form__limit" role="status">
                 <Icon name="clock" />

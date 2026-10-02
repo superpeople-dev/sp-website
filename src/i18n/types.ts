@@ -128,6 +128,7 @@ export type Dictionary = {
     filterAll: string;
     search: string;
     noMatch: string;
+    englishOnly: string;
     confirmTitle: string;
     confirmBody: string;
     confirmYes: string;

@@ -245,6 +245,7 @@ export const zh: Dictionary = {
     filterAll: "全部",
     search: "搜索",
     noMatch: "没有符合搜索或筛选条件的内容。",
+    englishOnly: "请用英文填写，方便整个团队阅读。",
     confirmTitle: "发布这个想法？",
     confirmBody: "管理员审核后才会显示在看板上。",
     confirmYes: "确定发布",

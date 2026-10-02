@@ -247,6 +247,7 @@ export const ko: Dictionary = {
     filterAll: "전체",
     search: "검색",
     noMatch: "검색어나 필터에 맞는 항목이 없습니다.",
+    englishOnly: "팀 모두가 읽을 수 있도록 영어로 작성해 주세요.",
     confirmTitle: "이 아이디어를 올릴까요?",
     confirmBody: "보드에 표시되기 전에 관리자가 검토합니다.",
     confirmYes: "네, 올릴게요",

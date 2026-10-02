@@ -88,7 +88,7 @@ export function IdeasBoard({
     }
     if (response.status === 403 || response.status === 422) {
       const { error } = (await response.json().catch(() => ({}))) as { error?: string };
-      return { error: error === "offensive" || error === "name" ? error : "error" };
+      return { error: error === "offensive" || error === "name" || error === "english" ? error : "error" };
     }
     if (!response.ok) return { error: "error" };
     const { feedbackId } = (await response.json()) as { feedbackId: string };
@@ -237,6 +237,7 @@ export function IdeasBoard({
           confirm={{ title: r.confirmTitle, body: r.confirmBody, yes: r.confirmYes }}
           closeText={{ title: r.closeTitle, body: r.closeBody }}
           limit={atLimit ? fill(r.limitReached, { count: String(ideaLimits.pending) }) : null}
+          english
           create={create}
           onCreated={posted}
         />

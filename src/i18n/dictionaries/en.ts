@@ -247,6 +247,7 @@ export const en: Dictionary = {
     filterAll: "All",
     search: "Search",
     noMatch: "Nothing matches your search or filters.",
+    englishOnly: "Please write it in English, so the whole team can read it.",
     confirmTitle: "Post this idea?",
     confirmBody: "An admin will review it before it shows up on the board.",
     confirmYes: "Yes, post it",

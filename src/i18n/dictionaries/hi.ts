@@ -247,6 +247,7 @@ export const hi: Dictionary = {
     filterAll: "सभी",
     search: "खोजें",
     noMatch: "आपकी खोज या फ़िल्टर से कुछ भी मेल नहीं खाता।",
+    englishOnly: "कृपया इसे अंग्रेज़ी में लिखें, ताकि पूरी टीम इसे पढ़ सके।",
     confirmTitle: "यह आइडिया पोस्ट करें?",
     confirmBody: "बोर्ड पर दिखने से पहले एक एडमिन इसे देखेगा।",
     confirmYes: "हाँ, पोस्ट करें",
