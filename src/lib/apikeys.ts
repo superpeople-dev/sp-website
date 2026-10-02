@@ -71,6 +71,7 @@ export async function apiUser(request: NextRequest): Promise<(SessionUser & { vi
     admin: true,
     owner: access.owner,
     permissions: access.permissions,
+    staff: ["admin"],
     via: record.name,
   };
 }

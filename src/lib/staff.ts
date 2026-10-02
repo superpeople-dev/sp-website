@@ -16,22 +16,45 @@ const envAdmins = (process.env.ADMIN_DISCORD_IDS ?? "")
 
 export const isOwner = (id: string) => owners.includes(id);
 
+const roleIds = (value: string) =>
+  value
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
 // Whether these Discord roles include one that makes someone an admin (DISCORD_ADMIN_ROLE_IDS),
 // for the Discord bot's commands (app/api/bot): the bot sends the roles it saw on the member.
-const adminRoleIds = (process.env.DISCORD_ADMIN_ROLE_IDS ?? "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
+const adminRoleIds = roleIds(process.env.DISCORD_ADMIN_ROLE_IDS ?? "");
 export const hasAdminRole = (roles: string[]) => roles.some((role) => adminRoleIds.includes(role));
 
+// The server's Moderator role (DISCORD_MODERATOR_ROLE_IDS) and Developer role (DISCORD_DEVELOPER_ROLE_IDS),
+// each unset or empty for the SUPER PEOPLE server's own role, "none" for nobody.
+const moderatorRoleIds = roleIds(process.env.DISCORD_MODERATOR_ROLE_IDS || "1476337721374150668");
+const developerRoleIds = roleIds(process.env.DISCORD_DEVELOPER_ROLE_IDS || "1545601887292891136");
+
 // The Discord roles below the admins that may still ban for a while from the bot (/tempban) and lift
-// such a ban (/unban), but not ban until lifted: DISCORD_MODERATOR_ROLE_IDS, unset or empty the
-// server's Moderator and Developer roles ("none" for nobody). Only the bot's routes (app/api/bot) read it.
-const moderatorRoleIds = (process.env.DISCORD_MODERATOR_ROLE_IDS || "1476337721374150668,1545601887292891136")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
-export const hasModeratorRole = (roles: string[]) => roles.some((role) => moderatorRoleIds.includes(role));
+// such a ban (/unban), but not ban until lifted: the Moderator and Developer roles above. Only the bot's
+// routes (app/api/bot) read it.
+export const hasModeratorRole = (roles: string[]) =>
+  roles.some((role) => moderatorRoleIds.includes(role) || developerRoleIds.includes(role));
+
+// What someone is on the team, from their Discord roles when they sign in (app/api/auth/discord/callback),
+// kept in the session (lib/session.ts SessionUser.staff, where the site's owners and admins count as
+// admin too) and carried by the launcher's game pass (lib/launcher.ts), so the game backend knows who may
+// play in the Dev region (sp-backend lib/devaccess.js).
+export type StaffKind = "admin" | "moderator" | "developer";
+export const staffKinds: readonly StaffKind[] = ["admin", "moderator", "developer"];
+
+export const staffKindsOf = (roles: string[]): StaffKind[] =>
+  staffKinds.filter((kind) =>
+    kind === "admin"
+      ? hasAdminRole(roles)
+      : roles.some((role) => (kind === "moderator" ? moderatorRoleIds : developerRoleIds).includes(role)),
+  );
+
+// The known kinds in a value read back (a session cookie), each once, in staffKinds' order.
+export const staffKindsIn = (value: unknown): StaffKind[] =>
+  Array.isArray(value) ? staffKinds.filter((kind) => value.includes(kind)) : [];
 
 // Admins saved before the activity and api permissions existed had both (the activity log was every
 // admin's); they keep them until an owner saves their permissions again.

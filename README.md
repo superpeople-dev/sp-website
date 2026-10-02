@@ -117,6 +117,19 @@ listed, and can be lifted, from the Bans button next to the admin's name.
 To find a Discord ID, turn on Developer Mode in Discord's advanced settings, then right-click a user,
 server or role and choose Copy ID.
 
+### Staff roles and the Dev region
+
+At sign-in the site also notes what a player is on the team, from their roles on the `DISCORD_GUILD_ID`
+server ([`src/lib/staff.ts`](src/lib/staff.ts) `staffKindsOf`): `admin` (a `DISCORD_ADMIN_ROLE_IDS` role),
+`moderator` (`DISCORD_MODERATOR_ROLE_IDS`, by default the server's Moderator role) and `developer`
+(`DISCORD_DEVELOPER_ROLE_IDS`, by default its Developer role). They are kept in the session cookie as
+`staff`; the site's owners and admins count as `admin` too, checked on every request. The launcher's game
+pass carries them as `s` ([`src/lib/launcher.ts`](src/lib/launcher.ts)), and the game backend lets the
+kinds the owner chose into the Dev region, its private servers (sp-backend `lib/devaccess.js`, which also
+keeps the Discord IDs the owner invited). Sessions from before 02.10.2026 have no `moderator` or `developer`
+until the player signs in again (in the launcher: sign out, then sign in). The bot's `/tempban` and `/unban`
+(app/api/bot) take the Moderator and Developer roles alike.
+
 ### Discord announcements
 
 When a post is approved, or moves to the roadmap, into progress or to completed, the site posts a message
@@ -130,7 +143,8 @@ did it.
 | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Discord sign-in |
 | `AUTH_SECRET` | Signing the sign-in cookie, any long random string |
 | `DISCORD_GUILD_ID`, `DISCORD_ADMIN_ROLE_IDS` | Optional: role-based admins |
-| `DISCORD_MODERATOR_ROLE_IDS` | Optional: Discord roles that may `/tempban` from the bot and lift those bans, but not ban until lifted. Default: the Moderator and Developer roles |
+| `DISCORD_MODERATOR_ROLE_IDS` | Optional: the Moderator role(s): staff kind `moderator`, and may `/tempban` from the bot and lift those bans, but not ban until lifted. Default: the server's Moderator role; `none` for nobody |
+| `DISCORD_DEVELOPER_ROLE_IDS` | Optional: the Developer role(s): staff kind `developer`, and the same bot rights as moderators. Default: the server's Developer role; `none` for nobody |
 | `ADMIN_DISCORD_IDS` | Optional: extra admins by Discord user ID, comma-separated |
 | `DATABASE_URL` | Postgres (Neon's pooled address): posts, votes, comments, bans, admins, notifications, API keys, download limits. `neon env pull` writes it, with `DATABASE_URL_UNPOOLED` |
 | `DATABASE_URL_UNPOOLED` | The direct address, for `bun run db:migrate` (schema changes, `db/migrations/*.sql`, each applied once) |

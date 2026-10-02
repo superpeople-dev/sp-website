@@ -7,6 +7,7 @@ import { kinds, typeAndPlatforms } from "./kinds";
 import { siteUrl } from "./seo";
 import { statusUrl } from "./servers";
 import type { SessionUser } from "./session";
+import type { StaffKind } from "./staff";
 import { legalUpdated } from "./site";
 import type { Profile } from "./store";
 
@@ -49,7 +50,10 @@ const passLifetime = 120_000;
 
 // a: the hash of the player's Discord avatar ("" for Discord's default one). The backend keeps it and
 // shows the picture as the player's profile picture in the game's lobby.
-export type GamePass = { d: string; u: string; n: string; a: string; exp: number; j: string };
+// s: what they are on the team (lib/session.ts SessionUser.staff), usually nothing. The backend keeps it
+// on their account and lets them into the Dev region when the owner allows that kind
+// (sp-backend lib/devaccess.js); a pass without s counts as nothing.
+export type GamePass = { d: string; u: string; n: string; a: string; s: StaffKind[]; exp: number; j: string };
 
 // The session keeps the avatar as its CDN address (app/api/auth/discord/callback).
 const avatarHash = (avatar: string) => avatar.match(/\/avatars\/\d+\/((?:a_)?[0-9a-f]{32})\.png/)?.[1] ?? "";
@@ -68,6 +72,7 @@ export function gamePass(user: SessionUser): string {
     u: user.username,
     n: user.name,
     a: avatarHash(user.avatar),
+    s: user.staff,
     exp: Date.now() + passLifetime,
     j: randomUUID(),
   };

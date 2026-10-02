@@ -16,28 +16,23 @@ import {
   sessionCookieOptions,
   type SessionUser,
 } from "@/lib/session";
-import { accessOf, isOwner } from "@/lib/staff";
+import { accessOf, hasAdminRole, isOwner, staffKindsOf } from "@/lib/staff";
 import { banOf, profileOf, rememberProfile, saveLauncherLogin, saveStaff, staffEntry } from "@/lib/store";
 
 type DiscordUser = { id: string; username: string; global_name?: string | null; avatar?: string | null };
 
-const list = (value: string | undefined) =>
-  (value ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-async function hasAdminRole(accessToken: string) {
+// Their roles on the SUPER PEOPLE Discord server (DISCORD_GUILD_ID), none when it is not set, they are not
+// on it, or Discord does not answer: what makes them an admin, a moderator or a developer (lib/staff.ts).
+async function memberRoles(accessToken: string): Promise<string[]> {
   const guild = process.env.DISCORD_GUILD_ID;
-  const adminRoles = list(process.env.DISCORD_ADMIN_ROLE_IDS);
-  if (!guild || !adminRoles.length) return false;
+  if (!guild) return [];
   const response = await fetch(`https://discord.com/api/users/@me/guilds/${guild}/member`, {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
-  if (!response.ok) return false;
-  const { roles = [] } = (await response.json()) as { roles?: string[] };
-  return roles.some((role) => adminRoles.includes(role));
+  if (!response.ok) return [];
+  const { roles } = (await response.json()) as { roles?: unknown };
+  return Array.isArray(roles) ? roles.filter((role): role is string => typeof role === "string") : [];
 }
 
 async function discordUser(code: string, redirectUri: string): Promise<SessionUser | null> {
@@ -65,14 +60,17 @@ async function discordUser(code: string, redirectUri: string): Promise<SessionUs
   const avatar = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
     : `https://cdn.discordapp.com/embed/avatars/${Number((BigInt(user.id) >> BigInt(22)) % BigInt(6))}.png`;
+  const roles = await memberRoles(accessToken).catch(() => []);
   return {
     id: user.id,
     name: shownName(user.global_name || user.username, user.username),
     username: user.username,
     avatar,
-    admin: await hasAdminRole(accessToken),
+    admin: hasAdminRole(roles),
     owner: false,
     permissions: [],
+    // Kept in the cookie; lib/session.ts adds admin for the site's owners and admins on every request.
+    staff: staffKindsOf(roles),
   };
 }
 

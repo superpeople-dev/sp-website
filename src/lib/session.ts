@@ -2,13 +2,16 @@ import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import type { Permission, Viewer } from "./board";
 import { offensiveName } from "./moderation";
-import { accessOf } from "./staff";
+import { accessOf, staffKindsIn, type StaffKind } from "./staff";
 import { banOf } from "./store";
 
 export { isListedAdmin } from "./staff";
 
 // admin, owner and permissions come from lib/staff.ts on every request. In the cookie, admin only
 // records whether they had the Discord admin role when they signed in.
+// staff: what they are on the team (lib/staff.ts staffKindsOf). moderator and developer are their Discord
+// roles when they signed in, kept in the cookie; admin is whether they are an admin now (owners included).
+// A cookie from before 02.10.2026 has no moderator or developer until they sign in again.
 export type SessionUser = {
   id: string;
   name: string;
@@ -17,6 +20,7 @@ export type SessionUser = {
   admin: boolean;
   owner: boolean;
   permissions: Permission[];
+  staff: StaffKind[];
 };
 
 export const sessionCookie = "sp_session";
@@ -90,6 +94,7 @@ export async function verifySession(value: string | undefined): Promise<SessionU
     const [access, ban] = await Promise.all([accessOf(id, data.admin === true), banOf(id)]);
     // Locked out (the honeypot): the session is gone, here and in the launcher.
     if (ban?.lockout && !access) return null;
+    const roles = staffKindsIn(data.staff).filter((kind) => kind !== "admin");
     return {
       id,
       name,
@@ -98,6 +103,7 @@ export async function verifySession(value: string | undefined): Promise<SessionU
       admin: access !== null,
       owner: access?.owner ?? false,
       permissions: access?.permissions ?? [],
+      staff: access ? ["admin", ...roles] : roles,
     };
   } catch {
     return null;
