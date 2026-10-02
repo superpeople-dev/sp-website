@@ -136,6 +136,7 @@ It skips anything already there, so it is safe to run again after adding bugs to
 | `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Discord sign-in |
 | `AUTH_SECRET` | Signing the sign-in cookie, any long random string |
 | `DISCORD_GUILD_ID`, `DISCORD_ADMIN_ROLE_IDS` | Optional: role-based admins |
+| `DISCORD_MODERATOR_ROLE_IDS` | Optional: Discord roles that may `/tempban` from the bot and lift those bans, but not ban until lifted. Default: the Moderator and Developer roles |
 | `ADMIN_DISCORD_IDS` | Optional: extra admins by Discord user ID, comma-separated |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Optional: comment avatars and bans. Connecting Upstash from the Vercel Marketplace adds them (as `KV_REST_API_URL` and `KV_REST_API_TOKEN`, which also work) |
 | `DISCORD_WEBHOOK_URL`, `REFLET_WEBHOOK_SECRET` | Optional: Discord announcements |

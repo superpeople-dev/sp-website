@@ -24,6 +24,15 @@ const adminRoleIds = (process.env.DISCORD_ADMIN_ROLE_IDS ?? "")
   .filter(Boolean);
 export const hasAdminRole = (roles: string[]) => roles.some((role) => adminRoleIds.includes(role));
 
+// The Discord roles below the admins that may still ban for a while from the bot (/tempban) and lift
+// such a ban (/unban), but not ban until lifted: DISCORD_MODERATOR_ROLE_IDS, unset or empty the
+// server's Moderator and Developer roles ("none" for nobody). Only the bot's routes (app/api/bot) read it.
+const moderatorRoleIds = (process.env.DISCORD_MODERATOR_ROLE_IDS || "1476337721374150668,1545601887292891136")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
+export const hasModeratorRole = (roles: string[]) => roles.some((role) => moderatorRoleIds.includes(role));
+
 // Admins saved before the activity and api permissions existed had both (the activity log was every
 // admin's); they keep them until an owner saves their permissions again.
 const since2: Permission[] = ["activity", "api"];

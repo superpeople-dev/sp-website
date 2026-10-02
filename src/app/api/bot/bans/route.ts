@@ -1,19 +1,23 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { banUser, unbanUser, type BanTarget } from "@/lib/bans";
-import { accessOf, hasAdminRole } from "@/lib/staff";
+import { accessOf, hasAdminRole, hasModeratorRole } from "@/lib/staff";
 import { banOf, isBanned, storeReady } from "@/lib/store";
 
 // The Discord bot's /ban, /tempban and /unban (sp-bot, src/commands). The bot sends BOT_API_SECRET and
-// who ran the command: their Discord id and the roles the bot saw on them. The site decides, as in
-// the admin panel, whether they may: an admin with the "bans" permission (lib/staff.ts). Without
-// BOT_API_SECRET this route is off.
+// who ran the command: their Discord id and the roles the bot saw on them. The site decides whether
+// they may (lib/staff.ts): an admin with the "bans" permission may do all of it, as in the admin
+// panel. A moderator (a DISCORD_MODERATOR_ROLE_IDS role, Moderator and Developer) may ban for a
+// while and lift a ban that ends by itself, nothing that lasts until lifted. Without BOT_API_SECRET
+// this route is off.
 //
 // POST { action: "ban" | "unban", user: { id, name, username, avatar }, reason, until?, actor: { id, name, avatar, roles } }
 //  until: when a temporary ban ends (epoch ms or an ISO date), at most a year ahead; none: until lifted.
 //  -> { ok: true, already }  already: they were banned (ban) or not banned (unban) before; nothing changed.
 //     A ban that ends sooner than the new one is replaced by it (a /ban after a /tempban is for good).
-//     401 unauthorized, 403 forbidden (not an admin with "bans"), 400 invalid / reason / protected, 503 disabled / store
+//     401 unauthorized, 400 invalid / reason / protected, 503 disabled / store,
+//     403 forbidden (neither an admin with "bans" nor a moderator), admin_only (a moderator asking
+//     for a ban until lifted, or to lift one, or to lift a ban the site does not have)
 
 const secret = process.env.BOT_API_SECRET ?? "";
 const digest = (value: string) => createHash("sha256").update(value).digest();
@@ -50,12 +54,15 @@ export async function POST(request: NextRequest) {
 
   const roles = Array.isArray(body.actor?.roles) ? body.actor.roles.filter((role): role is string => typeof role === "string").slice(0, 250) : [];
   const access = await accessOf(actor.id, hasAdminRole(roles));
-  if (!access?.permissions.includes("bans")) return Response.json({ error: "forbidden" }, { status: 403 });
+  const admin = !!access?.permissions.includes("bans");
+  if (!admin && !hasModeratorRole(roles)) return Response.json({ error: "forbidden" }, { status: 403 });
+  const adminOnly = () => Response.json({ error: "admin_only" }, { status: 403 });
 
   try {
     if (body.action === "ban") {
       const until = endOf(body.until);
       if (until === null) return Response.json({ error: "until" }, { status: 400 });
+      if (!admin && until === undefined) return adminOnly();
       // Already banned: the ban that is there stays as it is (who, when and why), unless it ends sooner.
       const current = await banOf(target.id);
       if (current && !(current.until && (!until || until > current.until))) return Response.json({ ok: true, already: true });
@@ -64,6 +71,9 @@ export async function POST(request: NextRequest) {
       return Response.json({ ok: true, already: false });
     }
     if (body.action === "unban") {
+      // A moderator lifts only a ban that would end by itself. Not one until lifted, and not when the
+      // site has none: the bot then lifts the launcher's and Discord's, which may be for good.
+      if (!admin && !(await banOf(target.id))?.until) return adminOnly();
       if (!(await isBanned(target.id))) return Response.json({ ok: true, already: true });
       await unbanUser(actor, target);
       return Response.json({ ok: true, already: false });
