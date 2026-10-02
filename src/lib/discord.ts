@@ -370,7 +370,7 @@ export async function logGameReport(who: Player, report: GameReport, reported?: 
   // Game text in code style: no formatting, links or mentions from a player name.
   const code = (text: string) => `\`${text.replaceAll("`", "'")}\``;
   const inGame = (player: ReportedPlayer) =>
-    [player.name ? code(player.name) : undefined, player.id ? `ID ${code(player.id)}` : undefined].filter(Boolean).join("\n");
+    [player.name ? code(player.name) : undefined, player.id ? `Player game ID ${code(player.id)}` : undefined].filter(Boolean).join("\n");
   // Client fixes before v35 read the reason before the game had put the player's choice in, so
   // theirs is never one of the four.
   const reason =
