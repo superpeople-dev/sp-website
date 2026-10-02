@@ -526,6 +526,7 @@ export const ja: Dictionary = {
     unban: "BAN を解除",
     unbanElsewhere: "BAN の解除は管理パネルで行います：",
     bannedOn: "{date} に {name} が BAN",
+    bannedUntil: "{date} まで",
     downloadBlocks: "ダウンロード制限",
     downloadBlocked: "1 時間で {amount} をダウンロード - {date} までブロック",
     unblock: "ブロックを解除",

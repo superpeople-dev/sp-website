@@ -526,6 +526,7 @@ export const ru: Dictionary = {
     unban: "Разблокировать",
     unbanElsewhere: "Снять бан можно в админ-панели:",
     bannedOn: "Заблокирован {date} - {name}",
+    bannedUntil: "до {date}",
     downloadBlocks: "Лимиты загрузки",
     downloadBlocked: "Скачал {amount} за час - заблокирован до {date}",
     unblock: "Снять ограничение",

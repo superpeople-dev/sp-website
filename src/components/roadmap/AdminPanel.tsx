@@ -269,7 +269,10 @@ function AdminBody({
                   {shownName(ban.name, ban.username)}
                   {ban.username && <span className="who__user">@{ban.username}</span>}
                 </b>
-                <span>{fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}</span>
+                <span>
+                  {fill(b.bannedOn, { date: day.format(ban.at), name: ban.by })}
+                  {ban.until ? ` - ${fill(b.bannedUntil, { date: moment.format(ban.until) })}` : ""}
+                </span>
                 {ban.reason && <q className="bans__reason">{ban.reason}</q>}
               </div>
             </li>

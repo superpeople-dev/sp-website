@@ -526,6 +526,7 @@ export const ko: Dictionary = {
     unban: "차단 해제",
     unbanElsewhere: "차단 해제는 관리자 패널에서 합니다:",
     bannedOn: "{date} - {name} 님이 차단",
+    bannedUntil: "{date}까지",
     downloadBlocks: "다운로드 제한",
     downloadBlocked: "1시간 동안 {amount} 다운로드 - {date}까지 차단",
     unblock: "제한 해제",

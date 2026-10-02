@@ -526,6 +526,7 @@ export const de: Dictionary = {
     unban: "Entsperren",
     unbanElsewhere: "Entbannen geht im Admin-Panel:",
     bannedOn: "Gesperrt am {date} von {name}",
+    bannedUntil: "bis {date}",
     downloadBlocks: "Download-Limits",
     downloadBlocked: "{amount} in einer Stunde heruntergeladen - gesperrt bis {date}",
     unblock: "Freigeben",

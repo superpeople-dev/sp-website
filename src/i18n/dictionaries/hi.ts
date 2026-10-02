@@ -526,6 +526,7 @@ export const hi: Dictionary = {
     unban: "बैन हटाएँ",
     unbanElsewhere: "बैन हटाने का काम एडमिन पैनल में होता है:",
     bannedOn: "{date} को {name} ने बैन किया",
+    bannedUntil: "{date} तक",
     downloadBlocks: "डाउनलोड सीमाएँ",
     downloadBlocked: "एक घंटे में {amount} डाउनलोड किया - {date} तक रोका गया",
     unblock: "रोक हटाएँ",

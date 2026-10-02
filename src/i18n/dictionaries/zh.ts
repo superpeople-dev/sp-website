@@ -524,6 +524,7 @@ export const zh: Dictionary = {
     unban: "解除封禁",
     unbanElsewhere: "解除封禁请前往管理面板：",
     bannedOn: "{date} 由 {name} 封禁",
+    bannedUntil: "至 {date}",
     downloadBlocks: "下载限制",
     downloadBlocked: "一小时内下载了 {amount} - 限制至 {date}",
     unblock: "解除限制",

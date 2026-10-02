@@ -12,7 +12,10 @@ export const storeReady = redis !== null;
 export type Profile = { id: string; name: string; username: string; avatar: string; admin: boolean };
 // lockout: banned from everything (lib/honeypot.ts), not only from posting and voting: no sign-in on the
 // website or in the launcher, and any session they had stops working.
-export type Ban = Omit<Profile, "admin"> & { by: string; at: number; reason?: string; lockout?: boolean };
+// until: a temporary ban (the bot's /tempban), which ends by itself then (epoch ms). Without it a ban
+// lasts until it is lifted. A temporary ban stops posting, voting and playing, but the launcher stays
+// signed in to show it (app/api/launcher/me).
+export type Ban = Omit<Profile, "admin"> & { by: string; at: number; reason?: string; lockout?: boolean; until?: number };
 
 const bansKey = "sp:bans";
 const authorsKey = "sp:authors";
@@ -35,12 +38,17 @@ async function attempt<T>(action: string, fallback: T, run: (client: Redis) => P
   }
 }
 
-export const isBanned = (id: string) => attempt("ban check", false, async (client) => (await client.hexists(bansKey, id)) === 1);
-export const banOf = (id: string) => attempt("ban lookup", null as Ban | null, (client) => client.hget<Ban>(bansKey, id));
+// A temporary ban that has run out counts as none; it stays stored until a new ban or an unban replaces it.
+const inForce = (entry: Ban | null) => (entry && !(entry.until && entry.until <= Date.now()) ? entry : null);
+
+export const banOf = (id: string) => attempt("ban lookup", null as Ban | null, async (client) => inForce(await client.hget<Ban>(bansKey, id)));
+export const isBanned = async (id: string) => (await banOf(id)) !== null;
 
 export const listBans = () =>
   attempt("ban list", [] as Ban[], async (client) =>
-    Object.values((await client.hgetall<Record<string, Ban>>(bansKey)) ?? {}).sort((a, b) => b.at - a.at),
+    Object.values((await client.hgetall<Record<string, Ban>>(bansKey)) ?? {})
+      .filter((entry) => inForce(entry))
+      .sort((a, b) => b.at - a.at),
   );
 
 export async function ban(entry: Ban) {

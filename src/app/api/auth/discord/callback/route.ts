@@ -102,14 +102,14 @@ export async function GET(request: NextRequest) {
   const user = await discordUser(code, `${request.nextUrl.origin}/api/auth/discord/callback`).catch(() => null);
   if (!user) return response;
   // Bans (never an admin's): probing the decoy routes before signing in (lib/honeypot.ts) bans them
-  // from everything now. Banned from everything: no sign-in at all. Any ban: not into the launcher,
-  // whose Play button would let them into the game.
+  // from everything now. Banned from everything: no sign-in at all. A ban until lifted: not into the
+  // launcher either. A temporary ban (/tempban): the launcher signs in, shows the ban and refuses Play.
   const mark = trapMark(request);
   if (mark) clearTrapMark(response);
   const admin = (await accessOf(user.id, user.admin)) !== null;
   if (!admin && mark) await lockOut(user, `Honeypot (before signing in): ${mark}`);
   const ban = admin ? null : await banOf(user.id);
-  if (ban && (ban.lockout || launcher)) {
+  if (ban && (ban.lockout || (launcher && !ban.until))) {
     after(() => logAuth("refused", user, launcher ? "launcher" : "website", ban.lockout ? "Locked out (honeypot)" : "Banned"));
     response.headers.set("Location", new URL(launcher ? `${connectedPath}?error=banned` : "/banned", request.url).toString());
     return response;

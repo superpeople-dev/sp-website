@@ -3,7 +3,7 @@ import { after, type NextRequest } from "next/server";
 import { logAuth } from "@/lib/discord";
 import { challengeOf, profileOfSession } from "@/lib/launcher";
 import { verifySession } from "@/lib/session";
-import { isBanned, takeLauncherLogin } from "@/lib/store";
+import { banOf, takeLauncherLogin } from "@/lib/store";
 
 // The launcher trades the one-time code from /launcher/connected, with the PKCE verifier behind its
 // challenge, for the player's session (lib/launcher.ts). Each code works once, for two minutes.
@@ -20,8 +20,10 @@ export async function POST(request: NextRequest) {
   }
   const user = await verifySession(login.token);
   if (!user) return Response.json({ error: "invalid" }, { status: 400 });
-  // Banned on the website since the code was made: not into the launcher either.
-  if (!user.admin && (await isBanned(user.id))) {
+  // Banned until lifted since the code was made: not into the launcher either. A temporary ban signs
+  // in: the launcher shows it and refuses Play (app/api/launcher/me, pass).
+  const ban = user.admin ? null : await banOf(user.id);
+  if (ban && !ban.until) {
     after(() => logAuth("refused", user, "launcher", "Banned"));
     return Response.json({ error: "banned" }, { status: 403 });
   }
