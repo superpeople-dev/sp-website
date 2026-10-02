@@ -5,7 +5,7 @@ import { fill } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { Dictionary, IdeaType } from "@/i18n/types";
 import type { Category, TypeTag } from "@/lib/board";
-import { readsAsEnglish } from "@/lib/english";
+import { postReadsAsEnglish } from "@/lib/english";
 import { ideaLimits, ideaTypes, mediaLimits } from "@/lib/site";
 import { useConfirm } from "../ConfirmDialog";
 import { Icon, type IconName } from "../Icon";
@@ -125,7 +125,7 @@ export function IdeaForm({
     // The type and the platform are required: the first one left empty opens its list.
     if (kinds.length > 1 && !kind) return setPicking("type");
     if (platforms.length > 1 && !platform) return setPicking("platform");
-    if (english && !readsAsEnglish(`${title}\n${details}`)) return setState("english");
+    if (english && !postReadsAsEnglish(title, details)) return setState("english");
     if (confirm && !(await ask({ title: confirm.title, body: confirm.body, confirm: confirm.yes, cancel: t.board.cancel, icon: "send" }))) {
       return;
     }

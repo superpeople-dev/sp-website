@@ -1,9 +1,10 @@
 // Whether a post on Bugs & Ideas reads as English, the one language the whole team reads. It doesn't when
 // most of its letters are of another script (Cyrillic, Hangul, kana and kanji, Devanagari, Arabic…),
 // when most of its letters carry accents (Vietnamese), or when it has more of another language's
-// little words ("le", "der", "não", "que"…) than of English ones. Text with none of those signs (a
-// short title, game words, a player's name) counts as English: this stops posts written in another
-// language, not English with a foreign word in it.
+// little words ("le", "der", "não", "que"…) than of English ones. Text with none of those signs (game
+// words, a player's name) counts as English: this stops posts written in another language, not English
+// with a foreign word in it. The title is checked on its own as well (postReadsAsEnglish), so a long
+// English description doesn't carry a title in another language.
 
 // Little words of English, and of the languages players most often write in instead. Words both use
 // ("a", "in", "no", "die", "on", "so", "de"…) are in neither list.
@@ -39,9 +40,10 @@ const latin = /\p{Script=Latin}/u;
 export function readsAsEnglish(text: string): boolean {
   const all = text.match(letters) ?? [];
   if (all.length === 0) return true;
-  // Mostly another script.
+  // Mostly another script. In a short text two or three letters are enough when they are most of it:
+  // in Chinese or Japanese that is a whole title (高跟鞋, "high heels").
   const foreign = all.filter((letter) => !latin.test(letter)).length;
-  if (foreign >= 4 && foreign / all.length > 0.3) return false;
+  if (foreign >= 2 && foreign / all.length > (foreign >= 4 ? 0.3 : 0.5)) return false;
   // Mostly accented letters (Vietnamese); French, Spanish or Portuguese have a few.
   const accented = all.filter((letter) => letter.normalize("NFD").length > 1).length;
   if (accented >= 6 && accented / all.length > 0.15) return false;
@@ -51,3 +53,7 @@ export function readsAsEnglish(text: string): boolean {
   const theirs = words.filter((word) => otherWords.has(word) || elided.test(word)).length;
   return !(theirs >= 2 && theirs > ours);
 }
+
+// A post: its title on its own, and the whole of it.
+export const postReadsAsEnglish = (title: string, description: string) =>
+  readsAsEnglish(title) && readsAsEnglish(`${title}\n${description}`);
