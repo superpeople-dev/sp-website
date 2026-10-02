@@ -240,6 +240,8 @@ export type LauncherDetails = {
   location?: { country: string; region?: string };
   // The player's IP, for the team to match accounts and stop abuse.
   ip?: string;
+  // With IPv6 as `ip`, the player's IPv4 too, when the launcher checked in over it (lib/ipv4.ts).
+  ipv4?: string;
 };
 
 // "🇧🇷 Brazil (SP)": the flag, the country's English name, the region's code when there is one.
@@ -313,7 +315,12 @@ export async function logLauncher(action: LauncherAction, who: Player, details: 
   add("Launcher", details.version ? `v${details.version}` : undefined);
   add("Location", details.location ? place(details.location) : undefined);
   // Behind a spoiler: shown on a click, not to whoever glances at the channel.
-  add("IP", details.ip ? `||\`${details.ip}\`||` : undefined);
+  // Both when the player has both (IPv4 first), else the one there is.
+  const spoiler = (ip: string) => `||\`${ip}\`||`;
+  add(
+    "IP",
+    details.ip && details.ipv4 ? `IPv4 ${spoiler(details.ipv4)}\nIPv6 ${spoiler(details.ip)}` : details.ip ? spoiler(details.ip) : undefined,
+  );
   add("When", now(), false);
   if (details.hardware) add("Hardware", verbatim(hardwareText(details.hardware) || "unknown"), false);
   if (details.reason) add("Reason", verbatim(details.reason), false);

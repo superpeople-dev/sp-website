@@ -3,6 +3,7 @@ import { launcherActions, logLauncher, type Hardware, type LauncherAction, type 
 import { choiceOf } from "@/lib/consentstore";
 import { clientIp, clientLocation } from "@/lib/clientip";
 import { countThisHour, limitsReady } from "@/lib/downloads";
+import { isIpv4, recentIpv4 } from "@/lib/ipv4";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // What a signed-in player did with the game in the launcher (download, verify, uninstall, starting
@@ -60,6 +61,10 @@ export async function POST(request: NextRequest) {
   }
   // Declined in the data pop-up (lib/consent.ts): no hardware, location or IP for this account.
   const extras = action === "game.launched" && (await choiceOf(user.id)) !== "declined";
+  // As the site saw the connection (lib/clientip.ts); only an address's own characters. When it is
+  // IPv6, also the IPv4 one the launcher checked in with just before (app/api/launcher/ipv4).
+  const ip = extras ? [clientIp(request)].find((address) => /^[0-9a-fA-F:.]{3,45}$/.test(address)) : undefined;
+  const ipv4 = ip && !isIpv4(ip) ? await recentIpv4(user.id) : undefined;
   const details: LauncherDetails = {
     files: count(body.files, 100_000),
     bytes: count(body.bytes, 1e12),
@@ -71,7 +76,8 @@ export async function POST(request: NextRequest) {
     hardware: extras ? hardwareOf(body.hardware) : undefined,
     // The player's own, not the Cloudflare server in front of the site (lib/clientip.ts).
     location: extras ? clientLocation(request) : undefined,
-    ip: extras ? [clientIp(request)].find((ip) => /^[0-9a-fA-F:.]{3,45}$/.test(ip)) : undefined,
+    ip,
+    ipv4,
   };
   after(() => logLauncher(action, user, details));
   return new Response(null, { status: 204 });
