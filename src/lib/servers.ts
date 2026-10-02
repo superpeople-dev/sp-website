@@ -1,6 +1,6 @@
 // The game server list, from the backend's public route (sp-backend: GET /ds/api/listen/public).
 // That route never carries addresses; it answers 404 until listenServers.publicStatus is on.
-const statusUrl = process.env.SERVER_STATUS_URL || "http://64.226.112.204:8080/ds/api/listen/public";
+export const statusUrl = process.env.SERVER_STATUS_URL || "http://64.226.112.204:8080/ds/api/listen/public";
 const REVALIDATE_SECONDS = 15;
 // The charts' samples (sp-backend lib/listen-history.js), a new point every 5 minutes at most.
 const HISTORY_REVALIDATE_SECONDS = 60;

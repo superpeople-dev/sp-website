@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const pages = ["servers", "bugs-and-ideas", "roadmap", "completed", "faq", "terms", "privacy"];
+const pages = ["servers", "leaderboard", "bugs-and-ideas", "roadmap", "completed", "faq", "terms", "privacy"];
 // Boards whose items have their own pages: /bugs-and-ideas/<id>/<slug> and so on.
 const boards = ["bugs-and-ideas", "roadmap", "completed"];
 // Pages that moved: the old links (shared, posted on Discord, found by search engines) keep working.

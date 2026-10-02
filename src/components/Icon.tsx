@@ -97,6 +97,13 @@ const paths = {
     />
   ),
   play: <path fill="currentColor" d="M8 5.5v13a1 1 0 0 0 1.5.9l10.3-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5Z" />,
+  // A cup: the leaderboard.
+  trophy: (
+    <g {...stroke} strokeWidth={2}>
+      <path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0V4Z" />
+      <path d="M7.5 6H5a2.5 2.5 0 0 0 2.6 4M16.5 6H19a2.5 2.5 0 0 1-2.6 4M12 14v4M8.5 20h7" />
+    </g>
+  ),
   // A line chart: a server's history (Servers page).
   chart: <path {...stroke} strokeWidth={2} d="M4 4v16h16M7.5 15l3.5-4 3 3 5-6.5" />,
   // A pulse line: the admin panel's activity log.

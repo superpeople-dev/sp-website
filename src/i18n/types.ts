@@ -20,6 +20,8 @@ export type Dictionary = {
     roadmapHint: string;
     completedHint: string;
     serversHint: string;
+    leaderboard: string;
+    leaderboardHint: string;
     tagline: string;
     download: string;
     githubLabel: string;
@@ -369,6 +371,22 @@ export type Dictionary = {
     tabAdmins: string;
     reviewEmpty: string;
     openIdeas: string;
+  };
+  leaderboard: {
+    title: string;
+    lead: string;
+    seoTitle: string;
+    seoDescription: string;
+    mode: string;
+    view: string;
+    rank: string;
+    player: string;
+    tier: string;
+    points: string;
+    pointsTitle: string;
+    empty: string;
+    unavailable: string;
+    tiers: Record<"superSoldier" | "legendary" | "grandMaster" | "master" | "diamond" | "platinum" | "gold" | "silver" | "bronze" | "iron", string>;
   };
   legal: {
     terms: string;

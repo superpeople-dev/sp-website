@@ -2665,3 +2665,96 @@ button.votes__down:disabled { cursor: default; }
 .notfound__code { margin: 0; font: 900 clamp(96px, 20vw, 200px)/0.9 var(--display); color: var(--signal); }
 .notfound h1 { margin: 0; font: 800 clamp(32px, 5vw, 48px)/1 var(--display); text-transform: uppercase; }
 .notfound p { margin: 0 0 12px; color: var(--paper-dim); }
+/* Leaderboard (components/leaderboard/Leaderboard.tsx). Desktop: the modes and the view side by side,
+   the list in four columns. Phone (700px and under): the modes on a row of their own with the view
+   under them, the tier under the player's name. Nothing wraps; long names end in an ellipsis. */
+.leaders { display: grid; gap: 20px; }
+.leaders__bar { display: flex; align-items: center; gap: 12px; }
+.seg { display: inline-flex; flex: none; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.seg button {
+  height: 32px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--paper-dim);
+  font: 700 12px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.seg button:hover { color: var(--paper); }
+.seg button.is-active { background: var(--signal); color: #fff; }
+.seg button:focus-visible { outline: 2px solid var(--signal-hi); outline-offset: 2px; }
+.leaders__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.leaders__table { width: 100%; border-collapse: separate; border-spacing: 0 6px; table-layout: fixed; }
+.leaders__table th {
+  padding: 0 16px 2px;
+  color: var(--muted);
+  font: 700 12px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+}
+.leaders__table th abbr { text-decoration: none; cursor: help; }
+.leaders__table td { height: 52px; padding: 0 16px; border-block: 1px solid var(--line-soft); background: var(--surface); white-space: nowrap; }
+.leaders__table td:first-child { border-left: 1px solid var(--line-soft); border-radius: var(--r) 0 0 var(--r); }
+.leaders__table td:last-child { border-right: 1px solid var(--line-soft); border-radius: 0 var(--r) var(--r) 0; }
+.leaders__table tr.is-top td { background: var(--surface-2); }
+.leaders__table .leaders__rank { width: 76px; }
+.leaders__table .leaders__tier { width: 210px; }
+.leaders__table .leaders__rp { width: 120px; text-align: right; }
+td.leaders__rank { color: var(--paper-dim); font: 700 18px var(--display); font-variant-numeric: tabular-nums; }
+.is-top-1 td.leaders__rank { color: var(--gold); }
+.is-top-2 td.leaders__rank { color: #c9d0d8; }
+.is-top-3 td.leaders__rank { color: #c98a5a; }
+td.leaders__rp { color: var(--paper); font: 700 17px var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+.leaders__player { overflow: hidden; }
+.leaders__name { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--paper); font-weight: 600; }
+.leaders__name bdi { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.leaders__flag { flex: none; width: 21px; height: 14px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); }
+.leaders__tier-under { display: none; }
+.tier {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font: 700 11px var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tier--iron { color: #9a958f; }
+.tier--bronze { color: #c98a5a; }
+.tier--silver { color: #c9d0d8; }
+.tier--gold { color: var(--gold); }
+.tier--platinum { color: #5fd3c6; }
+.tier--diamond { color: #7fb2ff; }
+.tier--master { color: #b88cff; }
+.tier--grandMaster { color: #ff7a8a; }
+.tier--legendary { color: #ff9d3d; }
+.tier--superSoldier { background: rgba(239, 68, 56, 0.12); color: var(--signal-hi); }
+@media (max-width: 700px) {
+  .leaders__bar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .seg--modes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .seg--modes button { min-width: 0; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; }
+  .leaders__bar .seg:not(.seg--modes) { align-self: flex-start; }
+  .leaders__table .leaders__tier { display: none; }
+  .leaders__tier-under { display: block; margin-top: 5px; }
+  .leaders__table th { padding: 0 10px 2px; }
+  .leaders__table td { height: auto; padding: 10px; }
+  .leaders__table .leaders__rank { width: 46px; }
+  .leaders__table .leaders__rp { width: 78px; }
+  td.leaders__rank { font-size: 16px; }
+  td.leaders__rp { font-size: 15px; }
+  .tier { height: 20px; padding: 0 7px; font-size: 10px; }
+}
+/* The narrowest phones: the longest mode names (Escuadrón, スクワッド) still fit in a quarter. */
+@media (max-width: 400px) {
+  .seg--modes button { padding: 0 3px; font-size: 11px; letter-spacing: 0.04em; }
+}

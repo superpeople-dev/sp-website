@@ -13,6 +13,7 @@ type Page = { art: string; title: (d: Dictionary) => string; line?: (d: Dictiona
 
 const pages: Record<string, Page> = {
   servers: { art: "squad", title: (d) => d.servers.title, line: (d) => d.nav.serversHint },
+  leaderboard: { art: "fight", title: (d) => d.leaderboard.title, line: (d) => d.nav.leaderboardHint },
   "bugs-and-ideas": { art: "powers", title: (d) => d.ideas.title, line: (d) => d.nav.ideasHint },
   roadmap: { art: "vehicle", title: (d) => d.plan.title, line: (d) => d.nav.roadmapHint },
   completed: { art: "tower", title: (d) => d.completed.title, line: (d) => d.nav.completedHint },

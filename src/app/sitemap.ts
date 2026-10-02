@@ -14,6 +14,7 @@ export const revalidate = 600;
 
 const subpages = [
   { path: "/servers", changeFrequency: "always", priority: 0.8 },
+  { path: "/leaderboard", changeFrequency: "hourly", priority: 0.7 },
   { path: "/roadmap", changeFrequency: "daily", priority: 0.8 },
   { path: "/bugs-and-ideas", changeFrequency: "daily", priority: 0.7 },
   { path: "/completed", changeFrequency: "weekly", priority: 0.7 },

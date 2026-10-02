@@ -39,6 +39,8 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   switch (page) {
     case "/servers":
       return { title: d.servers.seoTitle, description: d.servers.seoDescription };
+    case "/leaderboard":
+      return { title: d.leaderboard.seoTitle, description: d.leaderboard.seoDescription };
     case "/bugs-and-ideas":
       return { title: d.ideas.seoTitle, description: d.ideas.seoDescription };
     case "/roadmap":
@@ -60,6 +62,8 @@ function pageName(locale: Locale, page: Exclude<PagePath, "">) {
   switch (page) {
     case "/servers":
       return d.nav.servers;
+    case "/leaderboard":
+      return d.nav.leaderboard;
     case "/bugs-and-ideas":
       return d.nav.ideas;
     case "/roadmap":
@@ -312,6 +316,7 @@ export function llmsTxt() {
 - [Website](${siteUrl})
 - [Download the latest launcher](${siteUrl}/download)
 - [Game servers and live status](${siteUrl}/servers)
+- [Leaderboard: the season's top 100 players of each mode](${siteUrl}/leaderboard)
 - [Roadmap](${siteUrl}/roadmap)
 - [Bug reports and feature requests](${siteUrl}/bugs-and-ideas)
 - [Completed work and release notes](${siteUrl}/completed)

@@ -18,6 +18,7 @@ const subscribe = () => () => {};
 export const menuPages = [
   { path: "", label: "home", hint: "homeHint", icon: "home" },
   { path: "/servers", label: "servers", hint: "serversHint", icon: "server" },
+  { path: "/leaderboard", label: "leaderboard", hint: "leaderboardHint", icon: "trophy" },
   { path: "/bugs-and-ideas", label: "ideas", hint: "ideasHint", icon: "bulb" },
   { path: "/roadmap", label: "roadmap", hint: "roadmapHint", icon: "board" },
 ] as const satisfies readonly { path: PagePath; label: string; hint: string; icon: IconName }[];
