@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
-import type { Continent, GameServer, ServerList as List, ServerHistory as History } from "@/lib/servers";
+import type { Continent, GameServer, ServerList as List, PlayerHistory as Players, ServerHistory as History } from "@/lib/servers";
 import { FilterPicker } from "../FilterPicker";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
+import { PlayerHistory } from "./PlayerHistory";
 import { historyId, ServerHistory } from "./ServerHistory";
 
 const POLL_MS = 30_000;
@@ -21,7 +22,7 @@ const subscribeClock = (tick: () => void) => {
 };
 const clockNow = () => Math.floor(Date.now() / 10_000) * 10;
 
-export function ServerList({ initial, history }: { initial: List; history: History | null }) {
+export function ServerList({ initial, history, players }: { initial: List; history: History | null; players: Players | null }) {
   const { locale, t } = useI18n();
   const s = t.servers;
   const [list, setList] = useState(initial);
@@ -170,6 +171,12 @@ export function ServerList({ initial, history }: { initial: List; history: Histo
             <p className="servers__empty">{s.empty}</p>
           )}
         </Reveal>
+
+        {players && (
+          <Reveal delay={0.12} y={16}>
+            <PlayerHistory initial={players} />
+          </Reveal>
+        )}
 
         {history && (
           <Reveal delay={0.12} y={16}>

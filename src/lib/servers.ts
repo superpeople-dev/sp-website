@@ -150,3 +150,50 @@ export async function getHistory(range: HistoryRange): Promise<ServerHistory | n
     return null;
   }
 }
+
+// The player chart's periods (sp-backend lib/player-history.js): the three above, and every day so far.
+export const playerRanges = ["24h", "7d", "30d", "all"] as const;
+export type PlayerRange = (typeof playerRanges)[number];
+export const isPlayerRange = (value: unknown): value is PlayerRange => playerRanges.includes(value as PlayerRange);
+
+// One bucket: its start (unix seconds), the average and the most players online, the average in the
+// lobby and in a match. unique: different players over 24 hours, 7 and 30 days (counted since `since`,
+// the first day sampled), and all: every player account. Counts only, no names.
+export type PlayerPoint = { t: number; online: number; peak: number; lobby: number; match: number };
+export type PlayerHistory = {
+  range: PlayerRange;
+  bucket: number;
+  from: number;
+  to: number;
+  points: PlayerPoint[];
+  unique: { "24h": number; "7d": number; "30d": number; all: number | null };
+  since: number | null;
+};
+
+const count = (value: unknown) => numberOrNull(value) ?? 0;
+
+// Null when the backend cannot be reached, is older than the player chart or has the list off.
+export async function getPlayerHistory(range: PlayerRange): Promise<PlayerHistory | null> {
+  try {
+    const res = await fetch(`${statusUrl}/players?range=${range}`, { cache: "force-cache", next: { revalidate: HISTORY_REVALIDATE_SECONDS } });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { d?: { bucket?: unknown; from?: unknown; to?: unknown; points?: unknown; unique?: Record<string, unknown>; since?: unknown } };
+    const d = body.d;
+    if (!d || !Array.isArray(d.points) || typeof d.bucket !== "number" || typeof d.from !== "number" || typeof d.to !== "number") return null;
+    const points = (d.points as unknown[])
+      .filter((p): p is unknown[] => Array.isArray(p) && typeof p[0] === "number")
+      .map((p) => ({ t: p[0] as number, online: count(p[1]), peak: count(p[2]), lobby: count(p[3]), match: count(p[4]) }));
+    const unique = d.unique ?? {};
+    return {
+      range,
+      bucket: d.bucket,
+      from: d.from,
+      to: d.to,
+      points,
+      unique: { "24h": count(unique["24h"]), "7d": count(unique["7d"]), "30d": count(unique["30d"]), all: numberOrNull(unique.all) },
+      since: numberOrNull(d.since),
+    };
+  } catch {
+    return null;
+  }
+}

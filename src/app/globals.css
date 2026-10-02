@@ -1069,6 +1069,7 @@ html[lang="zh-Hans"] .ideas__filter-btn { letter-spacing: 0.02em; }
 .history__stat dt { overflow: hidden; color: var(--muted); font: 700 11px var(--display); letter-spacing: 0.14em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .history__stat dd { margin: 6px 0 0; color: var(--paper); font: 700 26px/1.1 var(--display); letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; }
 .history__charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.history__note { margin: 0; color: var(--muted); font-size: 13px; }
 .chart { min-width: 0; margin: 0; padding: 14px 16px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
 .chart__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
 .chart__title { color: var(--paper-dim); font: 700 13px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
@@ -1077,6 +1078,7 @@ html[lang="zh-Hans"] .ideas__filter-btn { letter-spacing: 0.02em; }
 .chart svg { display: block; overflow: visible; }
 .chart--players { color: var(--green); }
 .chart--ping { color: #8fb0ff; }
+.chart--match { color: var(--gold); }
 .chart__line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .chart__dot { fill: currentColor; }
 .chart__grid { stroke: var(--line-soft); stroke-width: 1; }

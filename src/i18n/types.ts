@@ -199,8 +199,8 @@ export type Dictionary = {
     historyLead: string;
     historyServer: string;
     historyRange: string;
-    rangeShort: Record<"24h" | "7d" | "30d", string>;
-    rangeNames: Record<"24h" | "7d" | "30d", string>;
+    rangeShort: Record<"24h" | "7d" | "30d" | "all", string>;
+    rangeNames: Record<"24h" | "7d" | "30d" | "all", string>;
     peak: string;
     average: string;
     uptime: string;
@@ -212,6 +212,16 @@ export type Dictionary = {
     historyEmpty: string;
     historyError: string;
     showHistory: string;
+    playersTitle: string;
+    playersLead: string;
+    onlineChart: string;
+    matchChart: string;
+    matchAverage: string;
+    uniquePlayers: string;
+    allPlayers: string;
+    countedSince: string;
+    playersEmpty: string;
+    playersError: string;
   };
   admin: {
     tabActivity: string;

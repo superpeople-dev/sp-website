@@ -1,20 +1,27 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
-import type { HistoryPoint, HistoryRange } from "@/lib/servers";
+import type { HistoryRange } from "@/lib/servers";
 
 // One line chart of a server's history (ServerHistory): players or ping over the period, with the
 // times the server was offline shaded and a gap where nothing was checked (the backend was down).
-// Drawn in the browser at the width it gets: the times are in the visitor's own time zone.
+// Also the player chart (PlayerHistory), whose points have no uptime and whose longest period is all
+// of it ("all", a point a day). Drawn in the browser at the width it gets: the times are in the
+// visitor's own time zone.
+
+export type ChartRange = HistoryRange | "all";
+// A point: its bucket's start (unix seconds) and, for a server, the share of checks it was online.
+export type ChartPoint = { t: number; up?: number };
 
 const HEIGHT = 190;
 const PAD = { top: 12, right: 10, bottom: 26, left: 38 };
 
 // The axis labels: every few hours over 24 hours, every few days over 7 and 30 days, as many as fit.
-const tickSteps: Record<HistoryRange, { unit: "hour" | "day"; steps: number[]; format: Intl.DateTimeFormatOptions }> = {
+const tickSteps: Record<ChartRange, { unit: "hour" | "day"; steps: number[]; format: Intl.DateTimeFormatOptions }> = {
   "24h": { unit: "hour", steps: [1, 2, 3, 4, 6, 8, 12], format: { hour: "numeric", minute: "2-digit" } },
   "7d": { unit: "day", steps: [1, 2, 3, 7], format: { weekday: "short" } },
   "30d": { unit: "day", steps: [1, 2, 3, 5, 7, 10, 15], format: { day: "numeric", month: "short" } },
+  all: { unit: "day", steps: [1, 2, 3, 5, 7, 10, 15, 30, 60, 90, 180, 365], format: { day: "numeric", month: "short" } },
 };
 const MIN_LABEL_GAP = 64;
 
@@ -29,7 +36,7 @@ function niceTop(max: number, whole: boolean) {
 }
 
 // Local midnights or whole hours between two times, every step-th one.
-function tickTimes(fromMs: number, toMs: number, range: HistoryRange, width: number) {
+function tickTimes(fromMs: number, toMs: number, range: ChartRange, width: number) {
   const { unit, steps } = tickSteps[range];
   const spanMs = toMs - fromMs;
   const unitMs = unit === "hour" ? 3_600_000 : 86_400_000;
@@ -50,7 +57,7 @@ function tickTimes(fromMs: number, toMs: number, range: HistoryRange, width: num
   return out;
 }
 
-export function HistoryChart({
+export function HistoryChart<P extends ChartPoint>({
   title,
   current,
   points,
@@ -69,24 +76,24 @@ export function HistoryChart({
   title: string;
   // The value now, next to the title.
   current: string | null;
-  points: HistoryPoint[];
-  value: (point: HistoryPoint) => number | null;
+  points: P[];
+  value: (point: P) => number | null;
   // Counts (players) get whole-number steps on the axis.
   whole: boolean;
-  range: HistoryRange;
+  range: ChartRange;
   from: number;
   to: number;
   bucket: number;
   intl: string;
   formatAxis: (value: number) => string;
   // The tooltip's line for a point (offline, or its value).
-  describe: (point: HistoryPoint) => string;
-  tone: "players" | "ping";
+  describe: (point: P) => string;
+  tone: "players" | "ping" | "match";
   offlineLabel: string;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
-  const [hover, setHover] = useState<HistoryPoint | null>(null);
+  const [hover, setHover] = useState<P | null>(null);
   const gradient = useId();
 
   useEffect(() => {
@@ -127,7 +134,7 @@ export function HistoryChart({
     // Offline stretches: buckets where the server was down most of the time, merged.
     const offline: { x1: number; x2: number }[] = [];
     for (const point of points) {
-      if (point.up >= 0.5) continue;
+      if ((point.up ?? 1) >= 0.5) continue;
       const x1 = xAt(point.t);
       const x2 = xAt(point.t + bucket);
       const prev = offline[offline.length - 1];
@@ -140,7 +147,14 @@ export function HistoryChart({
   const axis = useMemo(() => new Intl.DateTimeFormat(intl, tickSteps[range].format), [intl, range]);
   const when = useMemo(
     () =>
-      new Intl.DateTimeFormat(intl, range === "24h" ? { weekday: "short", hour: "numeric", minute: "2-digit" } : { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }),
+      new Intl.DateTimeFormat(
+        intl,
+        range === "24h"
+          ? { weekday: "short", hour: "numeric", minute: "2-digit" }
+          : range === "all"
+            ? { weekday: "short", day: "numeric", month: "short", year: "numeric" }
+            : { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" },
+      ),
     [intl, range],
   );
   const ticks = width ? tickTimes(startMs, endMs, range, plotW) : [];
@@ -160,7 +174,7 @@ export function HistoryChart({
   const hoverValue = hover ? value(hover) : null;
   const hoverX = hover ? x(hover.t + bucket / 2) : 0;
   const hoverLabel = hover
-    ? bucket > 300
+    ? bucket > 300 && range !== "all"
       ? when.formatRange(new Date(hover.t * 1000), new Date((hover.t + bucket) * 1000))
       : when.format(new Date(hover.t * 1000))
     : "";

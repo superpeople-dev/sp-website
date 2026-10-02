@@ -9,7 +9,7 @@ import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { pageMetadata, pageStructuredData } from "@/lib/seo";
-import { getHistory, getServers } from "@/lib/servers";
+import { getHistory, getPlayerHistory, getServers } from "@/lib/servers";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/servers">): Promise<Metadata> {
   const { lang } = await params;
@@ -21,7 +21,7 @@ export default async function ServersPage({ params }: PageProps<"/[lang]/servers
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const [release, servers, history] = await Promise.all([getLatestRelease(), getServers(), getHistory("24h")]);
+  const [release, servers, history, players] = await Promise.all([getLatestRelease(), getServers(), getHistory("24h"), getPlayerHistory("24h")]);
 
   return (
     <>
@@ -29,7 +29,7 @@ export default async function ServersPage({ params }: PageProps<"/[lang]/servers
       <Nav downloadUrl={release.downloadUrl} page="/servers" />
       <main>
         <PageHead title={t.servers.title} lead={t.servers.lead} notice={servers ? null : t.servers.unavailable} />
-        {servers && <ServerList initial={servers} history={history} />}
+        {servers && <ServerList initial={servers} history={history} players={players} />}
       </main>
       <Footer t={t} locale={lang} />
     </>
