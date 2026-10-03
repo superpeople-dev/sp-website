@@ -9,8 +9,8 @@ import { Icon } from "../Icon";
 import { Markdown } from "./Markdown";
 
 // /news/write: admins with "manage" write news posts in English (app/api/admin/news). The list of posts
-// on the left, the form and a live preview on the right. Publishing translates the post into the other
-// languages, which takes up to a minute. The team reads English, so this page is in English only.
+// on the left, the form and a live preview on the right. Posts show in English in every language. The
+// team reads English, so this page is in English only.
 
 type Form = { id: string | null; title: string; summary: string; body: string; category: NewsCategory; coverKey: string | null; cover: string | null };
 const empty: Form = { id: null, title: "", summary: "", body: "", category: "update", coverKey: null, cover: null };
@@ -23,7 +23,7 @@ async function api<T>(body: unknown): Promise<T> {
   return data;
 }
 
-type Listing = { posts: NewsDraft[]; translate: boolean; uploads: boolean };
+type Listing = { posts: NewsDraft[]; uploads: boolean };
 
 // The posts, or the HTTP status when they can't be had.
 async function fetchListing(): Promise<Listing | number> {
@@ -45,7 +45,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
   const { t } = useI18n();
   const n = t.news;
   const [posts, setPosts] = useState<NewsDraft[] | null>(null);
-  const [setup, setSetup] = useState({ translate: true, uploads: true });
+  const [uploads, setUploads] = useState(true);
   const [form, setForm] = useState<Form>(empty);
   const [status, setStatus] = useState<"draft" | "published" | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
@@ -67,7 +67,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
     (data: Listing | number) => {
       if (typeof data === "number") return setMessage({ text: data === 503 ? "The database is not set up." : "Could not load the posts.", error: true });
       setPosts(data.posts);
-      setSetup({ translate: data.translate, uploads: data.uploads });
+      setUploads(data.uploads);
       const wanted = data.posts.find((post) => post.id === pending.current);
       pending.current = null;
       if (wanted) open(wanted);
@@ -98,9 +98,9 @@ export function Editor({ initialId }: { initialId: string | null }) {
   };
 
   const save = (publish: boolean) =>
-    run(publish ? "Publishing and translating…" : status === "published" ? "Saving and translating…" : "Saving…", async () => {
+    run(publish ? "Publishing…" : "Saving…", async () => {
       const { coverKey, title, summary, body: text, category } = form;
-      const result = await api<{ id: string; slug: string; status: "draft" | "published"; translated: number }>({
+      const result = await api<{ id: string; slug: string; status: "draft" | "published" }>({
         action: "save",
         id: form.id,
         publish,
@@ -110,8 +110,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
       setForm((f) => ({ ...f, id: result.id }));
       setStatus(result.status);
       setSlug(result.slug);
-      if (result.status !== "published") return "Draft saved.";
-      return setup.translate ? `Published, translated into ${result.translated} of 9 languages.` : "Published (in English only: translation is not set up).";
+      return result.status === "published" ? (publish ? "Published." : "Changes saved.") : "Draft saved.";
     });
 
   const pickCover = (file: File | undefined) =>
@@ -165,7 +164,6 @@ export function Editor({ initialId }: { initialId: string | null }) {
                   <b>{post.title || "Untitled"}</b>
                   <small>
                     {n.categories[post.category]} · {new Date(post.publishedAt ?? post.updatedAt).toLocaleDateString("en-GB")}
-                    {post.status === "published" && ` · ${post.translations.length}/9 translated`}
                   </small>
                 </button>
               </li>
@@ -195,7 +193,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
               <span>Cover image</span>
               <span className="news-editor__drop" style={form.cover ? { backgroundImage: `url("${form.cover}")` } : undefined}>
                 {form.cover ? "Replace" : "Upload"}
-                <input type="file" accept={imageTypes.join(",")} disabled={!setup.uploads} onChange={(e) => pickCover(e.target.files?.[0])} />
+                <input type="file" accept={imageTypes.join(",")} disabled={!uploads} onChange={(e) => pickCover(e.target.files?.[0])} />
               </span>
             </label>
           </div>
@@ -208,7 +206,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
               Text: ## heading, **bold**, *italic*, - list, [link](https://…)
               <span className="news-editor__insert">
                 <Icon name="attach" /> Insert picture
-                <input type="file" accept={imageTypes.join(",")} disabled={!setup.uploads} onChange={(e) => insertImage(e.target.files?.[0])} />
+                <input type="file" accept={imageTypes.join(",")} disabled={!uploads} onChange={(e) => insertImage(e.target.files?.[0])} />
               </span>
             </span>
             <textarea ref={body} className="news-editor__body" rows={16} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
@@ -219,7 +217,6 @@ export function Editor({ initialId }: { initialId: string | null }) {
               Also post it to the community Discord channel when publishing
             </label>
           )}
-          {!setup.translate && <p className="news-editor__hint">Translation is not set up (ANTHROPIC_API_KEY): posts show in English everywhere.</p>}
           <div className="news-editor__actions">
             {status === "published" && slug && (
               <a className="btn btn--sm" href={`/news/${slug}`} target="_blank" rel="noreferrer">

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { NewsArticle } from "@/components/news/NewsArticle";
-import { defaultLocale, isLocale, localeHref } from "@/i18n/config";
+import { isLocale, localeHref } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { can } from "@/lib/board";
 import { getLatestRelease } from "@/lib/github";
@@ -17,7 +17,7 @@ export const dynamicParams = true;
 export async function generateMetadata({ params }: PageProps<"/[lang]/news/[slug]">): Promise<Metadata> {
   const { lang, slug } = await params;
   if (!isLocale(lang) || !newsReady) notFound();
-  const post = await getNews(slug, lang);
+  const post = await getNews(slug);
   if (!post) notFound();
   const base = pageMetadata(lang, "/news");
   const url = `${localeHref(lang, "/news")}/${slug}`;
@@ -44,15 +44,14 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/news/[slug
 export default async function NewsPostPage({ params }: PageProps<"/[lang]/news/[slug]">) {
   const { lang, slug } = await params;
   if (!isLocale(lang) || !newsReady) notFound();
-  const [release, post, session] = await Promise.all([getLatestRelease(), getNews(slug, lang), currentSession()]);
+  const [release, post, session] = await Promise.all([getLatestRelease(), getNews(slug), currentSession()]);
   if (!post) notFound();
-  const original = post.translated ? await getNews(slug, defaultLocale) : null;
 
   return (
     <>
       <Nav downloadUrl={release.downloadUrl} page="/news" />
       <main>
-        <NewsArticle post={post} original={original} editHref={can(session, "manage") ? `/news/write?id=${post.id}` : null} />
+        <NewsArticle post={post} editHref={can(session, "manage") ? `/news/write?id=${post.id}` : null} />
       </main>
       <Footer t={getDictionary(lang)} locale={lang} />
     </>

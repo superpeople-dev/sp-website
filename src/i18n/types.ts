@@ -401,9 +401,6 @@ export type Dictionary = {
     minRead: string;
     latest: string;
     allNews: string;
-    translated: string;
-    showOriginal: string;
-    showTranslation: string;
     empty: string;
     back: string;
     // {name}: the author.
