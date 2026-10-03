@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import {
   Barlow,
-  Barlow_Condensed,
   Noto_Sans_Devanagari,
   Noto_Sans_JP,
   Noto_Sans_KR,
   Noto_Sans_SC,
+  Saira_Condensed,
+  Saira_Extra_Condensed,
   Sofia_Sans,
   Sofia_Sans_Condensed,
 } from "next/font/google";
@@ -20,11 +21,11 @@ import { pageMetadata } from "@/lib/seo";
 import "../globals.css";
 
 const body = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const display = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800", "900"],
-  variable: "--font-display",
-});
+// Free lookalikes of the game's typefaces: Saira Condensed for Refrigerator Deluxe (every heading),
+// Saira Extra Condensed for CG Fiorello Condensed (the home headline). Neither has Cyrillic, so
+// Russian keeps Sofia Sans Condensed for both.
+const display = Saira_Condensed({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], variable: "--font-display" });
+const headline = Saira_Extra_Condensed({ subsets: ["latin"], weight: ["800"], variable: "--font-headline" });
 const cyrillicBody = Sofia_Sans({ subsets: ["cyrillic", "latin"], variable: "--font-body", preload: false, display: "swap" });
 const cyrillicDisplay = Sofia_Sans_Condensed({
   subsets: ["cyrillic", "latin"],
@@ -61,7 +62,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const cjk = { ja: japanese.variable, ko: korean.variable, zh: chinese.variable, hi: devanagari.variable }[lang as string] ?? "";
-  const latin = lang === "ru" ? `${cyrillicBody.variable} ${cyrillicDisplay.variable}` : `${body.variable} ${display.variable}`;
+  const latin = lang === "ru" ? `${cyrillicBody.variable} ${cyrillicDisplay.variable}` : `${body.variable} ${display.variable} ${headline.variable}`;
 
   return (
     <html lang={localeInfo[lang].htmlLang} className={`${latin} ${cjk}`}>

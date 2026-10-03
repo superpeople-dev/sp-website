@@ -14,7 +14,7 @@ export function Faq() {
 
   return (
     <section id="faq">
-      <Image className="gun gun--faq" src={guns.purple} alt="" aria-hidden="true" />
+      <Image className="gun gun--faq" src={guns.purple} quality={90} alt="" aria-hidden="true" />
       <div className="wrap">
         <Reveal>
           <h2>{t.faq.title}</h2>

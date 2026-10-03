@@ -22,8 +22,8 @@ export function Band({ downloadUrl }: { downloadUrl: string }) {
       </motion.div>
       <div className="band__shade" />
       {/* Two of the game's characters either side of the call to action (desktop only). */}
-      <Image className="band__fig band__fig--l" src={figures.tactical} alt="" aria-hidden="true" />
-      <Image className="band__fig band__fig--r" src={figures.whitehair} alt="" aria-hidden="true" />
+      <Image className="band__fig band__fig--l" src={figures.tactical} quality={90} alt="" aria-hidden="true" />
+      <Image className="band__fig band__fig--r" src={figures.whitehair} quality={90} alt="" aria-hidden="true" />
       <Reveal className="wrap">
         <h2>{t.band.title}</h2>
         <p className="lead">{t.band.lead}</p>

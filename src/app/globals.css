@@ -16,7 +16,7 @@
   --green: #3ddc84;
   --discord: #5865f2;
   --font-cjk: system-ui;
-  --display: var(--font-display), var(--font-cjk), "Refrigerator Deluxe", system-ui, sans-serif;
+  --display: var(--font-display), var(--font-cjk), system-ui, sans-serif;
   --body: var(--font-body), var(--font-cjk), system-ui, sans-serif;
   --r: 3px;
   --max: 1320px;
@@ -55,6 +55,7 @@ html[lang="ko"] .hero h1,
 html[lang="ja"] .hero h1,
 html[lang="zh-Hans"] .hero h1 { line-height: 1.08; letter-spacing: 0; }
 html[lang="ru"] .hero h1 { --hero-fit: 0.88; }
+html:is([lang="ru"], [lang="hi"], [lang="ja"], [lang="ko"], [lang="zh-Hans"]) .hero h1 { --hero-face: 1; }
 html[lang="ko"] h2,
 html[lang="ja"] h2,
 html[lang="zh-Hans"] h2 { line-height: 1.2; letter-spacing: 0; }
@@ -396,8 +397,13 @@ h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacin
 .slab--b { right: 6%; width: 60px; background: linear-gradient(180deg, rgba(239, 68, 56, 0.11), transparent 70%); }
 .slab--c { right: 22%; width: 20px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 70%); }
 
+/* The headline in Saira Extra Condensed (like the game's poster face): narrower than the heading font,
+   so Latin lines get 1.2x the size to fill the same width. Russian, Hindi and the CJK languages
+   have no headline font and keep the heading font at its usual size. */
 .hero h1 {
-  font: 900 clamp(34px, calc(17.5vw * var(--hero-scale, 1) * var(--hero-fit, 1)), var(--hero-cap, 120px))/0.86 var(--display);
+  --hero-face: 1.2;
+  font: 900 clamp(34px, calc(17.5vw * var(--hero-scale, 1) * var(--hero-fit, 1) * var(--hero-face)), calc(var(--hero-cap, 120px) * var(--hero-face)))/0.86 var(--font-headline, var(--font-display)), var(--display);
+  font-synthesis: none;
   text-transform: uppercase;
   letter-spacing: -0.005em;
   margin: 0;

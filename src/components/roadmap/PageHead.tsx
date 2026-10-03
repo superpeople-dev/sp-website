@@ -20,7 +20,7 @@ export function PageHead({
     <header className={art ? "page-head page-head--art" : "page-head"}>
       {art && (
         <div className="page-head__art" aria-hidden="true">
-          <Image src={art} alt="" fill sizes="(max-width: 700px) 100vw, 70vw" priority />
+          <Image src={art} alt="" fill sizes="(max-width: 700px) 100vw, 70vw" priority quality={90} />
         </div>
       )}
       <div className="wrap">

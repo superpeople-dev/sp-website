@@ -50,5 +50,5 @@ export const locations: StaticImageData[] = [loc01, loc02, loc03, loc04, loc05, 
 // Three weapon skins from the item icons, scattered beside section titles on the home page.
 export const guns = { red: gunRed, gold: gunGold, purple: gunPurple };
 
-// Key art the home hero fades through after its own picture (components/Hero).
+// Official key art (1920x1080) the home hero fades through after its own picture (components/Hero).
 export const heroSlides: StaticImageData[] = [hero2, hero3, hero4];
