@@ -452,3 +452,36 @@ export async function logGameReport(who: Player, report: GameReport, reported?: 
     fields,
   });
 }
+
+// #moderation: the game client's anti-tamper (sp-native anti_tamper.cpp, relayed by the launcher as
+// the signed-in account, app/api/launcher/tamper) saw a debugger attached, a known cheat module, or an
+// unknown DLL in the game. `banned` is set when the player was auto temp-banned (high-confidence);
+// otherwise it is a review alert only. The player is the launcher's Discord account -- never a name a
+// client could forge, and a report only ever concerns the player who sent it.
+export async function logTamper(
+  who: Player,
+  info: { signal: string; detail?: string; banned?: { until: number } },
+) {
+  const code = (text: string) => `\`${text.replaceAll("`", "'")}\``;
+  const fields: { name: string; value: string; inline?: boolean }[] = [];
+  fields.push({ name: "Player", value: `${person(who)} (${who.name})` });
+  fields.push({ name: "Signal", value: info.signal, inline: true });
+  if (info.detail) fields.push({ name: "Detail", value: code(info.detail), inline: true });
+  fields.push({
+    name: "Action",
+    value: info.banned
+      ? `Auto temp-ban until ${new Date(info.banned.until).toISOString().slice(0, 16).replace("T", " ")} UTC`
+      : "Alert only -- review (no automatic ban)",
+    inline: false,
+  });
+  await post("moderation", {
+    label: "🛡️ Anti-cheat",
+    color: info.banned ? colors.red : colors.gold,
+    title: info.banned ? "Tampering -- player temp-banned" : "Possible tampering -- review",
+    description: info.banned
+      ? "The game client detected tampering and the player was temporarily banned."
+      : "The game client saw something unexpected loaded. No automatic ban -- a human decides.",
+    thumbnail: who.avatar,
+    fields,
+  });
+}
