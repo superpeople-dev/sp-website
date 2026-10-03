@@ -28,8 +28,8 @@ export function Band({ downloadUrl }: { downloadUrl: string }) {
         <h2>{t.band.title}</h2>
         <p className="lead">{t.band.lead}</p>
         <div className="cta">
-          <DownloadButton href={downloadUrl} label={t.hero.download} large />
           <DiscordButton label={t.hero.discord} large />
+          <DownloadButton href={downloadUrl} label={t.hero.download} large />
         </div>
       </Reveal>
     </section>

@@ -29,7 +29,7 @@ export function NewsCard({ post, featured = false }: { post: NewsPost; featured?
         <span className="news-meta">
           <span className={`news-kind news-kind--${post.category}`}>{n.categories[post.category]}</span>
           <NewsDate at={post.publishedAt} />
-          {featured && <span>· {fill(n.minRead, { n: String(post.readMinutes) })}</span>}
+          {featured && <span>- {fill(n.minRead, { n: String(post.readMinutes) })}</span>}
         </span>
         <span className="news-card__title">{post.title}</span>
         {post.summary && <span className="news-card__summary">{post.summary}</span>}

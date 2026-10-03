@@ -47,7 +47,7 @@ export function PlayerCard({ row, modeLabel, flag, onClose }: { row: LeaderRow |
         <>
           <div className="sheet__bar">
             <span className="player-card__mode">
-              #{row.rank} · {modeLabel}
+              #{row.rank} - {modeLabel}
             </span>
             <div className="sheet__actions">
               <ShareButton title={row.name} url={() => window.location.href} />

@@ -27,7 +27,7 @@ export function NewsArticle({ post, editHref }: { post: NewsPost; editHref: stri
         <div className="news-meta">
           <span className={`news-kind news-kind--${post.category}`}>{n.categories[post.category]}</span>
           <NewsDate at={post.publishedAt} />
-          <span>· {fill(n.minRead, { n: String(post.readMinutes) })}</span>
+          <span>- {fill(n.minRead, { n: String(post.readMinutes) })}</span>
         </div>
         <h1 lang={lang}>{post.title}</h1>
         <div className="news-article__byline">

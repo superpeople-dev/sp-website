@@ -163,7 +163,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
                   <span className={`news-editor__state news-editor__state--${post.status}`}>{post.status === "draft" ? "Draft" : "Live"}</span>
                   <b>{post.title || "Untitled"}</b>
                   <small>
-                    {n.categories[post.category]} · {new Date(post.publishedAt ?? post.updatedAt).toLocaleDateString("en-GB")}
+                    {n.categories[post.category]} - {new Date(post.publishedAt ?? post.updatedAt).toLocaleDateString("en-GB")}
                   </small>
                 </button>
               </li>

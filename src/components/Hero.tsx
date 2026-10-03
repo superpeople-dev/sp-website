@@ -4,13 +4,12 @@ import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import hero from "@/assets/game/hero-3.webp";
+import hero from "@/assets/hero.jpg";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { HeadlineLine } from "@/i18n/types";
 import type { Release } from "@/lib/github";
 import { playersOnline, type PlayerHistory } from "@/lib/servers";
-import { scrollToSection } from "@/lib/scroll";
 import { DiscordButton } from "./Buttons";
 import { Icon } from "./Icon";
 import { RelativeTime } from "./RelativeTime";
@@ -75,9 +74,8 @@ export function Hero({ release, players: initialPlayers }: { release: Release; p
 
       <motion.div className="wrap hero__copy" style={{ y: copyY }}>
         <motion.div className="hero__ribbon" {...fadeUp(0.1)}>
-          <i />
           <span>
-            {t.nav.tagline} · {h.season}
+            {t.nav.tagline} - {h.season}
           </span>
         </motion.div>
 
@@ -103,15 +101,12 @@ export function Hero({ release, players: initialPlayers }: { release: Release; p
 
         <motion.div className="cta" {...fadeUp(0.85)}>
           <DiscordButton label={h.discord} large />
-          <a
-            href="#play"
-            className="btn btn--lg"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection("play");
-            }}
-          >
-            {h.howToPlay}
+          <a href={release.downloadUrl} className="hero__play">
+            <Icon name="download" />
+            <span>
+              {h.playNow}
+              <small>{h.playSub}</small>
+            </span>
           </a>
         </motion.div>
 
@@ -143,17 +138,6 @@ export function Hero({ release, players: initialPlayers }: { release: Release; p
           <b>{h.season}</b>
           <span>{h.ranked}</span>
         </Link>
-        <div className="hero__card">
-          <b>{h.free}</b>
-          <span>{h.freeLabel}</span>
-        </div>
-        <a href={release.downloadUrl} className="hero__play">
-          <Icon name="download" />
-          <span>
-            {h.playNow}
-            <small>{h.playSub}</small>
-          </span>
-        </a>
       </motion.div>
     </header>
   );

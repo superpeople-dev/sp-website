@@ -43,11 +43,8 @@ export type Dictionary = {
     latest: string;
     windows: string;
     season: string;
-    howToPlay: string;
     playersOnline: string;
     ranked: string;
-    free: string;
-    freeLabel: string;
     playNow: string;
     playSub: string;
   };
