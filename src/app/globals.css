@@ -417,11 +417,12 @@ html[lang="zh-Hans"] .hero__lede { max-width: min(25em, 100%); }
   .hero__updated svg { width: 17px; height: 17px; }
 }
 
-/* Play now is as tall as the Discord button beside it (or above it, on phones). */
+/* Play now is as tall and as wide as the Discord button beside it: two equal columns, each as wide as
+   the wider button. On phones they are stacked, both the full width. */
+.hero .cta { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: max-content; max-width: 100%; }
 .hero .cta .btn,
 .hero__play { height: 64px; }
 .hero__play {
-  flex: none;
   padding: 0 28px 5px;
   display: flex;
   align-items: center;
@@ -444,7 +445,7 @@ html[lang="zh-Hans"] .hero__lede { max-width: min(25em, 100%); }
 .hero__play small { display: block; font: 800 10px/1 var(--display); letter-spacing: 0.14em; opacity: 0.85; }
 @media (max-width: 700px) {
   .hero { padding-bottom: 24px; }
-  .hero .cta .hero__play { flex: 1 1 100%; }
+  .hero .cta { grid-auto-flow: row; width: 100%; }
 }
 /* The narrowest phones: the label and its line stay on one line in every language. */
 @media (max-width: 400px) {
