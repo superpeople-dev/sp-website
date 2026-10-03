@@ -32,7 +32,7 @@ export function NewsCard({ post, featured = false }: { post: NewsPost; featured?
           {featured && <span>- {fill(n.minRead, { n: String(post.readMinutes) })}</span>}
         </span>
         <span className="news-card__title">{post.title}</span>
-        {post.summary && <span className="news-card__summary">{post.summary}</span>}
+        {post.excerpt && <span className="news-card__summary">{post.excerpt}</span>}
         {featured && <span className="news-card__more">{n.readMore} →</span>}
       </span>
     </Link>

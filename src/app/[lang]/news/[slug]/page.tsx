@@ -25,19 +25,19 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/news/[slug
   return {
     ...base,
     title: post.title,
-    description: post.summary || base.description,
+    description: post.excerpt || base.description,
     alternates: { canonical: url, languages: languageAlternates(false, "/news", `/${slug}`) },
     openGraph: {
       ...base.openGraph,
       type: "article",
       url,
       title: `${post.title} - ${siteName}`,
-      description: post.summary || undefined,
+      description: post.excerpt || undefined,
       publishedTime: new Date(post.publishedAt).toISOString(),
       modifiedTime: new Date(post.updatedAt).toISOString(),
       images,
     },
-    twitter: { card: "summary_large_image", title: `${post.title} - ${siteName}`, description: post.summary || undefined, images },
+    twitter: { card: "summary_large_image", title: `${post.title} - ${siteName}`, description: post.excerpt || undefined, images },
   };
 }
 

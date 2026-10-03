@@ -19,6 +19,8 @@ export type NewsPost = {
   category: NewsCategory;
   title: string;
   summary: string;
+  // What a card and a link preview say about the post: its summary, or the start of its text.
+  excerpt: string;
   body: string;
   cover: string | null;
   author: { name: string; avatar: string };
@@ -107,6 +109,28 @@ export const isNewsKey = (key: unknown): key is string => typeof key === "string
 
 const readMinutes = (text: string) => Math.max(1, Math.round(text.split(/\s+/).filter(Boolean).length / 220));
 
+const EXCERPT_MAX = 200;
+
+// A post without a summary: its first paragraph (not a heading, list, quote or picture) as plain text,
+// cut at a word before 200 characters.
+export function excerptOf(body: string) {
+  const paragraph = body
+    .replace(/\r\n/g, "\n")
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .find((block) => block && !/^(#|!\[|[-*] |\d+\. |>)/.test(block));
+  if (!paragraph) return "";
+  const text = paragraph
+    .replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= EXCERPT_MAX) return text;
+  const cut = text.slice(0, EXCERPT_MAX);
+  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[\s,;:.-]+$/, "")}…`;
+}
+
 function view(row: PostRow): NewsPost {
   return {
     id: row.id,
@@ -114,6 +138,7 @@ function view(row: PostRow): NewsPost {
     category: row.category,
     title: row.title,
     summary: row.summary,
+    excerpt: row.summary || excerptOf(row.body),
     body: row.body,
     cover: row.cover_key ? newsImageUrl(row.cover_key) : null,
     author: { name: row.author_name, avatar: row.author_avatar },
