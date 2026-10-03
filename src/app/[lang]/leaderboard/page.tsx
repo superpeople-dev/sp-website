@@ -31,7 +31,12 @@ export default async function LeaderboardPage({ params, searchParams }: PageProp
       <JsonLd data={pageStructuredData(lang, "/leaderboard")} />
       <Nav downloadUrl={release.downloadUrl} page="/leaderboard" />
       <main>
-        <PageHead art={headArt.leaderboard} title={t.leaderboard.title} lead={t.leaderboard.lead} notice={board ? null : t.leaderboard.unavailable} />
+        <PageHead art={headArt.leaderboard} title={t.leaderboard.title} lead={t.leaderboard.lead} notice={board ? null : t.leaderboard.unavailable}>
+          <p className="season-tag">
+            <i />
+            {t.hero.season}
+          </p>
+        </PageHead>
         {board && first && <Leaderboard board={board} initialKey={first} />}
       </main>
       <Footer t={t} locale={lang} />

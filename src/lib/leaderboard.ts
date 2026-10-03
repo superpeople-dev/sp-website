@@ -3,7 +3,7 @@ import { statusUrl } from "./servers";
 
 // The season leaderboard: each mode's in-game Top 100, from the backend's public route next to the
 // server list (sp-backend: GET /ds/api/listen/public/leaderboard). Only what the lobby shows every
-// player: in-game name, RP, tier and country. The route answers 404 until it is deployed and
+// player: in-game name, RP, tier, country, the season record of that mode and the Discord avatar. The route answers 404 until it is deployed and
 // listenServers.publicStatus is on.
 const leaderboardUrl = `${statusUrl}/leaderboard`;
 const REVALIDATE_SECONDS = 60;
@@ -16,19 +16,61 @@ export type LeaderKey = `${LeaderMode}_${LeaderView}`;
 // The lists in the game's order: Solo TPP, Solo FPP, Duo TPP and so on.
 export const leaderKeys = leaderModes.flatMap((mode) => leaderViews.map((view): LeaderKey => `${mode}_${view}`));
 
-// rank from 1; tier: the game's tier id (tierOf); country: an ISO code the site has a flag for, or null.
-export type LeaderRow = { rank: number; name: string; rp: number; tier: number; country: string | null };
+// A player's season record in one mode (sp-backend routes/listen.js statsOf): sums since the hosts
+// started reporting match stats, kills of players only (AI kills apart), and the newest matches
+// (rank of `of`, RP before and after, start in unix seconds).
+export type RecentMatch = { rank: number; of: number; rp: number; prev: number; at: number };
+export type PlayerStats = {
+  matches: number;
+  wins: number;
+  top10: number;
+  kills: number;
+  aiKills: number;
+  deaths: number;
+  assists: number;
+  revives: number;
+  damage: number;
+  rankSum: number;
+  seconds: number;
+  recent: RecentMatch[];
+};
+
+// rank from 1; tier: the game's tier id (tierOf); country: an ISO code the site has a flag for, or null;
+// avatar: a Discord avatar hash (avatarUrl), or null; stats: null without matches this season.
+export type LeaderRow = { rank: number; name: string; rp: number; tier: number; country: string | null; avatar: string | null; stats: PlayerStats | null };
+
+const avatarHash = /^(?:a_)?[0-9a-f]{32}$/;
+export const isAvatarHash = (value: unknown): value is string => typeof value === "string" && avatarHash.test(value);
+// Through the site (app/api/leaderboard/avatar), never straight from the backend's plain-HTTP address.
+export const avatarUrl = (hash: string) => `/api/leaderboard/avatar/${hash}`;
+export const avatarSource = (hash: string) => `${statusUrl}/avatar/${hash}.png`;
+
+const count = (value: unknown) => (typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : 0);
+const statFields = ["matches", "wins", "top10", "kills", "aiKills", "deaths", "assists", "revives", "damage", "rankSum", "seconds"] as const;
+
+function statsOf(value: unknown): PlayerStats | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  if (!count(raw.matches)) return null;
+  const sums = Object.fromEntries(statFields.map((field) => [field, count(raw[field])])) as Omit<PlayerStats, "recent">;
+  const recent = (Array.isArray(raw.recent) ? raw.recent : [])
+    .filter((m): m is Record<string, unknown> => !!m && typeof m === "object" && count((m as Record<string, unknown>).rank) > 0)
+    .slice(0, 5)
+    .map((m) => ({ rank: count(m.rank), of: count(m.of), rp: count(m.rp), prev: count(m.prev), at: count(m.at) }));
+  return { ...sums, recent };
+}
 export type Leaderboard = { updated: number; lists: Record<LeaderKey, LeaderRow[]> };
 
 function rowsOf(value: unknown): LeaderRow[] {
   if (!Array.isArray(value)) return [];
   return value
-    .flatMap((raw: { rank?: unknown; name?: unknown; rp?: unknown; tier?: unknown; country?: unknown }) => {
+    .flatMap((raw: { rank?: unknown; name?: unknown; rp?: unknown; tier?: unknown; country?: unknown; avatar?: unknown; stats?: unknown }) => {
       const rank = Number(raw?.rank);
       const rp = Number(raw?.rp);
       if (!Number.isInteger(rank) || rank < 1 || !Number.isFinite(rp)) return [];
       const country = typeof raw.country === "string" && /^[A-Z]{2}$/.test(raw.country) && hasFlag(raw.country) ? raw.country : null;
-      return [{ rank, name: String(raw.name ?? "").trim() || "?", rp, tier: Number(raw.tier) || 0, country }];
+      const avatar = isAvatarHash(raw.avatar) ? raw.avatar : null;
+      return [{ rank, name: String(raw.name ?? "").trim() || "?", rp, tier: Number(raw.tier) || 0, country, avatar, stats: statsOf(raw.stats) }];
     })
     .slice(0, 100);
 }

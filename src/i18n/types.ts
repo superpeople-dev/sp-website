@@ -430,6 +430,8 @@ export type Dictionary = {
     unavailable: string;
     search: string;
     noMatch: string;
+    // The player card (components/leaderboard/PlayerCard.tsx).
+    card: Record<"matches" | "wins" | "top10" | "kills" | "kd" | "killsPerMatch" | "avgPlace" | "avgDamage" | "assists" | "revives" | "aiKills" | "playTime" | "hours" | "recent" | "place" | "noStats" | "open", string>;
     tiers: Record<"superSoldier" | "legendary" | "grandMaster" | "master" | "diamond" | "platinum" | "gold" | "silver" | "bronze" | "iron", string>;
   };
   legal: {

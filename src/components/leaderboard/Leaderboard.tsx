@@ -10,12 +10,14 @@ import {
   paramOfKey,
   tierOf,
   type LeaderKey,
+  type LeaderRow,
   type Leaderboard as Board,
   type LeaderMode,
   type LeaderView,
 } from "@/lib/leaderboard";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
+import { PlayerCard } from "./PlayerCard";
 
 // Names match with or without accents and capitals ("lea" finds "Léa").
 const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
@@ -25,12 +27,13 @@ const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toL
 // changes (where does a player stand in each mode?). Players found keep their rank. The top three stand
 // on a podium (2 - 1 - 3), the rest are a list. Desktop: one bar, the search on the right, the list in
 // four columns. Phone: the modes on a row of their own, the view and the search under them, the tier
-// under the name.
+// under the name. A click on a player opens their card (PlayerCard) with that mode's season record.
 export function Leaderboard({ board, initialKey }: { board: Board; initialKey: LeaderKey }) {
   const { locale, t } = useI18n();
   const l = t.leaderboard;
   const [key, setKey] = useState(initialKey);
   const [query, setQuery] = useState("");
+  const [shown, setShown] = useState<LeaderRow | null>(null);
   const [mode, view] = key.split("_") as [LeaderMode, LeaderView];
   const list = board.lists[key];
   const wanted = plain(query.trim());
@@ -116,7 +119,12 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
                 const tier = tierOf(row.tier);
                 return (
                   <li key={row.rank} className={`podium__place podium__place--${row.rank}`}>
-                    <div className="podium__player">
+                    <button type="button" className="podium__player" onClick={() => setShown(row)} aria-label={fill(l.card.open, { name: row.name })}>
+                      {row.rank === 1 && (
+                        <svg className="podium__crown" viewBox="0 0 24 16" aria-hidden="true">
+                          <path d="M2 5l5 4 5-8 5 8 5-4-2 11H4z" />
+                        </svg>
+                      )}
                       {tier && <Image className="podium__icon" src={tier.icon} alt="" width={64} height={64} unoptimized />}
                       <span className="leaders__name podium__name">
                         {flagOf(row.country)}
@@ -126,7 +134,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
                       <span className="podium__rp">
                         {number.format(row.rp)} <abbr title={l.pointsTitle}>{l.points}</abbr>
                       </span>
-                    </div>
+                    </button>
                     <div className="podium__step">{row.rank}</div>
                   </li>
                 );
@@ -152,13 +160,14 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.rank} className={row.rank <= 3 ? `is-top is-top-${row.rank}` : undefined}>
+                  <tr key={row.rank} className={row.rank <= 3 ? `is-top is-top-${row.rank}` : undefined} onClick={() => setShown(row)}>
                     <td className="leaders__rank">{row.rank}</td>
                     <td className="leaders__player">
-                      <span className="leaders__name">
+                      {/* The row opens the card on a click; the name is the button for the keyboard. */}
+                      <button type="button" className="leaders__name" onClick={(e) => (e.stopPropagation(), setShown(row))}>
                         {flagOf(row.country)}
                         <bdi>{row.name}</bdi>
-                      </span>
+                      </button>
                       <span className="leaders__tier-under">{badgeOf(row.tier, true)}</span>
                     </td>
                     <td className="leaders__tier">{badgeOf(row.tier, true)}</td>
@@ -176,6 +185,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
           )}
         </Reveal>
       </div>
+      <PlayerCard row={shown} modeLabel={`${t.servers.modes[mode]} ${t.servers.views[view]}`} flag={shown && flagOf(shown.country)} onClose={() => setShown(null)} />
     </section>
   );
 }
