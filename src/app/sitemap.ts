@@ -3,6 +3,7 @@ import type { FeedbackItem } from "reflet-sdk";
 import hero from "@/assets/hero.jpg";
 import { locales, type PagePath } from "@/i18n/config";
 import { slugOf } from "@/lib/board";
+import { newsReady, publishedSlugs } from "@/lib/news";
 import { listByStatus, safely } from "@/lib/reflet";
 import { itemSuffix, languageAlternates, localeUrl, ogImagePath, siteUrl } from "@/lib/seo";
 import { pageOf } from "@/lib/share";
@@ -13,6 +14,7 @@ import { galleryImages, legalUpdated } from "@/lib/site";
 export const revalidate = 600;
 
 const subpages = [
+  { path: "/news", changeFrequency: "daily", priority: 0.8 },
   { path: "/servers", changeFrequency: "always", priority: 0.8 },
   { path: "/leaderboard", changeFrequency: "hourly", priority: 0.7 },
   { path: "/roadmap", changeFrequency: "daily", priority: 0.8 },
@@ -70,5 +72,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       images: [`${siteUrl}/og/${locale}/item/${item.id}.png`],
     }));
   });
-  return [...home, ...pages, ...posts];
+  // Every published news post (/news/<slug>), in every language (translated, or the English post).
+  const newsPosts = newsReady ? await publishedSlugs().catch(() => []) : [];
+  const news = newsPosts.flatMap(({ slug, updatedAt }) => {
+    const languages = languageAlternates(true, "/news", `/${slug}`);
+    return locales.map((locale) => ({
+      url: `${localeUrl(locale, "/news")}/${slug}`,
+      lastModified: new Date(updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+      alternates: { languages },
+    }));
+  });
+  return [...home, ...pages, ...posts, ...news];
 }

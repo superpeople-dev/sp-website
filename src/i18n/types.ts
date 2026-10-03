@@ -1,4 +1,5 @@
 import type { EventRange, EventType, Permission } from "@/lib/board";
+import type { NewsCategory } from "@/lib/newskinds";
 
 export type IdeaStatus = "open" | "under_review" | "planned" | "in_progress" | "completed" | "closed";
 
@@ -22,6 +23,8 @@ export type Dictionary = {
     serversHint: string;
     leaderboard: string;
     leaderboardHint: string;
+    news: string;
+    newsHint: string;
     tagline: string;
     download: string;
     githubLabel: string;
@@ -385,6 +388,28 @@ export type Dictionary = {
     tabAdmins: string;
     reviewEmpty: string;
     openIdeas: string;
+  };
+  news: {
+    title: string;
+    lead: string;
+    seoTitle: string;
+    seoDescription: string;
+    all: string;
+    categories: Record<NewsCategory, string>;
+    readMore: string;
+    // {n}: minutes.
+    minRead: string;
+    latest: string;
+    allNews: string;
+    translated: string;
+    showOriginal: string;
+    showTranslation: string;
+    empty: string;
+    back: string;
+    // {name}: the author.
+    by: string;
+    write: string;
+    edit: string;
   };
   leaderboard: {
     title: string;

@@ -12,6 +12,7 @@ import headCompleted from "@/assets/game/head-completed.webp";
 import headFaq from "@/assets/game/head-faq.webp";
 import headIdeas from "@/assets/game/head-ideas.webp";
 import headLeaderboard from "@/assets/game/head-leaderboard.webp";
+import headNews from "@/assets/game/head-news.webp";
 import headRoadmap from "@/assets/game/head-roadmap.webp";
 import headServers from "@/assets/game/head-servers.webp";
 import loc01 from "@/assets/game/loc-01.webp";
@@ -35,6 +36,7 @@ import loc14 from "@/assets/game/loc-14.webp";
 // One key art behind each page head (components/roadmap/PageHead).
 export const headArt = {
   leaderboard: headLeaderboard,
+  news: headNews,
   servers: headServers,
   roadmap: headRoadmap,
   ideas: headIdeas,

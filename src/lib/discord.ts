@@ -27,6 +27,8 @@ type Embed = {
   ping?: string[];
   // A picture at the top right (the player's Discord avatar in the logs).
   thumbnail?: string;
+  // A large picture under the text (a news post's cover).
+  image?: string;
 };
 
 const hooks: Record<Channel, string | undefined> = {
@@ -64,6 +66,7 @@ async function post(channel: Channel, embed: Embed) {
           description: embed.description ? clip(embed.description, 1000) : undefined,
           color: embed.color,
           thumbnail: embed.thumbnail ? { url: embed.thumbnail } : undefined,
+          image: embed.image ? { url: embed.image } : undefined,
           fields: embed.fields?.map((field) => ({ ...field, value: clip(field.value, 1024) })),
           footer: { text: "superpeople.dev" },
           timestamp: new Date().toISOString(),
@@ -71,6 +74,18 @@ async function post(channel: Channel, embed: Embed) {
       ],
     }),
   }).catch((error) => console.error(`[discord] post failed: ${error instanceof Error ? error.message : String(error)}`));
+}
+
+// A news post just published (app/api/admin/news): its title, summary and cover, linking to the post.
+export async function announceNews(news: { title: string; summary: string; slug: string; cover: string | null }) {
+  await post("community", {
+    label: "📢 News",
+    color: colors.red,
+    title: news.title,
+    url: `${siteUrl}/news/${news.slug}`,
+    description: news.summary || undefined,
+    image: news.cover ? `${siteUrl}${news.cover}` : undefined,
+  });
 }
 
 const itemUrl = (item: { id: string; title: string; status?: ActivityEvent["to"] }) =>
