@@ -2704,7 +2704,8 @@ td.leaders__rp { color: var(--paper); font: 700 17px var(--display); font-varian
 .leaders__flag { flex: none; width: 21px; height: 14px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); }
 .leaders__tier-under { display: none; }
 /* A tier: a coloured label, like a card's type on the boards. */
-.tier { font: 700 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.tier { display: inline-flex; align-items: center; gap: 6px; font: 700 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.tier__icon { flex: none; width: 24px; height: 24px; }
 .tier--iron { color: #9a958f; }
 .tier--bronze { color: #c98a5a; }
 .tier--silver { color: #c9d0d8; }
