@@ -9,7 +9,7 @@ import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { HeadlineLine } from "@/i18n/types";
 import type { Release } from "@/lib/github";
-import { playersOnline, type ServerList } from "@/lib/servers";
+import { playersOnline, type PlayerHistory } from "@/lib/servers";
 import { scrollToSection } from "@/lib/scroll";
 import { DiscordButton } from "./Buttons";
 import { Icon } from "./Icon";
@@ -29,15 +29,15 @@ const lineWidth = ({ white = "", red = "" }: HeadlineLine) =>
 
 const POLL_MS = 60_000;
 
-// The home page's player count: the server-rendered value, then the live one from /api/servers
-// (the home page itself is cached for 5 minutes).
+// The home page's player count (everyone online, lobby and matches): the server-rendered value, then the
+// newest one from the player chart's route (the home page itself is cached for 5 minutes).
 function useLivePlayers(initial: number | null) {
   const [players, setPlayers] = useState(initial);
   useEffect(() => {
     const load = async () => {
       if (document.hidden) return;
-      const res = await fetch("/api/servers", { cache: "no-store" }).catch(() => null);
-      setPlayers(res?.ok ? playersOnline((await res.json()) as ServerList) : null);
+      const res = await fetch("/api/servers/players?range=24h", { cache: "no-store" }).catch(() => null);
+      setPlayers(res?.ok ? playersOnline((await res.json()) as PlayerHistory) : null);
     };
     void load();
     const timer = setInterval(() => void load(), POLL_MS);

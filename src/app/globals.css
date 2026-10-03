@@ -2701,7 +2701,7 @@ button.votes__down:disabled { cursor: default; }
 }
 
 .lang { position: relative; }
-.lang__button { gap: 6px; padding: 0 7px 0 0; overflow: visible; background: transparent; border-color: transparent; }
+.lang__button { gap: 6px; padding: 0 8px var(--strip-h) 10px; overflow: visible; background: transparent; border-color: transparent; }
 .lang__button:hover,
 .lang__button:active { transform: none; background: transparent; border-color: transparent; }
 .lang__button svg { width: 16px; height: 16px; }
@@ -2711,7 +2711,7 @@ button.votes__down:disabled { cursor: default; }
 .lang__button .lang__chevron { width: 14px; height: 14px; opacity: 0.7; transition: transform 0.2s; }
 .lang__button[aria-expanded="true"] .lang__chevron { transform: rotate(180deg); }
 @media (max-width: 700px) {
-  .lang__button { padding-right: 3px; }
+  .lang__button { padding-right: 4px; padding-left: 8px; }
 }
 .lang__button:hover .lang__chevron,
 .lang__button[aria-expanded="true"] .lang__chevron { opacity: 1; }
@@ -2913,7 +2913,7 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 .news-article__cover { position: relative; height: clamp(260px, 42vw, 520px); background: var(--surface-2) center 30% / cover no-repeat; }
 /* Dark at the top (the menu) and fading into the page where the title starts. */
 .news-article__cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(17, 19, 25, 0.6), rgba(17, 19, 25, 0.15) 28%, rgba(17, 19, 25, 0.55) 62%, var(--ink)); }
-.news-article__inner { position: relative; max-width: 960px; margin: clamp(-150px, -10vw, -90px) auto 0; padding: 0 var(--gutter) 40px; }
+.news-article__inner { position: relative; max-width: 1160px; margin: clamp(-150px, -10vw, -90px) auto 0; padding: 0 var(--gutter) 40px; }
 .news-article__back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 22px; color: var(--paper-dim); font: 700 13px var(--display); letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
 .news-article__back svg { width: 16px; height: 16px; }
 .news-article h1 { font: 800 clamp(40px, 6.5vw, 78px)/0.92 var(--display); text-transform: uppercase; margin: 14px 0 20px; text-wrap: balance; overflow-wrap: break-word; }
