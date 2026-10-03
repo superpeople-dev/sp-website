@@ -2,19 +2,18 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { localeHref, localeInfo, locales, pagePaths, type PagePath } from "@/i18n/config";
+import { localeInfo, locales } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import { Flag } from "./Flag";
 import { Icon } from "./Icon";
 import { ease } from "./motion";
+import { useLanguageLinks } from "./useLanguageLinks";
 
 export function LanguageSwitcher() {
   const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const page: PagePath = pagePaths.find((p) => p && pathname.endsWith(p)) ?? "";
+  const { hrefFor, refresh } = useLanguageLinks();
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +38,10 @@ export function LanguageSwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`${t.nav.language}: ${localeInfo[locale].name}`}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) refresh();
+          setOpen((v) => !v);
+        }}
       >
         <Flag locale={locale} />
         <span>{localeInfo[locale].short}</span>
@@ -59,7 +61,7 @@ export function LanguageSwitcher() {
               <li key={l} role="none">
                 <Link
                   role="menuitem"
-                  href={localeHref(l, page)}
+                  href={hrefFor(l)}
                   scroll={false}
                   hrefLang={localeInfo[l].hreflang}
                   lang={localeInfo[l].htmlLang}

@@ -12,6 +12,7 @@ import { repoUrl, site } from "@/lib/site";
 import { Flag } from "./Flag";
 import { Icon, type IconName } from "./Icon";
 import { ease } from "./motion";
+import { useLanguageLinks } from "./useLanguageLinks";
 
 const subscribe = () => () => {};
 
@@ -46,9 +47,11 @@ export function MobileMenu({
   const { locale, t } = useI18n();
   const panel = useRef<HTMLDivElement>(null);
   const client = useSyncExternalStore(subscribe, () => true, () => false);
+  const { hrefFor, refresh } = useLanguageLinks();
 
   useEffect(() => {
     if (!open) return;
+    refresh();
     const button = returnFocus.current;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -59,7 +62,7 @@ export function MobileMenu({
       document.removeEventListener("keydown", onKey);
       button?.focus();
     };
-  }, [open, onClose, returnFocus]);
+  }, [open, onClose, returnFocus, refresh]);
 
   const trapFocus = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== "Tab" || !panel.current) return;
@@ -162,7 +165,7 @@ export function MobileMenu({
                 {locales.map((l) => (
                   <Link
                     key={l}
-                    href={localeHref(l, page)}
+                    href={hrefFor(l)}
                     scroll={false}
                     hrefLang={localeInfo[l].hreflang}
                     className={l === locale ? "is-current" : undefined}
