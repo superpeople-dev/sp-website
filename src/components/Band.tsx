@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import squad from "@/assets/squad.jpg";
 import { useI18n } from "@/i18n/context";
+import { figures } from "@/lib/art";
 import { DiscordButton, DownloadButton } from "./Buttons";
 import { Reveal } from "./motion";
 
@@ -20,6 +21,9 @@ export function Band({ downloadUrl }: { downloadUrl: string }) {
         <Image src={squad} alt="" fill sizes="100vw" placeholder="blur" />
       </motion.div>
       <div className="band__shade" />
+      {/* Two of the game's characters either side of the call to action (desktop only). */}
+      <Image className="band__fig band__fig--l" src={figures.tactical} alt="" aria-hidden="true" />
+      <Image className="band__fig band__fig--r" src={figures.whitehair} alt="" aria-hidden="true" />
       <Reveal className="wrap">
         <h2>{t.band.title}</h2>
         <p className="lead">{t.band.lead}</p>

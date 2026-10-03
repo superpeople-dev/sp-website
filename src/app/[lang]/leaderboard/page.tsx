@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { Leaderboard } from "@/components/leaderboard/Leaderboard";
 import { Nav } from "@/components/Nav";
 import { PageHead } from "@/components/roadmap/PageHead";
+import { headArt } from "@/lib/art";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
@@ -30,7 +31,7 @@ export default async function LeaderboardPage({ params, searchParams }: PageProp
       <JsonLd data={pageStructuredData(lang, "/leaderboard")} />
       <Nav downloadUrl={release.downloadUrl} page="/leaderboard" />
       <main>
-        <PageHead title={t.leaderboard.title} lead={t.leaderboard.lead} notice={board ? null : t.leaderboard.unavailable} />
+        <PageHead art={headArt.leaderboard} title={t.leaderboard.title} lead={t.leaderboard.lead} notice={board ? null : t.leaderboard.unavailable} />
         {board && first && <Leaderboard board={board} initialKey={first} />}
       </main>
       <Footer t={t} locale={lang} />

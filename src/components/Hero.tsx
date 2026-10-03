@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRef, type CSSProperties } from "react";
 import hero from "@/assets/hero.jpg";
 import { useI18n } from "@/i18n/context";
+import { heroSlides } from "@/lib/art";
 import type { HeadlineLine } from "@/i18n/types";
 import type { Release } from "@/lib/github";
 import { scrollToSection } from "@/lib/scroll";
@@ -47,15 +48,21 @@ export function Hero({ release }: { release: Release }) {
         animate={{ scale: 1.04 }}
         transition={{ duration: 2.4, ease }}
       >
-        <Image
-          src={hero}
-          alt=""
-          fill
-          preload
-          sizes="(max-aspect-ratio: 53/25) 233vh, 110vw"
-          placeholder="blur"
-          className="hero__img"
-        />
+        {/* The hero's own picture, then the game's key art: a slow crossfade with a zoom, 7 s each. */}
+        {[hero, ...heroSlides].map((src, i) => (
+          <div key={i} className="hero__slide">
+            <Image
+              src={src}
+              alt=""
+              fill
+              preload={i === 0}
+              loading={i === 0 ? undefined : "eager"}
+              sizes="(max-aspect-ratio: 53/25) 233vh, 110vw"
+              placeholder="blur"
+              className="hero__img"
+            />
+          </div>
+        ))}
       </motion.div>
       <div className="hero__shade" />
       <motion.div className="slab slab--a" style={{ y: slabNear }} />

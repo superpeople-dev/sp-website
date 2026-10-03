@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { Nav } from "@/components/Nav";
 import { PageHead } from "@/components/roadmap/PageHead";
+import { headArt } from "@/lib/art";
 import { ServerList } from "@/components/servers/ServerList";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -28,7 +29,7 @@ export default async function ServersPage({ params }: PageProps<"/[lang]/servers
       <JsonLd data={pageStructuredData(lang, "/servers")} />
       <Nav downloadUrl={release.downloadUrl} page="/servers" />
       <main>
-        <PageHead title={t.servers.title} lead={t.servers.lead} notice={servers ? null : t.servers.unavailable} />
+        <PageHead art={headArt.servers} title={t.servers.title} lead={t.servers.lead} notice={servers ? null : t.servers.unavailable} />
         {servers && <ServerList initial={servers} history={history} players={players} />}
       </main>
       <Footer t={t} locale={lang} />

@@ -7,6 +7,7 @@ import { fill } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import { galleryImages } from "@/lib/site";
 import { Icon } from "./Icon";
+import { Locations } from "./Locations";
 import { Reveal, ease, inView, stagger } from "./motion";
 
 const tileSizes = (i: number) =>
@@ -192,6 +193,7 @@ export function Gallery() {
           ))}
         </motion.div>
       </div>
+      <Locations />
 
       <AnimatePresence>
         {shot && open !== null && (

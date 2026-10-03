@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import { useI18n } from "@/i18n/context";
+import { figures } from "@/lib/art";
 import { rich } from "@/lib/rich";
 import { DiscordButton, DownloadButton } from "./Buttons";
 import { Icon, type IconName } from "./Icon";
@@ -14,7 +16,8 @@ export function Steps({ downloadUrl }: { downloadUrl: string }) {
 
   return (
     <section id="play" className="tint">
-      <div className="wrap">
+      <div className="wrap steps__wrap">
+        <Image className="steps__fig" src={figures.bazooka} alt="" aria-hidden="true" />
         <Reveal>
           <h2>{t.steps.title}</h2>
           <p className="lead">{t.steps.lead}</p>

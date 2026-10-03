@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { Nav } from "@/components/Nav";
 import { AccountBar } from "@/components/roadmap/AccountBar";
 import { PageHead } from "@/components/roadmap/PageHead";
+import { headArt } from "@/lib/art";
 import { PlanBoard } from "@/components/roadmap/PlanBoard";
 import { isLocale, localeHref } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -57,7 +58,7 @@ export default async function RoadmapPage({ params, searchParams }: PageProps<"/
       <JsonLd data={pageStructuredData(lang, "/roadmap", shared)} />
       <Nav downloadUrl={release.downloadUrl} page="/roadmap" />
       <main>
-        <PageHead title={t.plan.title} lead={t.plan.lead} notice={items ? null : t.board.unavailable}>
+        <PageHead art={headArt.roadmap} title={t.plan.title} lead={t.plan.lead} notice={items ? null : t.board.unavailable}>
           {items && <AccountBar authReady={authReady} next={localeHref(lang, "/roadmap")} viewer={viewer} />}
         </PageHead>
         {board && (
