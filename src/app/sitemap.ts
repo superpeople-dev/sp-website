@@ -72,7 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       images: [`${siteUrl}/og/${locale}/item/${item.id}.png`],
     }));
   });
-  // Every published news post (/news/<slug>), in every language (translated, or the English post).
+  // Every published news post (/news/<slug>), in every language (the post is in English in all of them).
   const newsPosts = newsReady ? await publishedSlugs().catch(() => []) : [];
   const news = newsPosts.flatMap(({ slug, updatedAt }) => {
     const languages = languageAlternates(true, "/news", `/${slug}`);

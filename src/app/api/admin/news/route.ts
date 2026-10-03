@@ -14,13 +14,11 @@ import {
   newsTag,
   newsUploadUrl,
   saveNews,
-  saveTranslations,
   setNewsStatus,
   type NewsInput,
 } from "@/lib/news";
 import { objectsReady } from "@/lib/objects";
 import { readSession, sameOrigin } from "@/lib/session";
-import { translatePost, translateReady } from "@/lib/translate";
 
 // Posts are read through the "news" cache tag: pages that show them (the home page's "Latest news"
 // row, /news) pick up a change on their next visit.
@@ -29,10 +27,7 @@ function refresh() {
 }
 
 // The news editor (components/news/Editor.tsx): admins with the "manage" permission write, publish and
-// delete posts. Publishing (and saving a published post) translates it into the other languages
-// (lib/translate.ts), which takes up to a minute; the first publish can also post it to Discord.
-
-export const maxDuration = 120;
+// delete posts; the first publish can also post it to Discord.
 
 const limits = { title: 140, summary: 300, body: 40_000 };
 
@@ -56,7 +51,7 @@ export async function GET(request: NextRequest) {
   const user = await editor(request);
   if (!user) return Response.json({ error: "forbidden" }, { status: 403 });
   if (!newsReady) return Response.json({ error: "unavailable" }, { status: 503 });
-  return Response.json({ posts: await listDrafts(), translate: translateReady, uploads: objectsReady }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ posts: await listDrafts(), uploads: objectsReady }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(request: NextRequest) {
@@ -82,21 +77,13 @@ export async function POST(request: NextRequest) {
       if (id && !before) return Response.json({ error: "not found" }, { status: 404 });
       const saved = await saveNews(id, input, user);
       const publish = body.publish === true || before?.status === "published";
-      let translated = 0;
-      if (publish) {
-        await setNewsStatus(saved, "published");
-        if (translateReady) {
-          const translations = await translatePost(input);
-          await saveTranslations(saved, translations);
-          translated = translations.length;
-        }
-      }
+      if (publish) await setNewsStatus(saved, "published");
       refresh();
       const after = await getNewsSource(saved);
       if (publish && before?.status !== "published" && body.announce === true && after) {
         await announceNews({ title: after.title, summary: after.summary, slug: after.slug, cover: after.cover_key ? newsImageUrl(after.cover_key) : null });
       }
-      return Response.json({ id: saved, slug: after?.slug, status: after?.status, translated });
+      return Response.json({ id: saved, slug: after?.slug, status: after?.status });
     }
 
     if (body.action === "unpublish" && id) {

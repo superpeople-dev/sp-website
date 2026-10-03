@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import { fill, localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { NewsPost } from "@/lib/news";
@@ -11,13 +10,12 @@ import { Icon } from "../Icon";
 import { Markdown } from "./Markdown";
 import { NewsDate } from "./NewsCard";
 
-// A news post's page: the cover across the top, then the post. A translated post says so and can show
-// the English original instead (`original`, null when the post is shown as written).
-export function NewsArticle({ post, original, editHref }: { post: NewsPost; original: NewsPost | null; editHref: string | null }) {
+// A news post's page: the cover across the top, then the post. Posts are written in English, which the
+// text says to the browser in the other languages (lang="en").
+export function NewsArticle({ post, editHref }: { post: NewsPost; editHref: string | null }) {
   const { locale, t } = useI18n();
   const n = t.news;
-  const [showOriginal, setShowOriginal] = useState(false);
-  const shown = showOriginal && original ? original : post;
+  const lang = locale === "en" ? undefined : "en";
 
   return (
     <article className="news-article">
@@ -31,7 +29,7 @@ export function NewsArticle({ post, original, editHref }: { post: NewsPost; orig
           <NewsDate at={post.publishedAt} />
           <span>· {fill(n.minRead, { n: String(post.readMinutes) })}</span>
         </div>
-        <h1 lang={showOriginal ? "en" : undefined}>{shown.title}</h1>
+        <h1 lang={lang}>{post.title}</h1>
         <div className="news-article__byline">
           {post.author.avatar && <Image src={post.author.avatar} alt="" width={36} height={36} unoptimized />}
           <span>{fill(n.by, { name: post.author.name })}</span>
@@ -41,21 +39,13 @@ export function NewsArticle({ post, original, editHref }: { post: NewsPost; orig
             </Link>
           )}
         </div>
-        {original && (
-          <p className="news-article__translated">
-            <Icon name="globe" /> {n.translated}{" "}
-            <button type="button" onClick={() => setShowOriginal((v) => !v)}>
-              {showOriginal ? n.showTranslation : n.showOriginal}
-            </button>
+        {post.summary && (
+          <p className="news-article__summary" lang={lang}>
+            {post.summary}
           </p>
         )}
-        {shown.summary && (
-          <p className="news-article__summary" lang={showOriginal ? "en" : undefined}>
-            {shown.summary}
-          </p>
-        )}
-        <div lang={showOriginal ? "en" : undefined}>
-          <Markdown text={shown.body} />
+        <div lang={lang}>
+          <Markdown text={post.body} />
         </div>
         <div className="news-article__end">
           <DiscordButton label={t.hero.discord} />

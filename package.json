@@ -11,7 +11,6 @@
     "db:migrate": "bun --env-file=.env.local scripts/db-migrate.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.131.0",
     "@dnd-kit/core": "^6.3.1",
     "@vercel/functions": "^3.9.10",
     "country-flag-icons": "1.6.20",
@@ -21,8 +20,7 @@
     "pg": "^8.23.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "reflet-sdk": "^0.5.0",
-    "zod": "^4.6.5"
+    "reflet-sdk": "^0.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",

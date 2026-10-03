@@ -28,7 +28,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
     getLatestRelease(),
     getProgress(),
     // The news row must never take the home page down with it.
-    newsReady ? listNews(lang, 3).catch((error) => (console.error(`[news] home: ${error instanceof Error ? error.message : String(error)}`), [])) : Promise.resolve([]),
+    newsReady ? listNews(3).catch((error) => (console.error(`[news] home: ${error instanceof Error ? error.message : String(error)}`), [])) : Promise.resolve([]),
   ]);
 
   return (

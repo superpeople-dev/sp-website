@@ -26,7 +26,7 @@ export default async function NewsPage({ params }: PageProps<"/[lang]/news">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const [release, posts, session] = await Promise.all([getLatestRelease(), newsReady ? listNews(lang, 60) : Promise.resolve([]), currentSession()]);
+  const [release, posts, session] = await Promise.all([getLatestRelease(), newsReady ? listNews(60) : Promise.resolve([]), currentSession()]);
 
   return (
     <>

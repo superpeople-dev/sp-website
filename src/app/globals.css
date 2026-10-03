@@ -2913,9 +2913,6 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 .news-article__byline { display: flex; align-items: center; gap: 12px; color: var(--paper-dim); font-size: 15px; margin-bottom: 26px; }
 .news-article__byline img { border-radius: 50%; }
 .news-article__byline .btn { margin-left: auto; }
-.news-article__translated { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); color: var(--muted); font-size: 14px; }
-.news-article__translated svg { width: 16px; height: 16px; }
-.news-article__translated button { padding: 0; border: 0; background: none; color: var(--signal-hi); font: inherit; text-decoration: underline; cursor: pointer; }
 .news-article__summary { color: var(--paper); font-size: 20px; line-height: 1.6; margin: 26px 0 8px; }
 .news-article__end { display: flex; gap: 10px; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line-soft); }
 .prose { color: #dcd7d2; font-size: 18px; line-height: 1.75; overflow-wrap: break-word; }
