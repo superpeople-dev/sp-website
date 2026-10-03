@@ -16,7 +16,6 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
 import { listNews, newsReady } from "@/lib/news";
 import { fallbackProgress, getProgress } from "@/lib/progress";
-import { getPlayerHistory, playersOnline } from "@/lib/servers";
 import { structuredData } from "@/lib/seo";
 
 export const revalidate = 300;
@@ -25,10 +24,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const [release, progress, players, news] = await Promise.all([
+  const [release, progress, news] = await Promise.all([
     getLatestRelease(),
     getProgress(),
-    getPlayerHistory("24h"),
     // The news row must never take the home page down with it.
     newsReady ? listNews(3).catch((error) => (console.error(`[news] home: ${error instanceof Error ? error.message : String(error)}`), [])) : Promise.resolve([]),
   ]);
@@ -37,7 +35,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
     <>
       <JsonLd data={structuredData(release, lang)} />
       <Nav downloadUrl={release.downloadUrl} />
-      <Hero release={release} players={playersOnline(players)} />
+      <Hero release={release} />
       <main>
         <Story />
         <Steps downloadUrl={release.downloadUrl} />

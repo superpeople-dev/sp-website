@@ -52,7 +52,11 @@ export function Nav({ downloadUrl, page = "" }: { downloadUrl: string; page?: Pa
       <div className="wrap nav__inner">
         <Link className="nav__logo" href={localeHref(locale)} onClick={(e) => go(e, "")}>
           <Image src={logo} alt="SUPER PEOPLE" style={{ height: 28, width: "auto" }} preload />
-          <span>{t.nav.tagline}</span>
+          <span>
+            {t.nav.taglineLines[0]}
+            <br />
+            {t.nav.taglineLines[1]}
+          </span>
         </Link>
 
         <nav className="nav__links" aria-label={t.nav.sections}>

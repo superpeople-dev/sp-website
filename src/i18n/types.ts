@@ -26,6 +26,8 @@ export type Dictionary = {
     news: string;
     newsHint: string;
     tagline: string;
+    // The tagline beside the logo, on two lines.
+    taglineLines: [string, string];
     download: string;
     githubLabel: string;
     openMenu: string;
@@ -43,8 +45,6 @@ export type Dictionary = {
     latest: string;
     windows: string;
     season: string;
-    playersOnline: string;
-    ranked: string;
     playNow: string;
     playSub: string;
   };

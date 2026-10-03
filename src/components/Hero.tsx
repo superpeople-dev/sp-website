@@ -2,14 +2,11 @@
 
 import { motion, useScroll, useTransform } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
 import hero from "@/assets/hero.jpg";
-import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import type { HeadlineLine } from "@/i18n/types";
 import type { Release } from "@/lib/github";
-import { playersOnline, type PlayerHistory } from "@/lib/servers";
 import { DiscordButton } from "./Buttons";
 import { Icon } from "./Icon";
 import { RelativeTime } from "./RelativeTime";
@@ -26,30 +23,10 @@ const wide = /[ᄀ-ᇿ⺀-鿿가-힯＀-￯]/;
 const lineWidth = ({ white = "", red = "" }: HeadlineLine) =>
   [...`${white} ${red}`.trim()].reduce((sum, ch) => sum + (wide.test(ch) ? 2.3 : ch === " " ? 0.55 : 1), 0);
 
-const POLL_MS = 60_000;
-
-// The home page's player count (everyone online, lobby and matches): the server-rendered value, then the
-// newest one from the player chart's route (the home page itself is cached for 5 minutes).
-function useLivePlayers(initial: number | null) {
-  const [players, setPlayers] = useState(initial);
-  useEffect(() => {
-    const load = async () => {
-      if (document.hidden) return;
-      const res = await fetch("/api/servers/players?range=24h", { cache: "no-store" }).catch(() => null);
-      setPlayers(res?.ok ? playersOnline((await res.json()) as PlayerHistory) : null);
-    };
-    void load();
-    const timer = setInterval(() => void load(), POLL_MS);
-    return () => clearInterval(timer);
-  }, []);
-  return players;
-}
-
-export function Hero({ release, players: initialPlayers }: { release: Release; players: number | null }) {
+export function Hero({ release }: { release: Release }) {
   const { locale, t } = useI18n();
   const h = t.hero;
   const ref = useRef<HTMLElement>(null);
-  const players = useLivePlayers(initialPlayers);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const artY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
@@ -73,12 +50,6 @@ export function Hero({ release, players: initialPlayers }: { release: Release; p
       <div className="hero__shade" />
 
       <motion.div className="wrap hero__copy" style={{ y: copyY }}>
-        <motion.div className="hero__ribbon" {...fadeUp(0.1)}>
-          <span>
-            {t.nav.tagline} - {h.season}
-          </span>
-        </motion.div>
-
         <h1 aria-label={h.title} style={{ "--hero-scale": scale, "--hero-cap": `${cap}px` } as CSSProperties}>
           {h.lines.map(({ white, red }, i) => (
             <span className="hero__line" key={i} aria-hidden="true">
@@ -127,17 +98,6 @@ export function Hero({ release, players: initialPlayers }: { release: Release; p
           )}
           <span>{h.windows}</span>
         </motion.div>
-      </motion.div>
-
-      <motion.div className="wrap hero__dock" {...fadeUp(1.1)}>
-        <Link href={localeHref(locale, "/servers")} className="hero__card">
-          <b className="hero__live">● {players ?? "–"}</b>
-          <span>{h.playersOnline}</span>
-        </Link>
-        <Link href={localeHref(locale, "/leaderboard")} className="hero__card">
-          <b>{h.season}</b>
-          <span>{h.ranked}</span>
-        </Link>
       </motion.div>
     </header>
   );

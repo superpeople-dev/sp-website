@@ -172,10 +172,6 @@ export type PlayerHistory = {
 
 const count = (value: unknown) => numberOrNull(value) ?? 0;
 
-// Everyone online now, in the lobby or in a match: the newest 5-minute sample. Null while the backend's
-// chart is unavailable.
-export const playersOnline = (history: PlayerHistory | null) => history?.points.at(-1)?.online ?? null;
-
 // Null when the backend cannot be reached, is older than the player chart or has the list off.
 export async function getPlayerHistory(range: PlayerRange): Promise<PlayerHistory | null> {
   try {
