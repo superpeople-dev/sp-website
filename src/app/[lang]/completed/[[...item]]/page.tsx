@@ -7,6 +7,7 @@ import { AccountBar } from "@/components/roadmap/AccountBar";
 import { Changelog } from "@/components/roadmap/Changelog";
 import { CompletedList } from "@/components/roadmap/CompletedList";
 import { PageHead } from "@/components/roadmap/PageHead";
+import { headArt } from "@/lib/art";
 import { isLocale, localeHref } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
@@ -51,7 +52,7 @@ export default async function CompletedPage({ params, searchParams }: PageProps<
       <JsonLd data={pageStructuredData(lang, "/completed", shared)} />
       <Nav downloadUrl={release.downloadUrl} page="/completed" />
       <main>
-        <PageHead title={t.completed.title} lead={t.completed.lead} notice={items ? null : t.board.unavailable}>
+        <PageHead art={headArt.completed} title={t.completed.title} lead={t.completed.lead} notice={items ? null : t.board.unavailable}>
           {items && <AccountBar authReady={authReady} next={localeHref(lang, "/completed")} viewer={viewer} />}
         </PageHead>
         {board && (

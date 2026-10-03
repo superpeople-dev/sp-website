@@ -6,6 +6,7 @@ import { Nav } from "@/components/Nav";
 import { AccountBar } from "@/components/roadmap/AccountBar";
 import { IdeasBoard } from "@/components/roadmap/IdeasBoard";
 import { PageHead } from "@/components/roadmap/PageHead";
+import { headArt } from "@/lib/art";
 import { isLocale, localeHref } from "@/i18n/config";
 import { can } from "@/lib/board";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -53,7 +54,7 @@ export default async function IdeasPage({ params, searchParams }: PageProps<"/[l
       <JsonLd data={pageStructuredData(lang, "/bugs-and-ideas", shared)} />
       <Nav downloadUrl={release.downloadUrl} page="/bugs-and-ideas" />
       <main>
-        <PageHead title={t.ideas.title} lead={t.ideas.lead} notice={ideas ? null : t.board.unavailable}>
+        <PageHead art={headArt.ideas} title={t.ideas.title} lead={t.ideas.lead} notice={ideas ? null : t.board.unavailable}>
           {ideas && <AccountBar authReady={authReady} next={localeHref(lang, "/bugs-and-ideas")} viewer={viewer} suggest={Boolean(board)} />}
         </PageHead>
         {board && (

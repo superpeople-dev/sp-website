@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { Nav } from "@/components/Nav";
 import { PageHead } from "@/components/roadmap/PageHead";
+import { headArt } from "@/lib/art";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getLatestRelease } from "@/lib/github";
@@ -30,7 +31,7 @@ export default async function FaqPage({ params }: PageProps<"/[lang]/faq">) {
       <JsonLd data={pageStructuredData(lang, "/faq")} />
       <Nav downloadUrl={release.downloadUrl} page="/faq" />
       <main>
-        <PageHead title={t.faq.title} lead={t.faq.lead} />
+        <PageHead art={headArt.faq} title={t.faq.title} lead={t.faq.lead} />
         <section className="flush">
           <div className="wrap">
             <FaqList items={t.faq.items} />
