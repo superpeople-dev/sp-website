@@ -42,8 +42,14 @@ export type Dictionary = {
     updated: string;
     latest: string;
     windows: string;
-    scroll: string;
-    scrollLabel: string;
+    season: string;
+    howToPlay: string;
+    playersOnline: string;
+    ranked: string;
+    free: string;
+    freeLabel: string;
+    playNow: string;
+    playSub: string;
   };
   story: {
     title: string;

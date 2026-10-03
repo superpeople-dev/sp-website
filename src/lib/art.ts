@@ -5,9 +5,6 @@ import whitehair from "@/assets/game/fig-whitehair.webp";
 import gunRed from "@/assets/game/gun-03.webp";
 import gunGold from "@/assets/game/gun-07.webp";
 import gunPurple from "@/assets/game/gun-14.webp";
-import hero2 from "@/assets/game/hero-2.webp";
-import hero3 from "@/assets/game/hero-3.webp";
-import hero4 from "@/assets/game/hero-4.webp";
 import headCompleted from "@/assets/game/head-completed.webp";
 import headFaq from "@/assets/game/head-faq.webp";
 import headIdeas from "@/assets/game/head-ideas.webp";
@@ -52,5 +49,3 @@ export const locations: StaticImageData[] = [loc01, loc02, loc03, loc04, loc05, 
 // Three weapon skins from the item icons, scattered beside section titles on the home page.
 export const guns = { red: gunRed, gold: gunGold, purple: gunPurple };
 
-// Official key art (1920x1080) the home hero fades through after its own picture (components/Hero).
-export const heroSlides: StaticImageData[] = [hero2, hero3, hero4];

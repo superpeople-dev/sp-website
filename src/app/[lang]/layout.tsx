@@ -64,8 +64,11 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const cjk = { ja: japanese.variable, ko: korean.variable, zh: chinese.variable, hi: devanagari.variable }[lang as string] ?? "";
   const latin = lang === "ru" ? `${cyrillicBody.variable} ${cyrillicDisplay.variable}` : `${body.variable} ${display.variable} ${headline.variable}`;
 
+  // data-scroll-behavior: Next turns the CSS smooth scrolling off while it scrolls on a navigation.
+  // Without it, its scroll calls animate against each other and a news post opened from /news ends
+  // at the bottom of the page.
   return (
-    <html lang={localeInfo[lang].htmlLang} className={`${latin} ${cjk}`}>
+    <html lang={localeInfo[lang].htmlLang} className={`${latin} ${cjk}`} data-scroll-behavior="smooth">
       <body>
         <I18nProvider locale={lang} t={getDictionary(lang)}>
           <MotionProvider>{children}</MotionProvider>
