@@ -68,9 +68,12 @@ const ladder: Record<number, TierGroup> = { 420100001: "superSoldier", 420100002
 const groups: TierGroup[] = ["diamond", "platinum", "gold", "silver", "bronze", "iron"];
 const steps = ["I", "II", "III", "IV", "V"];
 
-export function tierOf(id: number): { group: TierGroup; step: string | null } | null {
-  if (ladder[id]) return { group: ladder[id], step: null };
+// icon: the game's own 64px tier icon (TBL-SeasonTier SmallIcon, cut from the Sprite_Tier_01 sheet),
+// public/tiers/<id - 420100000>.png.
+export function tierOf(id: number): { group: TierGroup; step: string | null; icon: string } | null {
+  const icon = `/tiers/${id - 420100000}.png`;
+  if (ladder[id]) return { group: ladder[id], step: null, icon };
   const offset = id - 420100005;
   if (!Number.isInteger(offset) || offset < 0 || offset >= groups.length * steps.length) return null;
-  return { group: groups[Math.floor(offset / steps.length)], step: steps[offset % steps.length] };
+  return { group: groups[Math.floor(offset / steps.length)], step: steps[offset % steps.length], icon };
 }

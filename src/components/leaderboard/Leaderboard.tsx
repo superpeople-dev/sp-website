@@ -101,6 +101,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
                   const tier = tierOf(row.tier);
                   const badge = tier && (
                     <span className={`tier tier--${tier.group}`}>
+                      <Image className="tier__icon" src={tier.icon} alt="" width={24} height={24} unoptimized />
                       {l.tiers[tier.group]}
                       {tier.step && ` ${tier.step}`}
                     </span>
