@@ -50,7 +50,7 @@ export function Progress({ lists }: { lists: ProgressLists }) {
 
   return (
     <section id="progress">
-      <Image className="gun gun--progress" src={guns.red} alt="" aria-hidden="true" />
+      <Image className="gun gun--progress" src={guns.red} quality={90} alt="" aria-hidden="true" />
       <div className="wrap">
         <Reveal>
           <h2>{p.title}</h2>

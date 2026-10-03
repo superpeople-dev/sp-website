@@ -17,7 +17,7 @@ export function Steps({ downloadUrl }: { downloadUrl: string }) {
   return (
     <section id="play" className="tint">
       <div className="wrap steps__wrap">
-        <Image className="steps__fig" src={figures.bazooka} alt="" aria-hidden="true" />
+        <Image className="steps__fig" src={figures.bazooka} quality={90} alt="" aria-hidden="true" />
         <Reveal>
           <h2>{t.steps.title}</h2>
           <p className="lead">{t.steps.lead}</p>

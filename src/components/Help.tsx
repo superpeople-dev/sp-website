@@ -74,7 +74,7 @@ export function Help() {
 
   return (
     <section id="help" className="tint tint--rev">
-      <Image className="gun gun--help" src={guns.gold} alt="" aria-hidden="true" />
+      <Image className="gun gun--help" src={guns.gold} quality={90} alt="" aria-hidden="true" />
       <div className="wrap">
         <Reveal>
           <h2>{h.title}</h2>

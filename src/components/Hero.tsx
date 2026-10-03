@@ -60,6 +60,7 @@ export function Hero({ release }: { release: Release }) {
               sizes="(max-aspect-ratio: 53/25) 233vh, 110vw"
               placeholder="blur"
               className="hero__img"
+              quality={90}
             />
           </div>
         ))}
