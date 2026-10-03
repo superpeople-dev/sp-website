@@ -9,7 +9,7 @@ export function Locations() {
       <div className="locations__track">
         {[...locations, ...locations].map((src, i) => (
           <div key={i} className="locations__tile">
-            <Image src={src} alt="" fill sizes="380px" quality={90} />
+            <Image src={src} alt="" fill sizes="(max-width: 700px) 280px, 420px" quality={90} />
           </div>
         ))}
       </div>
