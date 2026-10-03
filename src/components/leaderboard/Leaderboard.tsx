@@ -120,11 +120,6 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
                 return (
                   <li key={row.rank} className={`podium__place podium__place--${row.rank}`}>
                     <button type="button" className="podium__player" onClick={() => setShown(row)} aria-label={fill(l.card.open, { name: row.name })}>
-                      {row.rank === 1 && (
-                        <svg className="podium__crown" viewBox="0 0 24 16" aria-hidden="true">
-                          <path d="M2 5l5 4 5-8 5 8 5-4-2 11H4z" />
-                        </svg>
-                      )}
                       {tier && <Image className="podium__icon" src={tier.icon} alt="" width={64} height={64} unoptimized />}
                       <span className="leaders__name podium__name">
                         {flagOf(row.country)}

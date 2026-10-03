@@ -2810,7 +2810,6 @@ td.leaders__rp { position: relative; color: var(--paper); font: 700 17px var(--d
 .podium__player:hover { transform: translateY(-3px); }
 .podium__icon { width: 64px; height: 64px; }
 .podium__place--1 .podium__icon { width: 88px; height: 88px; }
-.podium__crown { width: 44px; height: 30px; margin-bottom: -10px; fill: var(--gold); filter: drop-shadow(0 4px 10px rgba(240, 183, 25, 0.45)); }
 .podium__name { max-width: 100%; font-size: 17px; }
 .podium__rp { color: var(--paper); font: 700 18px var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
 .podium__rp abbr { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; text-decoration: none; cursor: help; }
@@ -2858,7 +2857,6 @@ td.leaders__rp { position: relative; color: var(--paper); font: 700 17px var(--d
   .podium { gap: 6px; }
   .podium__icon { width: 44px; height: 44px; }
   .podium__place--1 .podium__icon { width: 56px; height: 56px; }
-  .podium__crown { width: 32px; height: 22px; margin-bottom: -6px; }
   .podium__name { font-size: 14px; }
   .podium__name .leaders__flag { display: none; }
   .podium__rp { font-size: 15px; }
