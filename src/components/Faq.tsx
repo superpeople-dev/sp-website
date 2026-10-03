@@ -1,8 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import { useState } from "react";
 import { useI18n } from "@/i18n/context";
+import { guns } from "@/lib/art";
 import { Answer } from "./FaqAnswer";
 import { Reveal, ease, inView, rise, stagger } from "./motion";
 
@@ -12,6 +14,7 @@ export function Faq() {
 
   return (
     <section id="faq">
+      <Image className="gun gun--faq" src={guns.purple} alt="" aria-hidden="true" />
       <div className="wrap">
         <Reveal>
           <h2>{t.faq.title}</h2>

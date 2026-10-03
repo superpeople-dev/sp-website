@@ -2,20 +2,12 @@ import type { StaticImageData } from "next/image";
 import bazooka from "@/assets/game/fig-bazooka.webp";
 import tactical from "@/assets/game/fig-tactical.webp";
 import whitehair from "@/assets/game/fig-whitehair.webp";
-import gun01 from "@/assets/game/gun-01.webp";
-import gun02 from "@/assets/game/gun-02.webp";
-import gun03 from "@/assets/game/gun-03.webp";
-import gun04 from "@/assets/game/gun-04.webp";
-import gun05 from "@/assets/game/gun-05.webp";
-import gun06 from "@/assets/game/gun-06.webp";
-import gun07 from "@/assets/game/gun-07.webp";
-import gun08 from "@/assets/game/gun-08.webp";
-import gun09 from "@/assets/game/gun-09.webp";
-import gun10 from "@/assets/game/gun-10.webp";
-import gun11 from "@/assets/game/gun-11.webp";
-import gun12 from "@/assets/game/gun-12.webp";
-import gun13 from "@/assets/game/gun-13.webp";
-import gun14 from "@/assets/game/gun-14.webp";
+import gunRed from "@/assets/game/gun-03.webp";
+import gunGold from "@/assets/game/gun-07.webp";
+import gunPurple from "@/assets/game/gun-14.webp";
+import hero2 from "@/assets/game/hero-2.webp";
+import hero3 from "@/assets/game/hero-3.webp";
+import hero4 from "@/assets/game/hero-4.webp";
 import headCompleted from "@/assets/game/head-completed.webp";
 import headFaq from "@/assets/game/head-faq.webp";
 import headIdeas from "@/assets/game/head-ideas.webp";
@@ -55,5 +47,8 @@ export const figures = { bazooka, tactical, whitehair };
 // The island strip under the gallery (components/Locations).
 export const locations: StaticImageData[] = [loc01, loc02, loc03, loc04, loc05, loc06, loc07, loc08, loc09, loc10, loc11, loc12, loc13, loc14];
 
-// Weapon skins from the item icons, a second strip under the island (components/Locations).
-export const guns: StaticImageData[] = [gun01, gun02, gun03, gun04, gun05, gun06, gun07, gun08, gun09, gun10, gun11, gun12, gun13, gun14];
+// Three weapon skins from the item icons, scattered beside section titles on the home page.
+export const guns = { red: gunRed, gold: gunGold, purple: gunPurple };
+
+// Key art the home hero fades through after its own picture (components/Hero).
+export const heroSlides: StaticImageData[] = [hero2, hero3, hero4];

@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { localeHref, type PagePath } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
+import { guns } from "@/lib/art";
 import type { ProgressLists, ProgressRow } from "@/lib/progress";
 import { nextPlaytestProgress } from "@/lib/site";
 import { Icon } from "./Icon";
@@ -48,6 +50,7 @@ export function Progress({ lists }: { lists: ProgressLists }) {
 
   return (
     <section id="progress">
+      <Image className="gun gun--progress" src={guns.red} alt="" aria-hidden="true" />
       <div className="wrap">
         <Reveal>
           <h2>{p.title}</h2>

@@ -1,8 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion, type Variants } from "motion/react";
+import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import { useI18n } from "@/i18n/context";
+import { guns } from "@/lib/art";
 import { repoUrl } from "@/lib/site";
 import { DiscordButton } from "./Buttons";
 import { Icon, type IconName } from "./Icon";
@@ -72,6 +74,7 @@ export function Help() {
 
   return (
     <section id="help" className="tint tint--rev">
+      <Image className="gun gun--help" src={guns.gold} alt="" aria-hidden="true" />
       <div className="wrap">
         <Reveal>
           <h2>{h.title}</h2>
