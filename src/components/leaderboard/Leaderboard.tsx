@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { fill, localeInfo } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import {
@@ -22,9 +22,10 @@ const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toL
 
 // The season leaderboard (app/[lang]/leaderboard): a mode and a view picked above the list, kept in the
 // link (?mode=squad-fpp) without reloading the page, and a search by name that stays when the list
-// changes (where does a player stand in each mode?). Players found keep their rank. Desktop: one bar,
-// the search on the right, the list in four columns. Phone: the modes on a row of their own, the view
-// and the search under them, the tier under the name.
+// changes (where does a player stand in each mode?). Players found keep their rank. The top three stand
+// on a podium (2 - 1 - 3), the rest are a list. Desktop: one bar, the search on the right, the list in
+// four columns. Phone: the modes on a row of their own, the view and the search under them, the tier
+// under the name.
 export function Leaderboard({ board, initialKey }: { board: Board; initialKey: LeaderKey }) {
   const { locale, t } = useI18n();
   const l = t.leaderboard;
@@ -33,7 +34,11 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
   const [mode, view] = key.split("_") as [LeaderMode, LeaderView];
   const list = board.lists[key];
   const wanted = plain(query.trim());
-  const rows = wanted ? list.filter((row) => plain(row.name).includes(wanted)) : list;
+  // The first three stand on a podium; the list under it goes on from rank 4. A search lists every
+  // player found, the top three included, without the podium.
+  const podium = wanted ? [] : list.slice(0, 3);
+  const rows = wanted ? list.filter((row) => plain(row.name).includes(wanted)) : list.slice(3);
+  const topRp = list[0]?.rp ?? 0;
   const intl = localeInfo[locale].intl;
   const number = useMemo(() => new Intl.NumberFormat(intl), [intl]);
   const regions = useMemo(() => new Intl.DisplayNames([intl], { type: "region" }), [intl]);
@@ -44,6 +49,32 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
     } catch {
       return code;
     }
+  };
+
+  const flagOf = (country: string | null) =>
+    country && (
+      <Image
+        className="leaders__flag"
+        src={`/flags/${country.toLowerCase()}.svg`}
+        alt={nameOf(country)}
+        title={nameOf(country)}
+        width={21}
+        height={14}
+        unoptimized
+      />
+    );
+
+  const badgeOf = (id: number, withIcon: boolean) => {
+    const tier = tierOf(id);
+    return (
+      tier && (
+        <span className={`tier tier--${tier.group}`}>
+          {withIcon && <Image className="tier__icon" src={tier.icon} alt="" width={24} height={24} unoptimized />}
+          {l.tiers[tier.group]}
+          {tier.step && ` ${tier.step}`}
+        </span>
+      )
+    );
   };
 
   const pick = (next: LeaderKey) => {
@@ -79,6 +110,29 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
         </Reveal>
 
         <Reveal delay={0.08} y={16}>
+          {podium.length > 0 && (
+            <ol className="podium" aria-label={`${l.title}: ${t.servers.modes[mode]} ${t.servers.views[view]}`}>
+              {podium.map((row) => {
+                const tier = tierOf(row.tier);
+                return (
+                  <li key={row.rank} className={`podium__place podium__place--${row.rank}`}>
+                    <div className="podium__player">
+                      {tier && <Image className="podium__icon" src={tier.icon} alt="" width={64} height={64} unoptimized />}
+                      <span className="leaders__name podium__name">
+                        {flagOf(row.country)}
+                        <bdi>{row.name}</bdi>
+                      </span>
+                      {badgeOf(row.tier, false)}
+                      <span className="podium__rp">
+                        {number.format(row.rp)} <abbr title={l.pointsTitle}>{l.points}</abbr>
+                      </span>
+                    </div>
+                    <div className="podium__step">{row.rank}</div>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
           {rows.length ? (
             <table className="leaders__table">
               <caption className="leaders__caption">{`${l.title}: ${t.servers.modes[mode]} ${t.servers.views[view]}`}</caption>
@@ -97,44 +151,28 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => {
-                  const tier = tierOf(row.tier);
-                  const badge = tier && (
-                    <span className={`tier tier--${tier.group}`}>
-                      <Image className="tier__icon" src={tier.icon} alt="" width={24} height={24} unoptimized />
-                      {l.tiers[tier.group]}
-                      {tier.step && ` ${tier.step}`}
-                    </span>
-                  );
-                  return (
-                    <tr key={row.rank} className={row.rank <= 3 ? `is-top is-top-${row.rank}` : undefined}>
-                      <td className="leaders__rank">{row.rank}</td>
-                      <td className="leaders__player">
-                        <span className="leaders__name">
-                          {row.country && (
-                            <Image
-                              className="leaders__flag"
-                              src={`/flags/${row.country.toLowerCase()}.svg`}
-                              alt={nameOf(row.country)}
-                              title={nameOf(row.country)}
-                              width={21}
-                              height={14}
-                              unoptimized
-                            />
-                          )}
-                          <bdi>{row.name}</bdi>
-                        </span>
-                        {badge && <span className="leaders__tier-under">{badge}</span>}
-                      </td>
-                      <td className="leaders__tier">{badge}</td>
-                      <td className="leaders__rp">{number.format(row.rp)}</td>
-                    </tr>
-                  );
-                })}
+                {rows.map((row) => (
+                  <tr key={row.rank} className={row.rank <= 3 ? `is-top is-top-${row.rank}` : undefined}>
+                    <td className="leaders__rank">{row.rank}</td>
+                    <td className="leaders__player">
+                      <span className="leaders__name">
+                        {flagOf(row.country)}
+                        <bdi>{row.name}</bdi>
+                      </span>
+                      <span className="leaders__tier-under">{badgeOf(row.tier, true)}</span>
+                    </td>
+                    <td className="leaders__tier">{badgeOf(row.tier, true)}</td>
+                    <td className="leaders__rp">
+                      {number.format(row.rp)}
+                      {/* The share of the leader's RP: how far behind the top a player is, at a glance. */}
+                      <span className="leaders__share" style={{ "--share": topRp ? row.rp / topRp : 0 } as CSSProperties} />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           ) : (
-            <p className="servers__empty">{list.length ? fill(l.noMatch, { name: query.trim() }) : l.empty}</p>
+            podium.length === 0 && <p className="servers__empty">{list.length ? fill(l.noMatch, { name: query.trim() }) : l.empty}</p>
           )}
         </Reveal>
       </div>

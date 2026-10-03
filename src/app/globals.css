@@ -2686,10 +2686,13 @@ button.votes__down:disabled { cursor: default; }
   white-space: nowrap;
 }
 .leaders__table th abbr { text-decoration: none; cursor: help; }
-.leaders__table td { height: 52px; padding: 0 16px; border-block: 1px solid var(--line-soft); background: var(--surface); white-space: nowrap; }
+.leaders__table td { height: 48px; padding: 0 16px; border-block: 1px solid var(--line-soft); background: var(--surface); white-space: nowrap; }
 .leaders__table td:first-child { border-left: 1px solid var(--line-soft); border-radius: var(--r) 0 0 var(--r); }
 .leaders__table td:last-child { border-right: 1px solid var(--line-soft); border-radius: 0 var(--r) var(--r) 0; }
 .leaders__table tr.is-top td { background: var(--surface-2); }
+/* Rank 4 on: every other row a shade lighter and the row under the pointer lit, so the eye keeps its line. */
+.leaders__table tbody tr:nth-child(even) td { background: var(--surface-2); }
+.leaders__table tbody tr:hover td { background: var(--surface-3); }
 .leaders__table .leaders__rank { width: 76px; }
 .leaders__table .leaders__tier { width: 210px; }
 .leaders__table .leaders__rp { width: 120px; text-align: right; }
@@ -2697,12 +2700,38 @@ td.leaders__rank { color: var(--paper-dim); font: 700 18px var(--display); font-
 .is-top-1 td.leaders__rank { color: var(--gold); }
 .is-top-2 td.leaders__rank { color: #c9d0d8; }
 .is-top-3 td.leaders__rank { color: #c98a5a; }
-td.leaders__rp { color: var(--paper); font: 700 17px var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+td.leaders__rp { position: relative; color: var(--paper); font: 700 17px var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+/* A thin bar along the bottom of the RP cell: the player's RP as a share of the leader's. */
+.leaders__share { --pad: 16px; position: absolute; right: var(--pad); bottom: 8px; width: calc((100% - 2 * var(--pad)) * var(--share)); height: 2px; border-radius: 1px; background: var(--signal); opacity: 0.7; }
 .leaders__player { overflow: hidden; }
 .leaders__name { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--paper); font-weight: 600; }
 .leaders__name bdi { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .leaders__flag { flex: none; width: 21px; height: 14px; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); }
 .leaders__tier-under { display: none; }
+/* The top three: 2 - 1 - 3, each player above a step of their height. In the DOM in rank order. */
+.podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; margin: 8px 0 20px; padding: 0; list-style: none; }
+.podium__place { display: grid; gap: 12px; min-width: 0; }
+.podium__place--1 { order: 2; }
+.podium__place--2 { order: 1; }
+.podium__place--3 { order: 3; }
+.podium__player { display: grid; justify-items: center; gap: 8px; min-width: 0; text-align: center; }
+.podium__icon { width: 64px; height: 64px; }
+.podium__place--1 .podium__icon { width: 88px; height: 88px; }
+.podium__name { max-width: 100%; font-size: 17px; }
+.podium__rp { color: var(--paper); font: 700 18px var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+.podium__rp abbr { color: var(--muted); font-size: 12px; letter-spacing: 0.1em; text-decoration: none; cursor: help; }
+.podium__step {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  border-bottom: 0;
+  border-radius: var(--r) var(--r) 0 0;
+  background: linear-gradient(var(--surface-2), var(--surface));
+  font: 700 40px var(--display);
+}
+.podium__place--1 .podium__step { height: 140px; border-top: 3px solid var(--gold); color: var(--gold); }
+.podium__place--2 .podium__step { height: 104px; border-top: 3px solid #c9d0d8; color: #c9d0d8; }
+.podium__place--3 .podium__step { height: 80px; border-top: 3px solid #c98a5a; color: #c98a5a; }
 /* A tier: a coloured label, like a card's type on the boards. */
 .tier { display: inline-flex; align-items: center; gap: 6px; font: 700 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
 .tier__icon { flex: none; width: 24px; height: 24px; }
@@ -2730,7 +2759,18 @@ td.leaders__rp { color: var(--paper); font: 700 17px var(--display); font-varian
   .leaders__table .leaders__rp { width: 78px; }
   td.leaders__rank { font-size: 16px; }
   td.leaders__rp { font-size: 15px; }
+  .leaders__share { --pad: 10px; bottom: 6px; }
   .tier { font-size: 11px; }
+  .podium { gap: 6px; }
+  .podium__icon { width: 44px; height: 44px; }
+  .podium__place--1 .podium__icon { width: 56px; height: 56px; }
+  .podium__name { font-size: 14px; }
+  .podium__name .leaders__flag { display: none; }
+  .podium__rp { font-size: 15px; }
+  .podium__step { font-size: 28px; }
+  .podium__place--1 .podium__step { height: 96px; }
+  .podium__place--2 .podium__step { height: 72px; }
+  .podium__place--3 .podium__step { height: 56px; }
 }
 /* The narrowest phones: the longest mode names (Escuadrón, スクワッド) still fit in a quarter. */
 @media (max-width: 400px) {
