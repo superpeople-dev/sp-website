@@ -17,7 +17,7 @@ export type LeaderKey = `${LeaderMode}_${LeaderView}`;
 export const leaderKeys = leaderModes.flatMap((mode) => leaderViews.map((view): LeaderKey => `${mode}_${view}`));
 
 // A player's season record in one mode (sp-backend routes/listen.js statsOf): sums since the hosts
-// started reporting match stats, kills of players only (AI kills apart), and the newest matches
+// started reporting match stats, kills of players only, and the newest matches
 // (rank of `of`, RP before and after, start in unix seconds).
 export type RecentMatch = { rank: number; of: number; rp: number; prev: number; at: number };
 export type PlayerStats = {
@@ -25,7 +25,6 @@ export type PlayerStats = {
   wins: number;
   top10: number;
   kills: number;
-  aiKills: number;
   deaths: number;
   assists: number;
   revives: number;
@@ -46,7 +45,7 @@ export const avatarUrl = (hash: string) => `/api/leaderboard/avatar/${hash}`;
 export const avatarSource = (hash: string) => `${statusUrl}/avatar/${hash}.png`;
 
 const count = (value: unknown) => (typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : 0);
-const statFields = ["matches", "wins", "top10", "kills", "aiKills", "deaths", "assists", "revives", "damage", "rankSum", "seconds"] as const;
+const statFields = ["matches", "wins", "top10", "kills", "deaths", "assists", "revives", "damage", "rankSum", "seconds"] as const;
 
 function statsOf(value: unknown): PlayerStats | null {
   if (!value || typeof value !== "object") return null;
@@ -109,6 +108,21 @@ export type TierGroup = "superSoldier" | "legendary" | "grandMaster" | "master" 
 const ladder: Record<number, TierGroup> = { 420100001: "superSoldier", 420100002: "legendary", 420100003: "grandMaster", 420100004: "master" };
 const groups: TierGroup[] = ["diamond", "platinum", "gold", "silver", "bronze", "iron"];
 const steps = ["I", "II", "III", "IV", "V"];
+
+// How a tier is reached, highest first, as sp-backend lib/tables.js gives it (tierForRp, ladderTierId):
+// Iron to Diamond by RP, five steps (V to I) 200 RP apart; Master from 6000 RP; Grand Master, Legendary
+// and Super Soldier for the top 100, top 10 and first of the players with 6000+ RP in that mode.
+export const LADDER_RP = 6000;
+export type RankStep = { group: TierGroup; id: number; top?: number; from?: number; to?: number };
+export const rankSteps: RankStep[] = [
+  { group: "superSoldier", id: 420100001, top: 1 },
+  { group: "legendary", id: 420100002, top: 10 },
+  { group: "grandMaster", id: 420100003, top: 100 },
+  { group: "master", id: 420100004, from: LADDER_RP },
+  ...groups.map((group, i) => ({ group, id: 420100005 + i * 5, from: (5 - i) * 1000, to: (5 - i) * 1000 + 999 })),
+];
+// A tier group's steps, V (lowest) to I, with the RP each starts at.
+export const stepsOf = (from: number) => [...steps].reverse().map((step, i) => ({ step, from: from + i * 200 }));
 
 // icon: the game's own 250px tier icon (TBL-SeasonTier CohIcon, cut from the Sprite_Tier_01 sheet),
 // public/tiers/<id - 420100000>.webp.

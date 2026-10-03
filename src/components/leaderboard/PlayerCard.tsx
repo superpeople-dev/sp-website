@@ -8,9 +8,10 @@ import { avatarUrl, tierOf, type LeaderRow } from "@/lib/leaderboard";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
 import { RelativeTime } from "../RelativeTime";
+import { ShareButton } from "../ShareButton";
 
 // A leaderboard player's card (components/leaderboard/Leaderboard.tsx): picture, name, tier and RP in the
-// list's mode and view, that mode's season record and the newest matches. The record counts the matches
+// list's mode and view, that mode's season record and the newest matches. Its link (?mode=…&player=…) opens it again. The record counts the matches
 // the hosts reported (sp-backend routes/ds.js recordMatchStats); kills are kills of players.
 export function PlayerCard({ row, modeLabel, flag, onClose }: { row: LeaderRow | null; modeLabel: string; flag: ReactNode; onClose: () => void }) {
   const { locale, t } = useI18n();
@@ -30,12 +31,12 @@ export function PlayerCard({ row, modeLabel, flag, onClose }: { row: LeaderRow |
         [c.top10, number.format(s.top10), percent.format(s.top10 / s.matches)],
         [c.kills, number.format(s.kills)],
         [c.killsPerMatch, decimal.format(s.kills / s.matches)],
+        [c.deaths, number.format(s.deaths)],
         [c.kd, decimal.format(s.kills / Math.max(1, s.deaths))],
         [c.avgPlace, `#${decimal.format(s.rankSum / s.matches)}`],
         [c.avgDamage, number.format(Math.round(s.damage / s.matches))],
         [c.assists, number.format(s.assists)],
         [c.revives, number.format(s.revives)],
-        [c.aiKills, number.format(s.aiKills)],
         [c.playTime, fill(c.hours, { n: decimal.format(s.seconds / 3600) })],
       ]
     : [];
@@ -49,6 +50,7 @@ export function PlayerCard({ row, modeLabel, flag, onClose }: { row: LeaderRow |
               #{row.rank} · {modeLabel}
             </span>
             <div className="sheet__actions">
+              <ShareButton title={row.name} url={() => window.location.href} />
               <button type="button" className="icon-btn" onClick={onClose} aria-label={t.board.close} title={t.board.close} data-autofocus>
                 <Icon name="close" />
               </button>

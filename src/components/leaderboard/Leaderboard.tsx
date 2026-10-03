@@ -17,7 +17,9 @@ import {
 } from "@/lib/leaderboard";
 import { Icon } from "../Icon";
 import { Reveal } from "../motion";
+import { ModeIcon, ViewIcon } from "./ModeIcons";
 import { PlayerCard } from "./PlayerCard";
+import { Ranks } from "./Ranks";
 
 // Names match with or without accents and capitals ("lea" finds "Léa").
 const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
@@ -28,12 +30,13 @@ const plain = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toL
 // on a podium (2 - 1 - 3), the rest are a list. Desktop: one bar, the search on the right, the list in
 // four columns. Phone: the modes on a row of their own, the view and the search under them, the tier
 // under the name. A click on a player opens their card (PlayerCard) with that mode's season record.
-export function Leaderboard({ board, initialKey }: { board: Board; initialKey: LeaderKey }) {
+export function Leaderboard({ board, initialKey, initialPlayer }: { board: Board; initialKey: LeaderKey; initialPlayer: string | null }) {
   const { locale, t } = useI18n();
   const l = t.leaderboard;
   const [key, setKey] = useState(initialKey);
   const [query, setQuery] = useState("");
-  const [shown, setShown] = useState<LeaderRow | null>(null);
+  // A shared card (?player=<name>) opens over its list.
+  const [shown, setShown] = useState<LeaderRow | null>(() => board.lists[initialKey].find((row) => row.name === initialPlayer) ?? null);
   const [mode, view] = key.split("_") as [LeaderMode, LeaderView];
   const list = board.lists[key];
   const wanted = plain(query.trim());
@@ -80,11 +83,21 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
     );
   };
 
+  // The list and the open card are kept in the link, so it can be shared (?mode=squad-fpp&player=Nova).
+  const setLink = (param: string, value: string | null) => {
+    const url = new URL(window.location.href);
+    if (value === null) url.searchParams.delete(param);
+    else url.searchParams.set(param, value);
+    window.history.replaceState(window.history.state, "", url);
+  };
   const pick = (next: LeaderKey) => {
     setKey(next);
-    const url = new URL(window.location.href);
-    url.searchParams.set("mode", paramOfKey(next));
-    window.history.replaceState(window.history.state, "", url);
+    setLink("mode", paramOfKey(next));
+  };
+  const show = (row: LeaderRow | null) => {
+    setShown(row);
+    if (row) setLink("mode", paramOfKey(key));
+    setLink("player", row ? row.name : null);
   };
 
   return (
@@ -94,6 +107,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
           <div className="ideas__sort leaders__modes" role="group" aria-label={l.mode}>
             {leaderModes.map((m) => (
               <button key={m} type="button" className={m === mode ? "is-active" : undefined} aria-pressed={m === mode} onClick={() => pick(`${m}_${view}`)}>
+                <ModeIcon mode={m} />
                 {t.servers.modes[m]}
               </button>
             ))}
@@ -101,10 +115,12 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
           <div className="ideas__sort leaders__views" role="group" aria-label={l.view}>
             {leaderViews.map((v) => (
               <button key={v} type="button" className={v === view ? "is-active" : undefined} aria-pressed={v === view} onClick={() => pick(`${mode}_${v}`)}>
+                <ViewIcon view={v} />
                 {t.servers.views[v]}
               </button>
             ))}
           </div>
+          <Ranks />
           {/* The ideas board's sort switches and search box, as on Bugs & Ideas. */}
           <label className="ideas__search">
             <Icon name="search" />
@@ -119,7 +135,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
                 const tier = tierOf(row.tier);
                 return (
                   <li key={row.rank} className={`podium__place podium__place--${row.rank}`}>
-                    <button type="button" className="podium__player" onClick={() => setShown(row)} aria-label={fill(l.card.open, { name: row.name })}>
+                    <button type="button" className="podium__player" onClick={() => show(row)} aria-label={fill(l.card.open, { name: row.name })}>
                       {tier && <Image className="podium__icon" src={tier.icon} alt="" width={64} height={64} unoptimized />}
                       <span className="leaders__name podium__name">
                         {flagOf(row.country)}
@@ -155,11 +171,11 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.rank} className={row.rank <= 3 ? `is-top is-top-${row.rank}` : undefined} onClick={() => setShown(row)}>
+                  <tr key={row.rank} className={row.rank <= 3 ? `is-top is-top-${row.rank}` : undefined} onClick={() => show(row)}>
                     <td className="leaders__rank">{row.rank}</td>
                     <td className="leaders__player">
                       {/* The row opens the card on a click; the name is the button for the keyboard. */}
-                      <button type="button" className="leaders__name" onClick={(e) => (e.stopPropagation(), setShown(row))}>
+                      <button type="button" className="leaders__name" onClick={(e) => (e.stopPropagation(), show(row))}>
                         {flagOf(row.country)}
                         <bdi>{row.name}</bdi>
                       </button>
@@ -180,7 +196,7 @@ export function Leaderboard({ board, initialKey }: { board: Board; initialKey: L
           )}
         </Reveal>
       </div>
-      <PlayerCard row={shown} modeLabel={`${t.servers.modes[mode]} ${t.servers.views[view]}`} flag={shown && flagOf(shown.country)} onClose={() => setShown(null)} />
+      <PlayerCard row={shown} modeLabel={`${t.servers.modes[mode]} ${t.servers.views[view]}`} flag={shown && flagOf(shown.country)} onClose={() => show(null)} />
     </section>
   );
 }
