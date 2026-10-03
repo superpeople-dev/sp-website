@@ -1,4 +1,4 @@
-import { createHash, createPrivateKey, randomUUID, sign } from "node:crypto";
+import { createHash, createPrivateKey, createPublicKey, randomUUID, sign } from "node:crypto";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { localeHref } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -84,6 +84,23 @@ export function gamePass(user: SessionUser): string {
 // passes for the other.
 export const siteRequest = (purpose: string, fields: Record<string, string | number>) =>
   signed({ ...fields, p: purpose, exp: Date.now() + passLifetime, j: randomUUID() });
+
+// ------------------------------------------------------- the game's console ---
+// The game ships with its console on, and players used it for cheats. SPClientFixes (sp-native
+// client-fixes, console_lock) clears it for everyone but the admins: just before it starts the game,
+// the launcher asks an admin's session for this token (app/api/launcher/console) and hands it to the
+// game process, and the DLL checks the signature with the key's public half, which it carries
+// (passPublicKey, app/api/launcher/pass-key). It has a p, so the backend never takes it for a pass.
+export const consolePurpose = "game-console";
+export const consoleToken = (user: SessionUser) => siteRequest(consolePurpose, { d: user.id, s: "admin" });
+
+// The public half of the pass key, SPKI DER in base64 (the backend's launcher.discordPassKey). Public:
+// it only checks signatures.
+export function passPublicKey(): string | null {
+  if (!passKey) return null;
+  const key = createPrivateKey({ key: Buffer.from(passKey, "base64"), format: "der", type: "pkcs8" });
+  return createPublicKey(key).export({ type: "spki", format: "der" }).toString("base64");
+}
 
 // The backend's launcher routes, on the host the server list comes from (the launcher's own address).
 export const launcherApi = () => `${new URL(statusUrl).origin}/launcher/api`;
