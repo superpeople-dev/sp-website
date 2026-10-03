@@ -29,6 +29,7 @@ import { useConfirm } from "../ConfirmDialog";
 import { Dropdown } from "../Dropdown";
 import { Icon, type IconName } from "../Icon";
 import { Modal } from "../Modal";
+import { ShareButton } from "../ShareButton";
 import { Toast } from "../Toast";
 import type { EditValues, useAdmin } from "./admin";
 import { CategoryTag, platformName } from "./CategoryTag";
@@ -125,41 +126,6 @@ function names(author: Pick<Author, "name" | "username">) {
   return { name: shownName(author.name, author.username), user: author.username || null };
 }
 
-// The item's link (the page with ?item=<id>): the phone's share sheet on touch screens, copied on desktop.
-function ShareButton({ item }: { item: FeedbackItem }) {
-  const { t } = useI18n();
-  const b = t.board;
-  const [copied, setCopied] = useState(false);
-  const share = async () => {
-    const url = pageUrl();
-    if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
-      await navigator.share({ title: item.title, url }).catch(() => null);
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      window.prompt(b.shareItem, url);
-    }
-  };
-  return (
-    <>
-      <button
-        type="button"
-        className={`share-btn${copied ? " is-copied" : ""}`}
-        onClick={() => void share()}
-        aria-label={b.shareItem}
-        title={b.shareItem}
-      >
-        <Icon name={copied ? "check" : "share"} />
-        <span>{b.shareItem}</span>
-      </button>
-      <Toast show={copied}>{b.linkCopied}</Toast>
-    </>
-  );
-}
 
 function ItemBody({
   item,
@@ -784,7 +750,7 @@ function ItemBody({
           </span>
         </div>
         <div className="sheet__actions">
-          {mode === "view" && <ShareButton item={item} />}
+          {mode === "view" && <ShareButton title={item.title} url={pageUrl} />}
           {mode === "view" && (canManage || (canModerate && thread.status === "ready")) && (
             <ItemMenu
               item={item}

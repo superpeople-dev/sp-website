@@ -23,7 +23,7 @@ export default async function LeaderboardPage({ params, searchParams }: PageProp
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
   const [release, board, query] = await Promise.all([getLatestRelease(), getLeaderboard(), searchParams]);
-  // A shared link (?mode=squad-fpp) opens on its list; else the list with the most players.
+  // A shared link (?mode=squad-fpp, &player=<name> for a card) opens on its list; else the list with the most players.
   const first = board && (keyOfParam(query.mode) ?? busiestKey(board));
 
   return (
@@ -37,7 +37,7 @@ export default async function LeaderboardPage({ params, searchParams }: PageProp
             {t.hero.season}
           </p>
         </PageHead>
-        {board && first && <Leaderboard board={board} initialKey={first} />}
+        {board && first && <Leaderboard board={board} initialKey={first} initialPlayer={typeof query.player === "string" ? query.player : null} />}
       </main>
       <Footer t={t} locale={lang} />
     </>

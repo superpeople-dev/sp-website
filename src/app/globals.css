@@ -2764,6 +2764,9 @@ button.votes__down:disabled { cursor: default; }
    long names end in an ellipsis. */
 .leaders { display: grid; gap: 20px; }
 .leaders__bar { display: flex; align-items: center; gap: 12px; }
+.leaders__bar .ideas__sort button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.mode-icon { flex: none; fill: currentColor; }
+.leaders__ranks { flex: none; height: 38px; }
 .leaders__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .leaders__table { width: 100%; border-collapse: separate; border-spacing: 0 6px; table-layout: fixed; }
 .leaders__table th {
@@ -2844,6 +2847,10 @@ td.leaders__rp { position: relative; color: var(--paper); font: 700 17px var(--d
   .leaders__views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .leaders__modes { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .leaders__bar .ideas__sort button { min-width: 0; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; }
+  /* The ranks button shrinks to its icon next to the search. */
+  .leaders__bar { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto; }
+  .leaders__ranks { grid-column: 3; grid-row: 2; width: 38px; padding: 0 0 var(--strip-h); }
+  .leaders__ranks span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .leaders__table .leaders__tier { display: none; }
   .leaders__tier-under { display: block; margin-top: 4px; }
   .leaders__table th { padding: 0 10px 2px; }
@@ -2868,6 +2875,8 @@ td.leaders__rp { position: relative; color: var(--paper); font: 700 17px var(--d
 /* The narrowest phones: the longest mode names (Escuadrón, スクワッド) still fit in a quarter. */
 @media (max-width: 400px) {
   .leaders__bar .leaders__modes button { padding: 0 3px; font-size: 11px; letter-spacing: 0.04em; }
+  .leaders__modes .mode-icon { height: 12px; width: auto; }
+  .leaders__bar .leaders__modes button { gap: 4px; }
 }
 
 /* OrbIsland's locations under the gallery: a slow endless strip, its edges faded into the page. */
@@ -3022,3 +3031,12 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 /* "Season: Playtest" under the leaderboard's title, in the hero ribbon's look. */
 .season-tag { display: flex; align-items: center; gap: 12px; margin: 22px 0 0; font: 800 14px var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--paper); }
 .season-tag i { flex: none; width: 48px; height: 24px; background: linear-gradient(90deg, var(--signal-dark), var(--signal)); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+
+/* The ranks dialog (components/leaderboard/Ranks.tsx). */
+.ranks__note { margin: 0 0 18px; color: var(--paper-dim); font-size: 16px; }
+.ranks { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ranks__row { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 14px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line-soft); }
+.ranks__what { display: grid; gap: 4px; min-width: 0; color: var(--paper-dim); font-size: 15px; }
+.ranks__what .tier { font-size: 16px; }
+.ranks__steps { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--muted); font: 600 13px var(--display); letter-spacing: 0.04em; }
+.ranks__steps i { font-style: normal; color: var(--paper-dim); }

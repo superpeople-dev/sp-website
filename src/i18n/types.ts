@@ -430,8 +430,16 @@ export type Dictionary = {
     unavailable: string;
     search: string;
     noMatch: string;
+    // The ranks dialog (components/leaderboard/Ranks.tsx).
+    ranks: string;
+    ranksTitle: string;
+    ranksNote: string;
+    rankFirst: string;
+    rankTop: string;
+    rpFrom: string;
+    rpRange: string;
     // The player card (components/leaderboard/PlayerCard.tsx).
-    card: Record<"matches" | "wins" | "top10" | "kills" | "kd" | "killsPerMatch" | "avgPlace" | "avgDamage" | "assists" | "revives" | "aiKills" | "playTime" | "hours" | "recent" | "place" | "noStats" | "open", string>;
+    card: Record<"matches" | "wins" | "top10" | "kills" | "kd" | "killsPerMatch" | "avgPlace" | "avgDamage" | "assists" | "revives" | "deaths" | "playTime" | "hours" | "recent" | "place" | "noStats" | "open", string>;
     tiers: Record<"superSoldier" | "legendary" | "grandMaster" | "master" | "diamond" | "platinum" | "gold" | "silver" | "bronze" | "iron", string>;
   };
   legal: {
