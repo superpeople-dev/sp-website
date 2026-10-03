@@ -1,8 +1,5 @@
 import type { StaticImageData } from "next/image";
 import bazooka from "@/assets/game/fig-bazooka.webp";
-import ghillie from "@/assets/game/fig-ghillie.webp";
-import runner from "@/assets/game/fig-runner.webp";
-import soldier from "@/assets/game/fig-soldier.webp";
 import tactical from "@/assets/game/fig-tactical.webp";
 import whitehair from "@/assets/game/fig-whitehair.webp";
 import headCompleted from "@/assets/game/head-completed.webp";
@@ -39,7 +36,7 @@ export const headArt = {
   faq: headFaq,
 } satisfies Record<string, StaticImageData>;
 
-export const figures = { bazooka, ghillie, runner, soldier, tactical, whitehair };
+export const figures = { bazooka, tactical, whitehair };
 
 // The island strip under the gallery (components/Locations).
 export const locations: StaticImageData[] = [loc01, loc02, loc03, loc04, loc05, loc06, loc07, loc08, loc09, loc10, loc11, loc12, loc13, loc14];
