@@ -101,6 +101,10 @@ function toServer(raw: RawServer): GameServer {
   };
 }
 
+// Players on the online servers, null while the backend's list is unavailable.
+export const playersOnline = (list: ServerList | null) =>
+  list ? list.servers.reduce((sum, server) => sum + (server.online ? (server.players ?? 0) : 0), 0) : null;
+
 // Online servers first, then by name. Null when the backend cannot be reached or has the route off.
 export async function getServers(): Promise<ServerList | null> {
   try {
