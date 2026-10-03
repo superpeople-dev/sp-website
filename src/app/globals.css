@@ -360,7 +360,7 @@ h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacin
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   padding: calc(var(--nav-h) + 24px) 0 32px;
   isolation: isolate;
   overflow: hidden;
@@ -2497,7 +2497,9 @@ button.votes__down:disabled { cursor: default; }
 }
 .done-group__icon svg { width: 20px; height: 20px; }
 
-.legal > * { max-width: 780px; }
+/* Terms and Privacy: one column in the middle of the page, under a centered title and date. */
+.page-head--legal { text-align: center; }
+.wrap.legal { max-width: calc(780px + 2 * var(--gutter)); }
 .legal__intro { margin: 0 0 36px; color: var(--paper); font-size: 19px; }
 .legal__section { padding: 26px 0; border-top: 1px solid var(--line-soft); }
 .legal__section h2 { margin: 0 0 10px; font-size: clamp(22px, 2.4vw, 28px); line-height: 1.1; }

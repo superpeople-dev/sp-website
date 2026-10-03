@@ -7,6 +7,7 @@ export function PageHead({
   lead,
   notice,
   art,
+  variant,
   children,
 }: {
   title: string;
@@ -14,10 +15,12 @@ export function PageHead({
   art?: StaticImageData;
   lead?: string;
   notice?: string | null;
+  // "legal": the title and its date centered over the Terms and Privacy column.
+  variant?: "legal";
   children?: ReactNode;
 }) {
   return (
-    <header className={art ? "page-head page-head--art" : "page-head"}>
+    <header className={["page-head", art && "page-head--art", variant && `page-head--${variant}`].filter(Boolean).join(" ")}>
       {art && (
         <div className="page-head__art" aria-hidden="true">
           <Image src={art} alt="" fill sizes="(max-width: 700px) 100vw, 70vw" priority quality={90} />

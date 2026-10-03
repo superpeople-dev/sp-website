@@ -39,7 +39,7 @@ export function LegalPage({
 
   return (
     <>
-      <PageHead title={title}>
+      <PageHead title={title} variant="legal">
         <p className="page-head__date">
           <time dateTime={legalUpdated}>{fill(updated, { date })}</time>
         </p>
