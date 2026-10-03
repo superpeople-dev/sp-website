@@ -5,9 +5,11 @@ import {
   Noto_Sans_JP,
   Noto_Sans_KR,
   Noto_Sans_SC,
+  Saira_Condensed,
+  Saira_Extra_Condensed,
   Sofia_Sans,
+  Sofia_Sans_Condensed,
 } from "next/font/google";
-import localFont from "next/font/local";
 import { notFound } from "next/navigation";
 import { Consent } from "@/components/Consent";
 import { MotionProvider } from "@/components/motion";
@@ -19,19 +21,18 @@ import { pageMetadata } from "@/lib/seo";
 import "../globals.css";
 
 const body = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-// The game's own typefaces (licensed): Refrigerator Deluxe for every heading (it covers Cyrillic too),
-// CG Fiorello Condensed for the home headline (Latin only; other scripts fall back per glyph).
-const display = localFont({
-  src: [
-    { path: "../../assets/fonts/refrigerator-deluxe-400.woff2", weight: "400" },
-    { path: "../../assets/fonts/refrigerator-deluxe-700.woff2", weight: "700" },
-    { path: "../../assets/fonts/refrigerator-deluxe-800.woff2", weight: "800" },
-    { path: "../../assets/fonts/refrigerator-deluxe-900.woff2", weight: "900" },
-  ],
-  variable: "--font-display",
-});
-const headline = localFont({ src: "../../assets/fonts/cg-fiorello-condensed.woff2", variable: "--font-headline" });
+// Free lookalikes of the game's typefaces: Saira Condensed for Refrigerator Deluxe (every heading),
+// Saira Extra Condensed for CG Fiorello Condensed (the home headline). Neither has Cyrillic, so
+// Russian keeps Sofia Sans Condensed for both.
+const display = Saira_Condensed({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], variable: "--font-display" });
+const headline = Saira_Extra_Condensed({ subsets: ["latin"], weight: ["800"], variable: "--font-headline" });
 const cyrillicBody = Sofia_Sans({ subsets: ["cyrillic", "latin"], variable: "--font-body", preload: false, display: "swap" });
+const cyrillicDisplay = Sofia_Sans_Condensed({
+  subsets: ["cyrillic", "latin"],
+  variable: "--font-display",
+  preload: false,
+  display: "swap",
+});
 const japanese = Noto_Sans_JP({ weight: ["400", "700", "900"], variable: "--font-jp", preload: false, display: "swap" });
 const korean = Noto_Sans_KR({ weight: ["400", "700", "900"], variable: "--font-kr", preload: false, display: "swap" });
 const chinese = Noto_Sans_SC({ weight: ["400", "700", "900"], variable: "--font-sc", preload: false, display: "swap" });
@@ -61,7 +62,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const cjk = { ja: japanese.variable, ko: korean.variable, zh: chinese.variable, hi: devanagari.variable }[lang as string] ?? "";
-  const latin = `${lang === "ru" ? cyrillicBody.variable : body.variable} ${display.variable} ${headline.variable}`;
+  const latin = lang === "ru" ? `${cyrillicBody.variable} ${cyrillicDisplay.variable}` : `${body.variable} ${display.variable} ${headline.variable}`;
 
   return (
     <html lang={localeInfo[lang].htmlLang} className={`${latin} ${cjk}`}>

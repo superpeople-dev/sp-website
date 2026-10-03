@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { Barlow } from "next/font/google";
-import localFont from "next/font/local";
+import { Barlow, Saira_Condensed } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 
 const body = Barlow({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const display = localFont({
-  src: [
-    { path: "../assets/fonts/refrigerator-deluxe-700.woff2", weight: "700" },
-    { path: "../assets/fonts/refrigerator-deluxe-900.woff2", weight: "900" },
-  ],
-  variable: "--font-display",
-});
+const display = Saira_Condensed({ subsets: ["latin"], weight: ["700", "900"], variable: "--font-display" });
 
 export const metadata: Metadata = {
   title: "Page not found - SUPER PEOPLE Revival",

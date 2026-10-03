@@ -397,12 +397,12 @@ h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacin
 .slab--b { right: 6%; width: 60px; background: linear-gradient(180deg, rgba(239, 68, 56, 0.11), transparent 70%); }
 .slab--c { right: 22%; width: 20px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 70%); }
 
-/* The headline in CG Fiorello Condensed, the game's poster face: much narrower than the heading font,
-   so Latin lines get 1.35x the size to fill the same width. Scripts it lacks fall back to the
-   heading font at its usual size. */
+/* The headline in Saira Extra Condensed (like the game's poster face): narrower than the heading font,
+   so Latin lines get 1.2x the size to fill the same width. Russian, Hindi and the CJK languages
+   have no headline font and keep the heading font at its usual size. */
 .hero h1 {
-  --hero-face: 1.35;
-  font: 900 clamp(34px, calc(17.5vw * var(--hero-scale, 1) * var(--hero-fit, 1) * var(--hero-face)), calc(var(--hero-cap, 120px) * var(--hero-face)))/0.86 var(--font-headline), var(--display);
+  --hero-face: 1.2;
+  font: 900 clamp(34px, calc(17.5vw * var(--hero-scale, 1) * var(--hero-fit, 1) * var(--hero-face)), calc(var(--hero-cap, 120px) * var(--hero-face)))/0.86 var(--font-headline, var(--font-display)), var(--display);
   font-synthesis: none;
   text-transform: uppercase;
   letter-spacing: -0.005em;
