@@ -18,10 +18,11 @@ const aiCrawlers = [
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    // The API answers the site's own pages; it has nothing to index.
+    // The API answers the site's own pages; it has nothing to index. Nor do the replays of reported
+    // matches (lib/replays.ts), whose pages are only reached through the staff's links.
     rules: [
-      { userAgent: "*", allow: "/", disallow: "/api/" },
-      { userAgent: aiCrawlers, allow: "/", disallow: "/api/" },
+      { userAgent: "*", allow: "/", disallow: ["/api/", "/replays/"] },
+      { userAgent: aiCrawlers, allow: "/", disallow: ["/api/", "/replays/"] },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
     host: siteUrl,

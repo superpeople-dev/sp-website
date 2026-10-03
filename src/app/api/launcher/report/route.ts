@@ -3,6 +3,8 @@ import { after, type NextRequest } from "next/server";
 import { logGameReport, type GameReport } from "@/lib/discord";
 import { countThisHour, limitsReady } from "@/lib/downloads";
 import { discordOfAccount } from "@/lib/launcher";
+import { confirmReplay, isReplayId, replayPage } from "@/lib/replays";
+import { siteUrl } from "@/lib/seo";
 import { readSession, sameOrigin } from "@/lib/session";
 
 // A report made with the game's own Report button (death cam, spectating), for #in-game-report.
@@ -21,9 +23,15 @@ const decimal = (value: unknown, max: number) =>
 const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
 const fieldsOf = (value: unknown) => (value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {});
-// The replay of the match, which the launcher uploaded to the game backend (sp-launcher replays.rs,
-// sp-backend lib/replays.js): only a link of the admin panel's own, behind its Discord sign-in.
+// The replay of the match, which the launcher uploaded (sp-launcher replays.rs). Since 02.10.2026 it is
+// on this site (lib/replays.ts): its page counts once the file is there and is the reporter's. Launchers
+// from before uploaded it to the game backend: a link of the admin panel's own, behind its sign-in.
 const REPLAY_URL = /^https:\/\/admin\.superpeople\.dev\/replay\/[0-9a-f]{32}$/;
+const siteReplayId = (url: unknown) => {
+  const prefix = `${siteUrl}/replays/`;
+  const id = typeof url === "string" && url.startsWith(prefix) ? url.slice(prefix.length) : "";
+  return isReplayId(id) ? id : undefined;
+};
 const REPLAY_NOTES = ["missing", "too_big", "failed"] as const;
 
 function playerOf(value: unknown) {
@@ -41,6 +49,9 @@ export async function POST(request: NextRequest) {
   const user = await readSession(request);
   if (!user) return Response.json({ error: "auth" }, { status: 401 });
   const body = fieldsOf(await request.json().catch(() => null));
+  // A replay on this site counts once its file is there; its size and name come from here.
+  const replayId = siteReplayId(body.replay_url);
+  const siteReplay = replayId ? await confirmReplay(replayId, user.id).catch(() => null) : null;
   const reporter = fieldsOf(body.reporter);
   const suspect = fieldsOf(body.suspect);
   const report: GameReport = {
@@ -50,10 +61,15 @@ export async function POST(request: NextRequest) {
       ? [...new Set(body.programs.map((program) => count(program, 99)).filter((program): program is number => program !== undefined))].slice(0, 8)
       : [],
     replay: line(body.replay, 120),
-    replayUrl: typeof body.replay_url === "string" && REPLAY_URL.test(body.replay_url) ? body.replay_url : undefined,
-    replayBytes: count(body.replay_bytes, 2 ** 31),
-    replayMatch: line(body.replay_match, 80),
-    replayNote: REPLAY_NOTES.find((note) => note === body.replay_note),
+    replayUrl: siteReplay
+      ? replayPage(siteReplay.id)
+      : typeof body.replay_url === "string" && REPLAY_URL.test(body.replay_url)
+        ? body.replay_url
+        : undefined,
+    replayBytes: siteReplay ? siteReplay.bytes : count(body.replay_bytes, 2 ** 31),
+    replayMatch: siteReplay ? siteReplay.name : line(body.replay_match, 80),
+    // A replay this site has no file of went nowhere.
+    replayNote: replayId && !siteReplay ? "failed" : REPLAY_NOTES.find((note) => note === body.replay_note),
     version: typeof body.version === "string" && /^\d{1,3}\.\d{1,3}\.\d{1,4}$/.test(body.version) ? body.version : undefined,
     reporter: {
       ...playerOf(reporter),

@@ -411,15 +411,20 @@ export async function logGameReport(who: Player, report: GameReport, reported?: 
     reporter.damageType ? code(reporter.damageType) : undefined,
   ].filter(Boolean);
   add("Reporter's last hit", death.length ? death.join(", ") : undefined);
-  // The game's recording of the match, as a zip behind the admin panel's Discord sign-in. Before
+  // The game's recording of the match. Its page on this site (lib/replays.ts, no sign-in) opens it in
+  // the launcher or downloads the zip; older launchers put it behind the admin panel's sign-in. Before
   // launchers sent it, a report only named a .7z the game never makes now: nothing to show.
   const size = report.replayBytes ? ` (${(report.replayBytes / 1048576).toFixed(1)} MB)` : "";
+  const match = report.replayMatch ? ` ${code(report.replayMatch)}` : "";
   add(
     "Replay",
-    report.replayUrl
-      ? `[Download the replay](${report.replayUrl})${size}${report.replayMatch ? ` ${code(report.replayMatch)}` : ""}\n` +
+    report.replayUrl?.startsWith(`${siteUrl}/replays/`)
+      ? `[Watch the replay](${report.replayUrl})${size}${match}\n` +
+          "Open it in the launcher from that page (it goes into the game's Replay menu), or download the zip. Kept 30 days."
+      : report.replayUrl
+        ? `[Download the replay](${report.replayUrl})${size}${match}\n` +
           "Unzip it into `%LOCALAPPDATA%\\BravoHotelGame\\Saved\\Demos` and open it from the game's Replay menu."
-      : report.replayNote && replayNotes[report.replayNote],
+        : report.replayNote && replayNotes[report.replayNote],
     false,
   );
   add("Launcher", report.version ? `v${report.version}` : undefined);
