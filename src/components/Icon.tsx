@@ -69,6 +69,7 @@ const paths = {
   vote: <path {...stroke} strokeWidth={1.8} d="M12 3.5 4.5 11.5H9V20h6v-8.5h4.5L12 3.5Z" />,
   // A filled circle with the i cut out of it (the background shows through).
   info: <path fill="currentColor" fillRule="evenodd" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20ZM10.6 10.4h2.8v7.4h-2.8ZM12 5.6a1.7 1.7 0 1 1 0 3.4 1.7 1.7 0 0 1 0-3.4Z" />,
+  news: <path {...stroke} strokeWidth={2} d="M5 4.5h11.5v14a1.5 1.5 0 0 0 3 0V8.5H16.5M5 4.5v14A1.5 1.5 0 0 0 6.5 20h12.5M8 8.5h5.5M8 12h5.5M8 15.5h3.5" />,
   bell: <path {...stroke} strokeWidth={2} d="M6 8.5a6 6 0 1 1 12 0c0 6.5 3 8.5 3 8.5H3s3-2 3-8.5ZM10.3 20.5a2 2 0 0 0 3.4 0" />,
   // The same arrow, pointing down: flipped in the drawing, not with a CSS transform.
   voteDown: <path {...stroke} strokeWidth={1.8} d="M12 20.5 19.5 12.5H15V4H9v8.5H4.5L12 20.5Z" />,

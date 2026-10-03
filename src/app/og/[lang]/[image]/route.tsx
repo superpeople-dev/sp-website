@@ -12,6 +12,7 @@ export const dynamicParams = false;
 type Page = { art: string; title: (d: Dictionary) => string; line?: (d: Dictionary) => string };
 
 const pages: Record<string, Page> = {
+  news: { art: "powers", title: (d) => d.news.title, line: (d) => d.nav.newsHint },
   servers: { art: "squad", title: (d) => d.servers.title, line: (d) => d.nav.serversHint },
   leaderboard: { art: "fight", title: (d) => d.leaderboard.title, line: (d) => d.nav.leaderboardHint },
   "bugs-and-ideas": { art: "powers", title: (d) => d.ideas.title, line: (d) => d.nav.ideasHint },

@@ -136,6 +136,17 @@ When a post is approved, or moves to the roadmap, into progress or to completed,
 to the Discord channel of `DISCORD_WEBHOOK_URL` ([`src/lib/announce.ts`](src/lib/announce.ts)), naming who
 did it.
 
+### News
+
+Admins with the "manage" permission write news on `/news/write` (a **Write a post** button on `/news`, an
+**Edit** button on each post): title, category, cover picture, a short summary and the text in simple
+Markdown (`## heading`, `**bold**`, `*italic*`, `- list`, `[link](https://…)`, pictures uploaded into the
+text). Posts are written in English; publishing translates them into the other nine languages with the
+Claude API ([`src/lib/translate.ts`](src/lib/translate.ts), `ANTHROPIC_API_KEY`), and a visitor reads their
+own language with a link to the English original. The first publish can also post it to the community
+Discord channel (`DISCORD_WEBHOOK_URL`). Posts are on `/news`, `/news/<slug>` and in the home page's
+"Latest news" row ([`src/lib/news.ts`](src/lib/news.ts), `db/migrations/003_news.sql`).
+
 ## Environment variables
 
 | Name | Used for |
@@ -150,6 +161,7 @@ did it.
 | `DATABASE_URL_UNPOOLED` | The direct address, for `bun run db:migrate` (schema changes, `db/migrations/*.sql`, each applied once) |
 | `NEON_S3_ENDPOINT`, `NEON_S3_REGION`, `NEON_S3_ACCESS_KEY_ID`, `NEON_S3_SECRET_ACCESS_KEY` | The branch's object storage, for images and videos on posts. Locally `neon env pull` writes them as `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, which work too (Vercel keeps the `AWS_` names for itself) |
 | `DISCORD_WEBHOOK_URL` | Optional: Discord announcements |
+| `ANTHROPIC_API_KEY` | Optional: translating news posts into the other languages (without it they show in English everywhere) |
 | `GITHUB_TOKEN` | Optional: only if the GitHub API rate-limits the server |
 | `NEXT_PUBLIC_SITE_URL` | Optional: replaces `https://superpeople.dev` in canonical links and the sitemap |
 

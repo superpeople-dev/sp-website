@@ -37,6 +37,8 @@ export function languageAlternates(absolute = false, page: PagePath = "", suffix
 function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
   const d = dictionaries[locale];
   switch (page) {
+    case "/news":
+      return { title: d.news.seoTitle, description: d.news.seoDescription };
     case "/servers":
       return { title: d.servers.seoTitle, description: d.servers.seoDescription };
     case "/leaderboard":
@@ -60,6 +62,8 @@ function subpageSeo(locale: Locale, page: Exclude<PagePath, "">) {
 function pageName(locale: Locale, page: Exclude<PagePath, "">) {
   const d = dictionaries[locale];
   switch (page) {
+    case "/news":
+      return d.nav.news;
     case "/servers":
       return d.nav.servers;
     case "/leaderboard":
