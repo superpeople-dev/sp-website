@@ -2896,6 +2896,16 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 .news-card--featured .news-card__text { justify-content: center; gap: 14px; padding: 40px; }
 .news-card--featured .news-card__title { font-size: clamp(30px, 3.2vw, 44px); line-height: 0.95; }
 .news-card--featured .news-card__summary { font-size: 17px; }
+/* Fewer cards than columns share the row instead of leaving it half empty. One card lies on its side,
+   picture left and text right, as the newest post above it does: standing at full width, its picture
+   would be over 600px tall. Phones keep one card per row (the 900px rules below). */
+@media (min-width: 901px) {
+  .news-grid:has(> .news-card:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .news-grid:has(> .news-card:only-child) { grid-template-columns: minmax(0, 1fr); }
+  .news-grid > .news-card:only-child { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+  .news-grid > .news-card:only-child .news-card__cover { aspect-ratio: auto; min-height: 300px; }
+  .news-grid > .news-card:only-child .news-card__text { justify-content: center; padding: 32px 36px; }
+}
 .news-latest__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
 .news-latest__head h2 { margin: 0; }
 .news-write { margin-top: 22px; }
