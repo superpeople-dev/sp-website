@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { localeHref } from "@/i18n/config";
 import { useI18n } from "@/i18n/context";
 import { boardOf, itemPath, type Notice } from "@/lib/board";
@@ -20,7 +21,9 @@ function fillNodes(text: string, values: Record<string, ReactNode>) {
 }
 
 // The bell in the account bar: an admin assigned you a task, or someone mentioned you in a comment.
-// The list opens under it and marks everything as seen; each notification opens its item.
+// The list opens under it and marks everything as seen; each notification opens its item. The list is
+// drawn on <body> and placed under the bell (on phones: under the account bar, as wide as it), so the
+// page head never has to be lifted over the board for it: its art reaches down over the board's filters.
 export function NotificationBell() {
   const { locale, t } = useI18n();
   const b = t.board;
@@ -29,7 +32,10 @@ export function NotificationBell() {
   // What was new when the list was opened stays marked while it is open.
   const [since, setSince] = useState(0);
   const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<CSSProperties>({});
   const root = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     const response = await fetch("/api/notifications", { cache: "no-store" }).catch(() => null);
@@ -52,13 +58,37 @@ export function NotificationBell() {
     };
   }, [load]);
 
+  // Under the bell, and with it while the page scrolls or resizes.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const follow = () => {
+      const bell = button.current?.getBoundingClientRect();
+      if (!bell) return;
+      const bar = root.current?.closest(".account-bar")?.getBoundingClientRect();
+      if (bar && window.matchMedia("(max-width: 700px)").matches) setPlace({ top: bar.bottom + 8, left: bar.left, width: bar.width });
+      else setPlace({ top: bell.bottom + 8, right: document.documentElement.clientWidth - bell.right });
+    };
+    follow();
+    window.addEventListener("resize", follow);
+    window.addEventListener("scroll", follow, true);
+    return () => {
+      window.removeEventListener("resize", follow);
+      window.removeEventListener("scroll", follow, true);
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
+    // The list is not inside the bell any more: Tab goes into it from there.
+    panel.current?.focus({ preventScroll: true });
     const onPointer = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (!root.current?.contains(target) && !panel.current?.contains(target)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      button.current?.focus();
     };
     document.addEventListener("pointerdown", onPointer);
     document.addEventListener("keydown", onKey);
@@ -83,6 +113,7 @@ export function NotificationBell() {
   return (
     <div ref={root} className="account-bar__bell">
       <button
+        ref={button}
         type="button"
         className="btn btn--sm bell__btn"
         aria-haspopup="true"
@@ -94,34 +125,36 @@ export function NotificationBell() {
         <Icon name="bell" />
         {unread > 0 && <span className="bell__count">{unread > 9 ? "9+" : unread}</span>}
       </button>
-      {open && (
-        <div className="bell__panel" role="dialog" aria-label={b.notifications}>
-          <p className="bell__title">{b.notifications}</p>
-          {notices.length ? (
-            notices.map((notice) => (
-              <a
-                key={notice.id}
-                className={`notice${notice.at > since ? " is-new" : ""}`}
-                href={itemPath(localeHref(locale, boardOf(notice.item.status ?? "open")), notice.item)}
-              >
-                <Avatar src={notice.actor.avatar} size={32} />
-                <span className="notice__main">
-                  <span className="notice__text">
-                    {fillNodes(notice.type === "assigned" ? b.noticeAssigned : b.noticeMention, {
-                      actor: <b>{notice.actor.name}</b>,
-                      item: <b>{notice.item.title}</b>,
-                    })}
+      {open &&
+        createPortal(
+          <div ref={panel} className="bell__panel" role="dialog" aria-label={b.notifications} tabIndex={-1} style={place}>
+            <p className="bell__title">{b.notifications}</p>
+            {notices.length ? (
+              notices.map((notice) => (
+                <a
+                  key={notice.id}
+                  className={`notice${notice.at > since ? " is-new" : ""}`}
+                  href={itemPath(localeHref(locale, boardOf(notice.item.status ?? "open")), notice.item)}
+                >
+                  <Avatar src={notice.actor.avatar} size={32} />
+                  <span className="notice__main">
+                    <span className="notice__text">
+                      {fillNodes(notice.type === "assigned" ? b.noticeAssigned : b.noticeMention, {
+                        actor: <b>{notice.actor.name}</b>,
+                        item: <b>{notice.item.title}</b>,
+                      })}
+                    </span>
+                    {notice.text && <span className="notice__quote">{notice.text}</span>}
+                    <RelativeTime iso={new Date(notice.at).toISOString()} locale={locale} />
                   </span>
-                  {notice.text && <span className="notice__quote">{notice.text}</span>}
-                  <RelativeTime iso={new Date(notice.at).toISOString()} locale={locale} />
-                </span>
-              </a>
-            ))
-          ) : (
-            <p className="bell__empty">{b.noticesEmpty}</p>
-          )}
-        </div>
-      )}
+                </a>
+              ))
+            ) : (
+              <p className="bell__empty">{b.noticesEmpty}</p>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
