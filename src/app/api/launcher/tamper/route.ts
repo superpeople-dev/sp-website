@@ -21,10 +21,13 @@ const SIGNALS: Record<string, { label: string; ban: boolean }> = {
   module: { label: "An unrecognized DLL is loaded in the game", ban: false },
 };
 
-// DLLs the game ships with (Engine\Binaries\ThirdParty, its Wwise, DLSS and ZipUtility plugins) and two
-// legitimate overlays, which ClientFixes v40/v41 reported as unrecognized: it trusted only the exe's
-// own folder. v42 (sp-native anti_tamper.cpp) trusts the whole install folder and knows the overlays;
-// until every player has it, these names are not posted. Only file names reach here, not folders.
+// DLLs the game ships with (Engine\Binaries\ThirdParty, its Wwise, DLSS and ZipUtility plugins) and
+// legitimate overlays and driver modules, which older ClientFixes reported as unrecognized: v40/v41
+// trusted only the exe's own folder, and before v43 only overlay names, not signatures (NVIDIA's
+// NvTelemetryBridge64.dll). v42 trusts the whole install folder; v43 also every DLL signed by a known
+// publisher (NVIDIA, AMD, Microsoft, Valve, Discord, ...) and reports "<name> (signed: ...)" or
+// "<name> (unsigned)". Until every player has it, these names are not posted. Only file names reach
+// here from older clients, not folders.
 const KNOWN_DLLS = new Set([
   "dbghelp.dll", "steam_api64.dll", "xaudio2_9redist.dll", "libvorbisfile_64.dll", "7z.dll",
   "physx3_x64.dll", "physx3common_x64.dll", "physx3cooking_x64.dll", "pxfoundation_x64.dll", "nvcloth_x64.dll",
@@ -32,7 +35,7 @@ const KNOWN_DLLS = new Set([
   "coherentgtcore.dll", "coherentgtjs.dll", "coherentuigt.dll", "coherenticuin.dll", "coherenticuuc.dll", "icudtcoherent53.dll",
   "wtf.dll", "renoircore.windowsdesktop.dll", "nvngx_dlss.dll",
   "akdelay.dll", "akmatrixreverb.dll", "akpeaklimiter.dll",
-  "gtiii-osd64-gl.dll", "aswhook.dll",
+  "gtiii-osd64-gl.dll", "aswhook.dll", "nvtelemetrybridge64.dll",
 ]);
 
 const line = (value: unknown, max: number) =>
