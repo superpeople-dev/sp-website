@@ -2125,8 +2125,10 @@ button.votes__down:disabled { cursor: default; }
   .share-btn { justify-content: center; width: 34px; padding: 0; }
   .share-btn span { display: none; }
 }
-.sheet__heading { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 22px; line-height: 1.1; }
-.sheet__heading svg { width: 20px; height: 20px; color: var(--signal-hi); }
+/* A dialog's title: the two red slashes above it, like every section title. */
+.sheet__heading { margin: 0; font-size: 22px; line-height: 1.1; }
+.sheet__heading::before { margin-bottom: 10px; }
+.sheet__heading-row { display: flex; align-items: center; gap: 10px; }
 .sheet__body { flex: 1 1 auto; min-height: 0; padding: 24px; overflow-y: auto; overscroll-behavior: contain; }
 .sheet__title { margin: 0 0 12px; font-size: clamp(26px, 4vw, 36px); line-height: 1.05; letter-spacing: 0.02em; overflow-wrap: anywhere; }
 .sheet__desc { margin: 0; color: var(--paper-dim); white-space: pre-line; overflow-wrap: anywhere; }

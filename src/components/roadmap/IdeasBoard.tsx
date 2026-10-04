@@ -237,7 +237,6 @@ export function IdeasBoard({
           categories={categories}
           types={types}
           heading={r.formTitle}
-          icon="bulb"
           submit={r.submit}
           submitIcon="send"
           confirm={{ title: r.confirmTitle, body: r.confirmBody, yes: r.confirmYes }}

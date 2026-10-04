@@ -355,7 +355,6 @@ function AdminBody({
     <>
       <div className="sheet__bar">
         <h2 id="admin-title" className="sheet__heading">
-          <Icon name="shield" />
           {b.adminPanel}
         </h2>
         <div className="sheet__actions">
@@ -486,8 +485,10 @@ function StaffDialog({
     <Modal open={member !== null} onClose={onClose} labelledBy="staff-title" className="sheet--narrow">
       <div className="sheet__bar">
         <h2 id="staff-title" className="sheet__heading">
-          {current && <Avatar src={current.avatar} size={28} />}
-          {current ? fill(a.manageTitle, { name: current.name }) : a.addTitle}
+          <span className="sheet__heading-row">
+            {current && <Avatar src={current.avatar} size={28} />}
+            {current ? fill(a.manageTitle, { name: current.name }) : a.addTitle}
+          </span>
         </h2>
         <div className="sheet__actions">
           <button type="button" className="icon-btn" onClick={onClose} aria-label={b.close} title={b.close}>

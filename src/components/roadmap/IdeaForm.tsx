@@ -50,7 +50,6 @@ export function IdeaForm({
   categories,
   types,
   heading,
-  icon,
   submit: submitText,
   submitIcon,
   confirm,
@@ -65,7 +64,6 @@ export function IdeaForm({
   categories: Category[];
   types: TypeTag[];
   heading: string;
-  icon: IconName;
   submit: string;
   submitIcon: IconName;
   // Asked before sending, if given.
@@ -162,7 +160,6 @@ export function IdeaForm({
       <Modal open={open} onClose={dismiss} labelledBy={headingId} className="sheet--narrow">
         <div className="sheet__bar">
           <h2 id={headingId} className="sheet__heading">
-            <Icon name={icon} />
             {heading}
           </h2>
           <div className="sheet__actions">

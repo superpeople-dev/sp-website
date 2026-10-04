@@ -4,11 +4,10 @@ import { useCallback, useRef, useState } from "react";
 import type { FeedbackItem, FeedbackStatus } from "reflet-sdk";
 import { useI18n } from "@/i18n/context";
 import type { Category, TypeTag } from "@/lib/board";
-import { Icon, type IconName } from "../Icon";
+import { Icon } from "../Icon";
 import { Toast } from "../Toast";
 import { IdeaForm, type Created, type IdeaFields } from "./IdeaForm";
 
-const columnIcon: Partial<Record<FeedbackStatus, IconName>> = { planned: "todo", in_progress: "wrench", completed: "done" };
 
 // A roadmap column's "Add task": the same form as a new idea on Bugs & Ideas (type, platform, title,
 // details, images), and the task goes straight into this column.
@@ -64,7 +63,6 @@ export function AddTask({
         categories={categories}
         types={types}
         heading={b.addTask}
-        icon={columnIcon[status] ?? "plus"}
         submit={b.addTask}
         submitIcon="plus"
         closeText={{ title: b.taskCloseTitle, body: b.taskCloseBody }}

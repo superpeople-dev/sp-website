@@ -58,7 +58,6 @@ export function FilterPicker<K extends string>({
       <Modal open={open} onClose={close} labelledBy={titleId} className="sheet--narrow">
         <div className="sheet__bar">
           <h2 id={titleId} className="sheet__heading">
-            <Icon name="filter" />
             {label}
           </h2>
           <div className="sheet__actions">
