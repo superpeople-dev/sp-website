@@ -35,8 +35,16 @@ const KNOWN_DLLS = new Set([
   "coherentgtcore.dll", "coherentgtjs.dll", "coherentuigt.dll", "coherenticuin.dll", "coherenticuuc.dll", "icudtcoherent53.dll",
   "wtf.dll", "renoircore.windowsdesktop.dll", "nvngx_dlss.dll",
   "akdelay.dll", "akmatrixreverb.dll", "akpeaklimiter.dll",
-  "gtiii-osd64-gl.dll", "aswhook.dll", "nvtelemetrybridge64.dll",
+  "gtiii-osd64-gl.dll", "aswhook.dll", "nvtelemetrybridge64.dll", "mdnsnsp.dll",
 ]);
+// v43 says who signed what it reports: "<name> (signed: <publisher>)". Publishers trusted since v44
+// (sp-native #70) that v43 still reported: Apple (Bonjour's mdnsnsp.dll, a Winsock name provider in
+// every game on PCs with iTunes or iCloud). A copied name without that signature is still posted.
+const TRUSTED_SIGNERS = new Set(["apple inc."]);
+const knownModule = (detail: string) => {
+  const signed = /^.+ \(signed: (.+)\)$/.exec(detail);
+  return signed ? TRUSTED_SIGNERS.has(signed[1].toLowerCase()) : KNOWN_DLLS.has(detail.toLowerCase());
+};
 
 const line = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, max) || undefined : undefined;
@@ -54,7 +62,7 @@ export async function POST(request: NextRequest) {
   if (!signal) return Response.json({ error: "invalid" }, { status: 400 });
   const detail = line(body?.detail, 120);
   // The game's own DLLs and known overlays from older ClientFixes: nothing for a human to review.
-  if (body?.signal === "module" && detail && KNOWN_DLLS.has(detail.toLowerCase())) return new Response(null, { status: 204 });
+  if (body?.signal === "module" && detail && knownModule(detail)) return new Response(null, { status: 204 });
 
   if (limitsReady) {
     // At most PER_HOUR tamper posts a player per hour, and the same signal from the same player once.
