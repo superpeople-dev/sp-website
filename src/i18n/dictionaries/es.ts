@@ -565,7 +565,6 @@ export const es: Dictionary = {
     seoDescription: "Las últimas noticias del equipo de SUPER PEOPLE Revival: actualizaciones, notas del parche, playtests y eventos.",
     all: "Todo",
     categories: { update: "Actualización", patch: "Notas del parche", event: "Evento", dev: "Diario de desarrollo" },
-    readMore: "Leer más",
     minRead: "{n} min de lectura",
     latest: "Últimas noticias",
     allNews: "Todas las noticias",

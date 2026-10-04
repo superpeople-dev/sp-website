@@ -565,7 +565,6 @@ export const fr: Dictionary = {
     seoDescription: "Les dernières nouvelles de l'équipe SUPER PEOPLE Revival : mises à jour, patch notes, playtests et événements.",
     all: "Tout",
     categories: { update: "Mise à jour", patch: "Patch notes", event: "Événement", dev: "Journal de dev" },
-    readMore: "Lire la suite",
     minRead: "{n} min de lecture",
     latest: "Dernières actus",
     allNews: "Toutes les actus",

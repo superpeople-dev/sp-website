@@ -563,7 +563,6 @@ export const zh: Dictionary = {
     seoDescription: "SUPER PEOPLE Revival 团队的最新消息：更新、补丁说明、测试和活动。",
     all: "全部",
     categories: { update: "更新", patch: "补丁说明", event: "活动", dev: "开发日志" },
-    readMore: "阅读全文",
     minRead: "阅读约 {n} 分钟",
     latest: "最新消息",
     allNews: "全部新闻",

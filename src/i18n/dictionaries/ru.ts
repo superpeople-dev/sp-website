@@ -565,7 +565,6 @@ export const ru: Dictionary = {
     seoDescription: "Последние новости команды SUPER PEOPLE Revival: обновления, патчноуты, плейтесты и события.",
     all: "Все",
     categories: { update: "Обновление", patch: "Патчноуты", event: "Событие", dev: "Дневник разработки" },
-    readMore: "Читать дальше",
     minRead: "{n} мин чтения",
     latest: "Последние новости",
     allNews: "Все новости",

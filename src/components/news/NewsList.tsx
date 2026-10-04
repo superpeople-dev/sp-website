@@ -7,14 +7,13 @@ import { newsCategories, type NewsCategory } from "@/lib/newskinds";
 import { Reveal } from "../motion";
 import { NewsCard } from "./NewsCard";
 
-// /news: the categories that have posts as filters, the newest post as a wide card, the rest in a grid.
+// /news: the categories that have posts as filters, then every post as a card, in rows of three.
 export function NewsList({ posts }: { posts: NewsPost[] }) {
   const { t } = useI18n();
   const n = t.news;
   const [category, setCategory] = useState<NewsCategory | null>(null);
   const used = newsCategories.filter((c) => posts.some((post) => post.category === c));
   const shown = category ? posts.filter((post) => post.category === category) : posts;
-  const [first, ...rest] = shown;
 
   if (!posts.length) return <p className="servers__empty">{n.empty}</p>;
 
@@ -32,14 +31,11 @@ export function NewsList({ posts }: { posts: NewsPost[] }) {
           ))}
         </div>
       )}
-      {first && <NewsCard post={first} featured />}
-      {rest.length > 0 && (
-        <div className="news-grid">
-          {rest.map((post) => (
-            <NewsCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
+      <div className="news-grid">
+        {shown.map((post) => (
+          <NewsCard key={post.id} post={post} />
+        ))}
+      </div>
     </Reveal>
   );
 }

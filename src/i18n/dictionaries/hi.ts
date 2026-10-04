@@ -565,7 +565,6 @@ export const hi: Dictionary = {
     seoDescription: "SUPER PEOPLE Revival टीम की ताज़ा खबरें: अपडेट, पैच नोट्स, प्लेटेस्ट और इवेंट।",
     all: "सभी",
     categories: { update: "अपडेट", patch: "पैच नोट्स", event: "इवेंट", dev: "डेव डायरी" },
-    readMore: "और पढ़ें",
     minRead: "{n} मिनट पढ़ने का समय",
     latest: "ताज़ा खबरें",
     allNews: "सभी खबरें",

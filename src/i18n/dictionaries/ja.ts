@@ -565,7 +565,6 @@ export const ja: Dictionary = {
     seoDescription: "SUPER PEOPLE Revival チームの最新ニュース：アップデート、パッチノート、プレイテスト、イベント。",
     all: "すべて",
     categories: { update: "アップデート", patch: "パッチノート", event: "イベント", dev: "開発日誌" },
-    readMore: "続きを読む",
     minRead: "{n}分で読めます",
     latest: "最新ニュース",
     allNews: "すべてのニュース",

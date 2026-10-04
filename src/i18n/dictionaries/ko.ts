@@ -565,7 +565,6 @@ export const ko: Dictionary = {
     seoDescription: "SUPER PEOPLE Revival 팀의 최신 소식: 업데이트, 패치 노트, 플레이테스트, 이벤트.",
     all: "전체",
     categories: { update: "업데이트", patch: "패치 노트", event: "이벤트", dev: "개발 일지" },
-    readMore: "더 보기",
     minRead: "{n}분 분량",
     latest: "최신 뉴스",
     allNews: "전체 뉴스",
