@@ -573,6 +573,7 @@ export const en: Dictionary = {
     seoDescription: "The latest news from the SUPER PEOPLE Revival team: updates, patch notes, playtests and events.",
     all: "All",
     categories: { update: "Update", patch: "Patch notes", event: "Event", dev: "Dev diary" },
+    readMore: "Read more",
     minRead: "{n} min read",
     latest: "Latest news",
     allNews: "All news",

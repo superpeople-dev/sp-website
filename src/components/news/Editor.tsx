@@ -48,6 +48,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
   const [uploads, setUploads] = useState(true);
   const [form, setForm] = useState<Form>(empty);
   const [status, setStatus] = useState<"draft" | "published" | null>(null);
+  const [pinned, setPinned] = useState(false);
   const [slug, setSlug] = useState<string | null>(null);
   const [announce, setAnnounce] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
     setMessage(null);
     setForm(post ? { id: post.id, title: post.title, summary: post.summary, body: post.body, category: post.category, coverKey: post.coverKey, cover: post.cover } : empty);
     setStatus(post?.status ?? null);
+    setPinned(post?.pinned ?? false);
     setSlug(post?.slug ?? null);
   }, []);
 
@@ -132,7 +134,17 @@ export function Editor({ initialId }: { initialId: string | null }) {
       return "Picture added to the text. Edit its caption between the [ ].";
     });
 
-  const unpublish = () => form.id && run("Unpublishing…", async () => (await api({ action: "unpublish", id: form.id }), setStatus("draft"), "Back to draft: hidden from the site."));
+  const unpublish = () =>
+    form.id && run("Unpublishing…", async () => (await api({ action: "unpublish", id: form.id }), setStatus("draft"), setPinned(false), "Back to draft: hidden from the site."));
+
+  // One post at most is pinned: pinning this one unpins the one that was.
+  const pin = (on: boolean) =>
+    form.id &&
+    run(on ? "Pinning…" : "Unpinning…", async () => {
+      await api({ action: on ? "pin" : "unpin", id: form.id });
+      setPinned(on);
+      return on ? "Pinned: the wide card on top of the News page." : "Unpinned: back in the rows with the others.";
+    });
 
   const remove = () => {
     if (!form.id || !window.confirm(`Delete "${form.title}" for good?`)) return;
@@ -161,6 +173,7 @@ export function Editor({ initialId }: { initialId: string | null }) {
               <li key={post.id}>
                 <button type="button" className={post.id === form.id ? "is-active" : undefined} onClick={() => open(post)}>
                   <span className={`news-editor__state news-editor__state--${post.status}`}>{post.status === "draft" ? "Draft" : "Live"}</span>
+                  {post.pinned && <span className="news-editor__state news-editor__state--pinned">Pinned</span>}
                   <b>{post.title || "Untitled"}</b>
                   <small>
                     {n.categories[post.category]} - {new Date(post.publishedAt ?? post.updatedAt).toLocaleDateString("en-GB")}
@@ -230,6 +243,9 @@ export function Editor({ initialId }: { initialId: string | null }) {
             )}
             {status === "published" ? (
               <>
+                <button type="button" className="btn btn--sm" onClick={() => pin(!pinned)} disabled={!!busy}>
+                  {pinned ? "Unpin" : "Pin to top"}
+                </button>
                 <button type="button" className="btn btn--sm" onClick={unpublish} disabled={!!busy}>
                   Unpublish
                 </button>

@@ -402,6 +402,7 @@ export type Dictionary = {
     seoDescription: string;
     all: string;
     categories: Record<NewsCategory, string>;
+    readMore: string;
     // {n}: minutes.
     minRead: string;
     latest: string;

@@ -14,6 +14,7 @@ import {
   newsTag,
   newsUploadUrl,
   saveNews,
+  setNewsPinned,
   setNewsStatus,
   type NewsInput,
 } from "@/lib/news";
@@ -88,6 +89,12 @@ export async function POST(request: NextRequest) {
 
     if (body.action === "unpublish" && id) {
       await setNewsStatus(id, "draft");
+      refresh();
+      return Response.json({ ok: true });
+    }
+
+    if ((body.action === "pin" || body.action === "unpin") && id) {
+      await setNewsPinned(id, body.action === "pin");
       refresh();
       return Response.json({ ok: true });
     }

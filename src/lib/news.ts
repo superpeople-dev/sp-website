@@ -27,6 +27,8 @@ export type NewsPost = {
   publishedAt: number;
   updatedAt: number;
   readMinutes: number;
+  // Pinned by an admin: /news shows it as the wide card on top. One post at most.
+  pinned: boolean;
 };
 
 // A post as the editor sees it: the English text, drafts included.
@@ -44,6 +46,7 @@ export type NewsDraft = {
   createdAt: number;
   updatedAt: number;
   publishedAt: number | null;
+  pinned: boolean;
 };
 
 export type NewsInput = { title: string; summary: string; body: string; category: NewsCategory; coverKey: string | null };
@@ -62,6 +65,7 @@ type PostRow = {
   created_at: number;
   updated_at: number;
   published_at: number | null;
+  pinned: boolean;
 };
 export const newsReady = dbReady;
 
@@ -87,6 +91,7 @@ function ensureTables() {
       published_at bigint
     );
     create index if not exists news_posts_published on news_posts (status, published_at desc);
+    alter table news_posts add column if not exists pinned boolean not null default false;
   `)
     .then(() => undefined)
     .catch((error: { code?: string }) => {
@@ -145,6 +150,7 @@ function view(row: PostRow): NewsPost {
     publishedAt: row.published_at ?? row.created_at,
     updatedAt: row.updated_at,
     readMinutes: readMinutes(row.body),
+    pinned: row.pinned === true,
   };
 }
 
@@ -186,6 +192,7 @@ export async function listDrafts(): Promise<NewsDraft[]> {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     publishedAt: row.published_at,
+    pinned: row.pinned === true,
   }));
 }
 
@@ -237,11 +244,23 @@ export async function saveNews(id: string | null, input: NewsInput, author: { id
 
 export async function setNewsStatus(id: string, status: "draft" | "published") {
   const [row] = await run<{ published_at: number | null }>(
-    `update news_posts set status = $2, published_at = case when $2 = 'published' then coalesce(published_at, $3) else published_at end, updated_at = $3
+    `update news_posts set status = $2, published_at = case when $2 = 'published' then coalesce(published_at, $3) else published_at end, updated_at = $3,
+       pinned = pinned and $2 = 'published'
      where id = $1 returning published_at`,
     [id, status, Date.now()],
   );
   if (!row) throw new Error("No such post");
+}
+
+// Pins a published post (and unpins whichever was pinned, in the same statement), or unpins it.
+export async function setNewsPinned(id: string, pinned: boolean) {
+  const rows = pinned
+    ? await run<{ id: string }>(
+        "update news_posts set pinned = (id = $1) where (pinned or id = $1) and exists (select 1 from news_posts where id = $1 and status = 'published') returning id",
+        [id],
+      )
+    : await run<{ id: string }>("update news_posts set pinned = false where id = $1 returning id", [id]);
+  if (!rows.length) throw new Error("No such published post");
 }
 
 export async function deleteNews(id: string) {

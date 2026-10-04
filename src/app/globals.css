@@ -2889,6 +2889,12 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 .news-card__title { font: 800 24px/1.05 var(--display); text-transform: uppercase; color: var(--paper); }
 .news-card__summary { color: var(--paper-dim); font-size: 15px; line-height: 1.55; }
 .news-card__more { color: var(--signal); font: 800 13px var(--display); letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+/* The pinned post (NewsList): picture left, text right, across the page. */
+.news-card--featured { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+.news-card--featured .news-card__cover { aspect-ratio: auto; min-height: 360px; }
+.news-card--featured .news-card__text { justify-content: center; gap: 14px; padding: 40px; }
+.news-card--featured .news-card__title { font-size: clamp(30px, 3.2vw, 44px); line-height: 0.95; }
+.news-card--featured .news-card__summary { font-size: 17px; }
 .news-latest__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
 .news-latest__head h2 { margin: 0; }
 .news-write { margin-top: 22px; }
@@ -2929,6 +2935,7 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 .news-editor__state { justify-self: start; font: 800 10px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
 .news-editor__state--draft { color: var(--gold); }
 .news-editor__state--published { color: var(--green); }
+.news-editor__state--pinned { color: var(--signal-hi); }
 .news-editor__main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .news-editor__form { display: grid; gap: 14px; }
 .news-editor__field { display: grid; gap: 6px; }
@@ -2963,6 +2970,9 @@ section:has(> .gun) { isolation: isolate; overflow-x: clip; }
 }
 @media (max-width: 900px) {
   .news-grid { grid-template-columns: 1fr; }
+  .news-card--featured { grid-template-columns: 1fr; }
+  .news-card--featured .news-card__cover { min-height: 0; aspect-ratio: 16 / 9; }
+  .news-card--featured .news-card__text { padding: 22px; }
   .news-latest__head { flex-direction: column; align-items: flex-start; }
 }
 
