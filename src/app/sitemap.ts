@@ -10,7 +10,10 @@ import { pageOf } from "@/lib/share";
 import { galleryImages, legalUpdated } from "@/lib/site";
 
 // The sitemap is rebuilt at most every ten minutes, so ideas and roadmap items people post show up in
-// it quickly. Every page is listed in every language, each with its other languages as alternates.
+// it quickly. Home and the main pages are listed in every language, each with its other languages as
+// alternates. Ideas, roadmap items and news posts are the same English in every language, so they are
+// listed once, in English, the page their other languages name as canonical (lib/seo.ts): ten copies
+// each made the sitemap 2,290 pages, most of them duplicates.
 export const revalidate = 600;
 
 const subpages = [
@@ -59,30 +62,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       images: [`${siteUrl}${ogImagePath(locale, path)}`],
     }));
   });
-  const posts = items.flatMap((item) => {
-    const suffix = itemSuffix({ id: item.id, slug: slugOf(item.title) });
-    const page = pageOf(item.status);
-    const languages = languageAlternates(true, page, suffix);
-    return locales.map((locale) => ({
-      url: `${localeUrl(locale, page)}${suffix}`,
-      lastModified: new Date(item.updatedAt),
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-      alternates: { languages },
-      images: [`${siteUrl}/og/${locale}/item/${item.id}.png`],
-    }));
-  });
-  // Every published news post (/news/<slug>), in every language (the post is in English in all of them).
+  const posts = items.map((item) => ({
+    url: `${localeUrl("en", pageOf(item.status))}${itemSuffix({ id: item.id, slug: slugOf(item.title) })}`,
+    lastModified: new Date(item.updatedAt),
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+    images: [`${siteUrl}/og/en/item/${item.id}.png`],
+  }));
+  // Every published news post (/news/<slug>), once, in English.
   const newsPosts = newsReady ? await publishedSlugs().catch(() => []) : [];
-  const news = newsPosts.flatMap(({ slug, updatedAt }) => {
-    const languages = languageAlternates(true, "/news", `/${slug}`);
-    return locales.map((locale) => ({
-      url: `${localeUrl(locale, "/news")}/${slug}`,
-      lastModified: new Date(updatedAt),
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-      alternates: { languages },
-    }));
-  });
+  const news = newsPosts.map(({ slug, updatedAt }) => ({
+    url: `${localeUrl("en", "/news")}/${slug}`,
+    lastModified: new Date(updatedAt),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
   return [...home, ...pages, ...posts, ...news];
 }

@@ -8,7 +8,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { can } from "@/lib/board";
 import { getLatestRelease } from "@/lib/github";
 import { getNews, newsReady } from "@/lib/news";
-import { languageAlternates, pageMetadata, siteName, siteUrl } from "@/lib/seo";
+import { pageMetadata, siteName, siteUrl } from "@/lib/seo";
 import { currentSession } from "@/lib/session";
 
 // Posts are published after the build, so their pages are made on the first visit.
@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/news/[slug
     ...base,
     title: post.title,
     description: post.excerpt || base.description,
-    alternates: { canonical: url, languages: languageAlternates(false, "/news", `/${slug}`) },
+    // The post is the same English in every language: the English page is the original.
+    alternates: { canonical: `${localeHref("en", "/news")}/${slug}` },
     openGraph: {
       ...base.openGraph,
       type: "article",

@@ -131,7 +131,9 @@ export function pageMetadata(locale: Locale, page: PagePath = "", item?: SharedI
     creator: `${siteName} team`,
     publisher: siteName,
     category: "games",
-    alternates: { canonical: url, languages: languageAlternates(false, page, suffix) },
+    // An item's text is the same English in every language (only the menus change), so its pages in
+    // the other languages name the English one as the original instead of standing as ten copies.
+    alternates: item ? { canonical: `${localeHref("en", page)}${suffix}` } : { canonical: url, languages: languageAlternates(false, page, suffix) },
     openGraph: {
       type: "website",
       url,
