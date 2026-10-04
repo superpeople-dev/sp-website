@@ -8,7 +8,7 @@ import { readSession, sameOrigin } from "@/lib/session";
 // module, or an unrecognized DLL in the game. The client writes it into SP_REPORT_DIR and the launcher
 // sends it here as the signed-in Discord account (sp-launcher reports.rs), so a report only ever
 // concerns the player who sent it -- it can never be used to ban someone else. A high-confidence signal
-// (debugger, known cheat) auto temp-bans for 24 h and alerts #moderation; an unrecognized DLL is only
+// (debugger, known cheat) auto temp-bans for 24 h and alerts #anti-cheat (lib/discord.ts logTamper); an unrecognized DLL is only
 // an alert for a human to review, because legitimate overlays (Discord, Steam, OBS, Afterburner, GPU
 // drivers) inject DLLs too. Staff are never flagged -- they may debug and run their own tools.
 const DAY = 24 * 60 * 60 * 1000;

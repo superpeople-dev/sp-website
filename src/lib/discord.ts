@@ -14,8 +14,10 @@ import { siteUrl } from "./seo";
 // starting the game), the launcher updating itself and the download limits. Without them those are not posted. A player's IP is
 // only on "Game launched", behind a spoiler. DISCORD_INGAME_REPORT_WEBHOOK_URL (#in-game-report)
 // gets the reports made with the game's own Report button, sent on by the launcher.
+// DISCORD_ANTICHEAT_WEBHOOK_URL (#anti-cheat) gets the game client's anti-tamper alerts (logTamper);
+// without it they go to the moderation channel, so none is lost.
 
-type Channel = "community" | "moderation" | "auth" | "launcher" | "reports";
+type Channel = "community" | "moderation" | "auth" | "launcher" | "reports" | "anticheat";
 type Embed = {
   label: string;
   color: number;
@@ -37,6 +39,7 @@ const hooks: Record<Channel, string | undefined> = {
   auth: process.env.DISCORD_AUTH_LOG_WEBHOOK_URL,
   launcher: process.env.DISCORD_LAUNCHER_LOG_WEBHOOK_URL,
   reports: process.env.DISCORD_INGAME_REPORT_WEBHOOK_URL,
+  anticheat: process.env.DISCORD_ANTICHEAT_WEBHOOK_URL,
 };
 
 // Name and picture of every post, whichever webhook it goes through. Without avatar_url Discord shows
@@ -453,7 +456,7 @@ export async function logGameReport(who: Player, report: GameReport, reported?: 
   });
 }
 
-// #moderation: the game client's anti-tamper (sp-native anti_tamper.cpp, relayed by the launcher as
+// #anti-cheat (#moderation until its webhook is set): the game client's anti-tamper (sp-native anti_tamper.cpp, relayed by the launcher as
 // the signed-in account, app/api/launcher/tamper) saw a debugger attached, a known cheat module, or an
 // unknown DLL in the game. `banned` is set when the player was auto temp-banned (high-confidence);
 // otherwise it is a review alert only. The player is the launcher's Discord account -- never a name a
@@ -474,7 +477,7 @@ export async function logTamper(
       : "Alert only -- review (no automatic ban)",
     inline: false,
   });
-  await post("moderation", {
+  await post(hooks.anticheat ? "anticheat" : "moderation", {
     label: "🛡️ Anti-cheat",
     color: info.banned ? colors.red : colors.gold,
     title: info.banned ? "Tampering -- player temp-banned" : "Possible tampering -- review",
