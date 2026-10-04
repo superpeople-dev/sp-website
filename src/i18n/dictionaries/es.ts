@@ -148,6 +148,10 @@ export const es: Dictionary = {
     shareTitle: "SUPER PEOPLE ha vuelto",
     shareText: "SUPER PEOPLE ha vuelto gracias a la comunidad. Gratis.",
     github: "Ver en GitHub",
+    supportTitle: "Apoya los servidores",
+    supportText:
+      "El juego sigue siendo gratis, pero los servidores, el almacenamiento y los dominios nos cuestan dinero cada mes. Una donación en Patreon los mantiene en marcha y nos ayuda a abrir nuevas regiones.",
+    patreon: "Apóyanos en Patreon",
   },
   faq: {
     title: "Preguntas frecuentes",
@@ -159,6 +163,10 @@ export const es: Dictionary = {
       {
         q: "¿Es gratis?",
         a: "Sí. El launcher, los servidores y la descarga del juego son totalmente gratis. Es un proyecto de fans y no vendemos nada.",
+      },
+      {
+        q: "¿Puedo apoyar el proyecto? ¿Puedo donar?",
+        a: "¡Sí, y gracias! SUPER PEOPLE sigue siendo gratis para todos, pero mantenerlo no lo es: los servidores, los relays, el almacenamiento y los dominios cuestan dinero cada mes, y hasta ahora lo pagamos nosotros. Las donaciones también nos ayudan a abrir nuevas regiones, como Asia y Norteamérica.\n\nPuedes apoyarnos en Patreon:\nhttps://www.patreon.com/superpeople\n\nPor ahora es una donación: no hay nada que comprar, y apoyarnos nunca te da ventaja en el juego. También puedes ayudar gratis: comparte el juego, únete a los playtests y reporta errores.",
       },
       {
         q: "¿Cuál es el objetivo del proyecto Super People Revival?",

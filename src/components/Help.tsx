@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, type ReactNode } from "react";
 import { useI18n } from "@/i18n/context";
 import { guns } from "@/lib/art";
-import { repoUrl } from "@/lib/site";
+import { repoUrl, site } from "@/lib/site";
 import { DiscordButton } from "./Buttons";
 import { Icon, type IconName } from "./Icon";
 import { Reveal, inView, rise, stagger } from "./motion";
@@ -94,6 +94,17 @@ export function Help() {
             }
           />
           <Card icon="layers" title={h.testTitle} text={h.testText} action={<DiscordButton label={t.hero.discord} />} />
+          <Card
+            icon="heart"
+            title={h.supportTitle}
+            text={h.supportText}
+            action={
+              <a className="btn" href={site.patreon} target="_blank" rel="noopener">
+                <Icon name="patreon" />
+                {h.patreon}
+              </a>
+            }
+          />
         </motion.div>
       </div>
     </section>

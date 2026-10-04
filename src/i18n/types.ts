@@ -102,6 +102,9 @@ export type Dictionary = {
     shareTitle: string;
     shareText: string;
     github: string;
+    supportTitle: string;
+    supportText: string;
+    patreon: string;
   };
   faq: { title: string; short: string; lead: string; seoTitle: string; seoDescription: string; items: { q: string; a: string }[] };
   ideas: {

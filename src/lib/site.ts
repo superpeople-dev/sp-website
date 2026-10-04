@@ -9,6 +9,8 @@ import tower from "@/assets/tower.jpg";
 export const site = {
   repo: "superpeople-dev/sp-launcher",
   discord: "https://discord.com/invite/superpeopleofficial",
+  // Donations for the servers, storage and domains (the FAQ's answer says what they pay for).
+  patreon: "https://www.patreon.com/superpeople",
 };
 
 export const contactEmail = "contact@superpeople.dev";

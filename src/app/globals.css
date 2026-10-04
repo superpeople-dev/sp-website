@@ -793,7 +793,7 @@ section.flush { padding-top: 0; }
   .lightbox__next { right: calc(50% - 60px); }
 }
 
-.help { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 44px; }
+.help { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 44px; }
 .help__card { display: flex; flex-direction: column; transition: border-color 0.25s; }
 .help__card:hover { border-color: rgba(239, 68, 56, 0.45); }
 .help__card p { color: var(--paper-dim); font-size: 16px; margin: 0 0 22px; flex: 1; }

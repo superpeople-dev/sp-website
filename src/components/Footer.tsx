@@ -20,6 +20,10 @@ export function Footer({ t, locale }: { t: Dictionary; locale: Locale }) {
             <Icon name="discord" />
             Discord
           </a>
+          <a className="footer__social" href={site.patreon} target="_blank" rel="noopener">
+            <Icon name="patreon" />
+            Patreon
+          </a>
           <a className="footer__social" href={repoUrl} target="_blank" rel="noopener" aria-label={t.nav.githubLabel}>
             <Icon name="github" />
             GitHub

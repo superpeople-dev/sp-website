@@ -146,6 +146,10 @@ export const zh: Dictionary = {
     shareTitle: "SUPER PEOPLE 回来了",
     shareText: "SUPER PEOPLE 回来了，由社区运营。免费畅玩。",
     github: "在 GitHub 上查看",
+    supportTitle: "支持服务器",
+    supportText:
+      "游戏会一直免费，但服务器、存储和域名每个月都要花钱。在 Patreon 上捐助能让它们持续运行，并帮助我们开设新的地区。",
+    patreon: "在 Patreon 上支持我们",
   },
   faq: {
     title: "常见问题",
@@ -157,6 +161,10 @@ export const zh: Dictionary = {
       {
         q: "免费吗？",
         a: "是的。启动器、服务器和游戏下载全部免费。这是一个粉丝项目，我们不卖任何东西。",
+      },
+      {
+        q: "我可以支持这个项目吗？可以捐款吗？",
+        a: "可以，谢谢你！SUPER PEOPLE 对所有人都免费，但运营它需要花钱：服务器、中继、存储和域名每个月都有费用，目前都是我们自己承担。捐款也能帮助我们开设新的地区，比如亚洲和北美。\n\n你可以在 Patreon 上支持我们：\nhttps://www.patreon.com/superpeople\n\n目前这只是捐助：没有任何需要购买的东西，支持我们也绝不会在游戏中带来任何优势。你也可以免费帮忙：分享游戏、参加测试并报告 bug。",
       },
       {
         q: "SUPER PEOPLE 复活项目的目标是什么？",
